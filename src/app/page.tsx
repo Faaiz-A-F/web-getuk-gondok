@@ -29,7 +29,7 @@ const products = [
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  
+  const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState(new Set<string>());
 
@@ -77,6 +77,50 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      {/* Hamburger Menu */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="p-2 focus:outline-none"
+        >
+          <div className="w-8 h-8 flex flex-col justify-center gap-1.5">
+            <div className="w-full h-1 bg-black rounded"></div>
+            <div className="w-full h-1 bg-black rounded"></div>
+            <div className="w-full h-1 bg-black rounded"></div>
+          </div>
+        </button>
+
+        {/* Dropdown Menu */}
+        {menuOpen && (
+          <div className="absolute top-12 right-0 bg-white shadow-lg rounded-lg overflow-hidden min-w-max">
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+              }}
+              className="block w-full text-left px-6 py-3 hover:bg-amber-50 text-black font-semibold text-sm border-b border-gray-200"
+            >
+              1. Pesan Sekarang
+            </button>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+              }}
+              className="block w-full text-left px-6 py-3 hover:bg-amber-50 text-black font-semibold text-sm border-b border-gray-200"
+            >
+              2. Transaksi
+            </button>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+              }}
+              className="block w-full text-left px-6 py-3 hover:bg-amber-50 text-black font-semibold text-sm"
+            >
+              3. History Pemesanan
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Hero Section */}
       <section className="relative w-full py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -140,7 +184,7 @@ export default function Home() {
       </section>
 
       {/* Contact Info */}
-      <section className="bg-amber-700 text-white py-8">
+      <section className="bg-amber-900 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             <div>
@@ -201,9 +245,6 @@ export default function Home() {
                   {product.category}
                 </span>
                 <h3 className="text-lg font-bold text-amber-900 mt-3">{product.name}</h3>
-                <button className="w-full mt-4 px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-semibold transition">
-                  Pesan
-                </button>
               </div>
             </div>
           ))}
@@ -233,7 +274,7 @@ export default function Home() {
               <p className="text-amber-100">Sejak 1985</p>
             </div>
           </div>
-          <div className="border-t border-amber-700 pt-8">
+          <div className="border-t border-white pt-8">
             <p className="text-center text-amber-100">
               © 2026 Getuk Gondok. All rights reserved.
             </p>
