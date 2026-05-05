@@ -78,15 +78,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Modern Navbar */}
-      <nav className="sticky top-0 z-50 bg-white shadow-lg border-b-4 border-amber-700">
+      <nav className="sticky top-0 z-50 bg-amber-50 shadow-lg border-b-4 border-amber-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo/Brand */}
-            <div className="flex-shrink-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-amber-900">
-                Getuk Gondok
-              </h1>
-              <p className="text-xs text-amber-600 font-semibold">Hj. Sri Rahayu</p>
+            <div className="flex-shrink-0 flex items-center gap-3">
+              <Image
+                src="/logo/1_20260505_231853_0000(1).png"
+                alt="Getuk Gondok Logo"
+                width={60}
+                height={60}
+                className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
+              />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-amber-900">
+                  Getuk Gondok
+                </h1>
+                <p className="text-xs text-amber-600 font-semibold">Hj. Sri Rahayu</p>
+              </div>
             </div>
 
             {/* Desktop Navigation */}
