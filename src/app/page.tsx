@@ -77,49 +77,66 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Hamburger Menu */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="p-2 focus:outline-none"
-        >
-          <div className="w-8 h-8 flex flex-col justify-center gap-1.5">
-            <div className="w-full h-1 bg-black rounded"></div>
-            <div className="w-full h-1 bg-black rounded"></div>
-            <div className="w-full h-1 bg-black rounded"></div>
-          </div>
-        </button>
+      {/* Modern Navbar */}
+      <nav className="sticky top-0 z-50 bg-white shadow-lg border-b-4 border-amber-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo/Brand */}
+            <div className="flex-shrink-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-amber-900">
+                Getuk Gondok
+              </h1>
+              <p className="text-xs text-amber-600 font-semibold">Hj. Sri Rahayu</p>
+            </div>
 
-        {/* Dropdown Menu */}
-        {menuOpen && (
-          <div className="absolute top-12 right-0 bg-white shadow-lg rounded-lg overflow-hidden min-w-max">
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-6 py-3 hover:bg-amber-50 text-black font-semibold text-sm border-b border-gray-200"
-            >
-              1. Pesan Sekarang
-            </button>
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-6 py-3 hover:bg-amber-50 text-black font-semibold text-sm border-b border-gray-200"
-            >
-              2. Transaksi
-            </button>
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-6 py-3 hover:bg-amber-50 text-black font-semibold text-sm"
-            >
-              3. History Pemesanan
-            </button>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              <button className="px-6 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-semibold transition transform hover:scale-105">
+                Pesan Sekarang
+              </button>
+              <button className="px-6 py-2 border-2 border-amber-700 text-amber-700 hover:bg-amber-50 rounded-lg font-semibold transition">
+                Transaksi
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 focus:outline-none"
+              >
+                <div className="w-8 h-8 flex flex-col justify-center gap-1.5">
+                  <div className={`w-full h-1 bg-amber-900 rounded transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
+                  <div className={`w-full h-1 bg-amber-900 rounded transition-all ${menuOpen ? 'opacity-0' : ''}`}></div>
+                  <div className={`w-full h-1 bg-amber-900 rounded transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
+                </div>
+              </button>
+
+              {/* Mobile Dropdown Menu */}
+              {menuOpen && (
+                <div className="absolute top-20 right-0 left-0 bg-white shadow-lg border-t-4 border-amber-700">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-6 py-4 hover:bg-amber-50 text-amber-900 font-semibold border-b border-amber-100"
+                  >
+                    Pesan Sekarang
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-6 py-4 hover:bg-amber-50 text-amber-900 font-semibold"
+                  >
+                    Transaksi
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      </nav>
 
       {/* Hero Section */}
       <section className="relative w-full py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8">
@@ -138,9 +155,6 @@ export default function Home() {
               Nikmati kelezatan autentik Getuk Gondok dengan resep tradisional yang telah dipercaya selama lebih dari 30 tahun. Setiap produk dibuat dengan bahan pilihan dan sentuhan cinta untuk keluarga Anda.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <button className="px-8 py-3 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-semibold transition">
-                Pesan Sekarang
-              </button>
               <button className="px-8 py-3 border-2 border-amber-700 text-amber-700 hover:bg-amber-50 rounded-lg font-semibold transition">
                 Lihat Katalog
               </button>
