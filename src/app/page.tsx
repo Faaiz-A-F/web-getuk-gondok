@@ -51,15 +51,6 @@ export default function Home() {
     setSelectedProducts(newSelected);
   };
 
-  const selectAll = () => {
-    const allIds = new Set(filteredProducts.map(p => p.id));
-    setSelectedProducts(allIds);
-  };
-
-  const clearAll = () => {
-    setSelectedProducts(new Set());
-  };
-
   const addSelectedToCart = () => {
     selectedProducts.forEach(id => {
       const product = products.find(p => p.id === id);
@@ -75,36 +66,58 @@ export default function Home() {
     setSelectedProducts(new Set());
   };
 
+  const addSingleToCart = (product: any) => {
+    if (addItem) {
+      addItem({
+        id: `${product.id}-${Date.now()}`,
+        productId: product.id,
+        quantity: 1,
+        price: product.price,
+      });
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      {/* Modern Navbar */}
-      <nav className="sticky top-0 z-50 bg-amber-50 shadow-lg border-b-4 border-amber-700">
+    <div className="min-h-screen bg-neutral-50 font-sans selection:bg-amber-200 selection:text-amber-900">
+      
+      {/* Glassmorphism Navbar */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-amber-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo/Brand */}
-            <div className="flex-shrink-0 flex items-center gap-3">
-              <Image
-                src="/logo/1_20260505_231853_0000(1).png"
-                alt="Getuk Gondok Logo"
-                width={60}
-                height={60}
-                className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
-              />
+            <div className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
+              <div className="bg-amber-100 p-2 rounded-xl">
+                <Image
+                  src="/logo/1_20260505_231853_0000(1).png"
+                  alt="Getuk Gondok Logo"
+                  width={50}
+                  height={50}
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                />
+              </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-amber-900">
+                <h1 className="text-xl sm:text-2xl font-black text-amber-950 tracking-tight">
                   Getuk Gondok
                 </h1>
-                <p className="text-xs text-amber-600 font-semibold">Hj. Sri Rahayu</p>
+                <p className="text-xs text-amber-600 font-medium tracking-wide uppercase">Hj. Sri Rahayu</p>
               </div>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">
-              <button className="px-6 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-semibold transition transform hover:scale-105">
+              <button className="text-gray-600 hover:text-amber-700 font-medium transition">Katalog</button>
+              <button className="text-gray-600 hover:text-amber-700 font-medium transition">Tentang Kami</button>
+              <div className="h-6 w-px bg-gray-200"></div>
+              <button className="px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-full font-semibold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                 Pesan Sekarang
-              </button>
-              <button className="px-6 py-2 border-2 border-amber-700 text-amber-700 hover:bg-amber-50 rounded-lg font-semibold transition">
-                Transaksi
               </button>
             </div>
 
@@ -112,198 +125,274 @@ export default function Home() {
             <div className="md:hidden">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 focus:outline-none"
+                className="p-2 text-amber-900 focus:outline-none"
               >
-                <div className="w-8 h-8 flex flex-col justify-center gap-1.5">
-                  <div className={`w-full h-1 bg-amber-900 rounded transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
-                  <div className={`w-full h-1 bg-amber-900 rounded transition-all ${menuOpen ? 'opacity-0' : ''}`}></div>
-                  <div className={`w-full h-1 bg-amber-900 rounded transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
-                </div>
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {menuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
               </button>
-
-              {/* Mobile Dropdown Menu */}
-              {menuOpen && (
-                <div className="absolute top-20 right-0 left-0 bg-white shadow-lg border-t-4 border-amber-700">
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-6 py-4 hover:bg-amber-50 text-amber-900 font-semibold border-b border-amber-100"
-                  >
-                    Pesan Sekarang
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-6 py-4 hover:bg-amber-50 text-amber-900 font-semibold"
-                  >
-                    Transaksi
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div className="md:hidden absolute top-20 right-0 left-0 bg-white shadow-xl border-t border-amber-100 py-4 px-4 flex flex-col gap-2">
+            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">Katalog</button>
+            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">Tentang Kami</button>
+            <button className="w-full mt-2 px-4 py-3 bg-amber-700 text-white rounded-lg font-semibold text-center">
+              Pesan Sekarang
+            </button>
+          </div>
+        )}
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative w-full py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-amber-900 tracking-tight">
-              Getuk Gondok
-            </h1>
-            <p className="text-xl sm:text-2xl text-amber-700 font-semibold">
-              Hj. Sri Rahayu
-            </p>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Oleh-Oleh Khas Magelang | Sejak 1985
-            </p>
-            <p className="text-gray-600 max-w-3xl mx-auto">
-              Nikmati kelezatan autentik Getuk Gondok dengan resep tradisional yang telah dipercaya selama lebih dari 30 tahun. Setiap produk dibuat dengan bahan pilihan dan sentuhan cinta untuk keluarga Anda.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <button className="px-8 py-3 border-2 border-amber-700 text-amber-700 hover:bg-amber-50 rounded-lg font-semibold transition">
-                Lihat Katalog
-              </button>
+      {/* Modern Hero Section */}
+      <section className="relative overflow-hidden bg-amber-950 text-white">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-800 blur-3xl opacity-50"></div>
+          <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-700 blur-3xl opacity-40"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/50 border border-amber-700/50 text-amber-200 text-sm font-medium">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                Buka & Menerima Pesanan
+              </div>
+              <h1 className="text-5xl lg:text-7xl font-black tracking-tight leading-tight">
+                Kelezatan <span className="text-amber-400">Autentik</span> Sejak 1985.
+              </h1>
+              <p className="text-lg lg:text-xl text-amber-100/80 max-w-2xl mx-auto lg:mx-0">
+                Oleh-oleh khas Magelang dengan resep warisan. Tumpeng hias, jajanan tradisional, dan hampers premium untuk momen spesial Anda.
+              </p>
+              
+              {/* Integrated Search in Hero */}
+              <div className="relative max-w-md mx-auto lg:mx-0">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari produk kesukaanmu..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-11 pr-4 py-4 rounded-full border-0 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-500 sm:text-lg shadow-xl"
+                />
+              </div>
+            </div>
+
+            <div className="hidden lg:block relative">
+              {/* Floating Image Effect */}
+              <div className="relative w-full h-[500px] animate-[bounce_10s_ease-in-out_infinite]">
+                <Image
+                  src="/products/1_20260404_090954_0000.png"
+                  alt="Tumpeng Premium"
+                  fill
+                  className="object-contain drop-shadow-2xl"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured 3D Products Section */}
-      <section className="bg-gradient-to-r from-amber-100 to-orange-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-amber-900 mb-12 text-center">Produk Unggulan</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            {[
-              { id: 1, image: "/products/1_20260404_090954_0000.png", name: "Tumpeng Hias Premium" },
-              { id: 2, image: "/products/2_20260404_090954_0001.png", name: "Tumpeng Hiasan Luxury" },
-              { id: 3, image: "/products/3_20260404_090954_0002.png", name: "Nampan Specialty" },
-              { id: 4, image: "/products/16_20260403_214751_0009.png", name: "Tampah Large" },
-              { id: 5, image: "/products/20_20260403_214751_0013.png", name: "Nampan Deluxe" },
-            ].map((product) => (
-              <div
-                key={product.id}
-                className="relative h-64 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition transform hover:scale-105"
+      {/* Store Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20" id="catalog">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">Katalog Produk</h2>
+            <p className="text-gray-500">Temukan berbagai macam pilihan untuk acaramu.</p>
+          </div>
+          
+          {/* Enhanced Category Filter */}
+          <div className="flex overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 hide-scrollbar w-full md:w-auto gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                  selectedCategory === cat
+                    ? "bg-amber-700 text-white shadow-md"
+                    : "bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:bg-amber-50"
+                }`}
               >
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={300}
-                  height={300}
-                  className="object-cover w-full h-full"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-                  <div className="p-4 w-full">
-                    <h3 className="text-white font-bold text-lg">{product.name}</h3>
-                  </div>
-                </div>
-              </div>
+                {cat}
+              </button>
             ))}
           </div>
         </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {filteredProducts.map((product) => {
+            const isSelected = selectedProducts.has(product.id);
+            return (
+              <div
+                key={product.id}
+                className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border-2 ${
+                  isSelected ? "border-amber-500 ring-4 ring-amber-500/20" : "border-transparent"
+                }`}
+              >
+                {/* Image Box */}
+                <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  
+                  {/* Category Badge */}
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur text-amber-800 text-xs font-bold rounded-full shadow-sm">
+                      {product.category}
+                    </span>
+                  </div>
+
+                  {/* Multi-select Checkbox */}
+                  <button 
+                    onClick={() => toggleProduct(product.id)}
+                    className="absolute top-4 right-4 z-10"
+                  >
+                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      isSelected ? "bg-amber-500 border-amber-500 text-white" : "bg-white/80 border-gray-300 text-transparent hover:border-amber-400"
+                    }`}>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Content Box */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{product.description}</p>
+                  
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="text-lg font-black text-amber-700">
+                      {formatPrice(product.price)}
+                    </span>
+                    <button 
+                      onClick={() => addSingleToCart(product)}
+                      className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-20">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-medium text-gray-900">Produk tidak ditemukan</h3>
+            <p className="text-gray-500 mt-2">Coba gunakan kata kunci atau kategori lain.</p>
+          </div>
+        )}
       </section>
 
-      {/* Contact Info */}
-      <section className="bg-amber-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div>
-              <p className="text-amber-100 text-sm mb-1">WhatsApp</p>
-              <p className="text-2xl font-bold">085643730540</p>
+      {/* Floating Action Bar for Multi-select */}
+      {selectedProducts.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-[slideUp_0.3s_ease-out]">
+          <div className="bg-gray-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center w-8 h-8 bg-amber-500 rounded-full font-bold text-sm">
+                {selectedProducts.size}
+              </span>
+              <span className="font-medium hidden sm:inline">Produk Terpilih</span>
             </div>
-            <div>
-              <p className="text-amber-100 text-sm mb-1">Instagram</p>
-              <p className="text-xl font-semibold">@getukkondok</p>
-            </div>
-            <div>
-              <p className="text-amber-100 text-sm mb-1">TikTok</p>
-              <p className="text-xl font-semibold">@getukkondok_magelang</p>
-            </div>
+            <div className="h-6 w-px bg-gray-700"></div>
+            <button 
+              onClick={addSelectedToCart}
+              className="bg-amber-500 hover:bg-amber-400 text-gray-950 px-6 py-2 rounded-full font-bold transition-colors"
+            >
+              Tambah ke Keranjang
+            </button>
           </div>
         </div>
-      </section>
-
-      {/* Category Filter */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-amber-900 mb-8 text-center">Kategori Produk</h2>
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-6 py-2 rounded-full font-semibold transition ${
-                selectedCategory === cat
-                  ? "bg-amber-700 text-white"
-                  : "bg-amber-100 text-amber-700 hover:bg-amber-200"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Products Gallery */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition transform hover:scale-105 overflow-hidden"
-            >
-              <div className="relative w-full h-48 bg-gray-200">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  width={300}
-                  height={200}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-              <div className="p-4">
-                <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                  {product.category}
-                </span>
-                <h3 className="text-lg font-bold text-amber-900 mt-3">{product.name}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      )}
 
       {/* Footer */}
-      <footer className="bg-amber-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Getuk Gondok</h3>
-              <p className="text-amber-100">Penghasil Oleh-Oleh Khas Magelang Terpercaya</p>
+      <footer className="bg-amber-950 text-amber-100/70 border-t border-amber-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-white p-1.5 rounded-lg inline-block">
+                  <Image src="/logo/1_20260505_231853_0000(1).png" alt="Logo" width={40} height={40} className="object-contain" />
+                </div>
+                <h3 className="text-2xl font-bold text-white">Getuk Gondok</h3>
+              </div>
+              <p className="text-sm leading-relaxed">
+                Pusat oleh-oleh khas Magelang yang memadukan resep tradisional dengan kualitas modern sejak 1985.
+              </p>
             </div>
+            
             <div>
-              <h4 className="font-semibold mb-4">Hubungi Kami</h4>
-              <p className="text-amber-100">WhatsApp: 085643730540</p>
+              <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Hubungi Kami</h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                  0856 4373 0540
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  Magelang, Jawa Tengah
+                </li>
+              </ul>
             </div>
+            
             <div>
-              <h4 className="font-semibold mb-4">Ikuti Kami</h4>
-              <p className="text-amber-100">Instagram: @getukkondok</p>
-              <p className="text-amber-100">TikTok: @getukkondok_magelang</p>
+              <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Sosial Media</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="hover:text-amber-400 transition-colors">@getukkondok (Instagram)</a></li>
+                <li><a href="#" className="hover:text-amber-400 transition-colors">@getukkondok_magelang (TikTok)</a></li>
+              </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Lokasi</h4>
-              <p className="text-amber-100">Magelang, Jawa Tengah</p>
-              <p className="text-amber-100">Sejak 1985</p>
+              <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Jam Operasional</h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex justify-between border-b border-amber-900 pb-2"><span>Senin - Jumat</span> <span>08:00 - 20:00</span></li>
+                <li className="flex justify-between border-b border-amber-900 pb-2"><span>Sabtu - Minggu</span> <span>07:00 - 21:00</span></li>
+              </ul>
             </div>
           </div>
-          <div className="border-t border-white pt-8">
-            <p className="text-center text-amber-100">
-              © 2026 Getuk Gondok. All rights reserved.
-            </p>
+          
+          <div className="pt-8 border-t border-amber-900 text-center text-sm">
+            <p>© {new Date().getFullYear()} Getuk Gondok Hj. Sri Rahayu. All rights reserved.</p>
           </div>
         </div>
       </footer>
+      
+      {/* Adding custom keyframe for the floating bar directly in the JSX using arbitrary values or global CSS would be ideal, but Tailwind covers most of it. */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes slideUp {
+          from { transform: translate(-50%, 100%); opacity: 0; }
+          to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </div>
   );
 }
