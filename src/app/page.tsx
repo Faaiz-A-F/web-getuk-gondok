@@ -123,10 +123,10 @@ export default function Home() {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <button>
+              <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 text-amber-900 focus:outline-none"
-              
+                >
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {menuOpen ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
