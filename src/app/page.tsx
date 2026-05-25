@@ -192,13 +192,63 @@ export default function Home() {
 
             <div className="hidden lg:block relative">
               {/* Floating Image Effect */}
-              <div className="relative w-full h-[500px] animate-[bounce_10s_ease-in-out_infinite]">
+              <div className="relative w-full h-125 animate-[sway_5s_ease-in-out_infinite]">
                 <Image
                   src="/products/1_20260404_090954_0000.png"
                   alt="Tumpeng Premium"
                   fill
                   className="object-contain drop-shadow-2xl"
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About / Story Section */}
+      <section className="bg-white py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div className="space-y-8 max-w-2xl">
+              <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">Kenapa Getuk Gondok?</p>
+              <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-[#c97a2d]">
+                Bukan Sekadar Oleh-Oleh.
+                <br />
+                Ini Sepotong Cerita Keluarga.
+              </h2>
+              <p className="text-base sm:text-lg leading-relaxed text-neutral-800 max-w-xl">
+                Sejak 1985, Hj. Sri Rahayu meracik getuk dengan tangan sendiri dan menggunakan singkong segar Magelang,
+                kelapa muda, dan gula merah pilihan. Tidak ada jalan pintas, tidak ada bahan pengawet.
+                <br />
+                Kini hadir dalam berbagai pilihan kemasan modern, tetap dengan resep yang sama: autentik, lembut, dan penuh rasa.
+              </p>
+
+              <div className="grid grid-cols-3 gap-6 sm:gap-10 max-w-xl pt-2">
+                <div>
+                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">40+</div>
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Tahun Pengalaman</div>
+                </div>
+                <div>
+                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">10+</div>
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Varian Produk</div>
+                </div>
+                <div>
+                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">1000+</div>
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Pelanggan Setia</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center lg:justify-center">
+              <div className="relative w-full max-w-55 rounded-4xl bg-[#5a2500] px-8 py-10 text-center shadow-[0_24px_60px_rgba(90,37,0,0.28)] text-[#d89a34]">
+                <div className="text-3xl font-semibold tracking-[0.15em] uppercase">Since</div>
+                <div className="mt-2 flex w-full justify-center text-6xl sm:text-7xl font-extrabold leading-none tabular-nums">1985</div>
+                <div className="mx-auto mt-4 h-px w-20 bg-[#d89a34]/70" />
+                <div className="mt-5 text-xl leading-tight text-white/95">
+                  Magelang,
+                  <br />
+                  Jawa Tengah
+                </div>
               </div>
             </div>
           </div>
@@ -386,6 +436,10 @@ export default function Home() {
       
       {/* Adding custom keyframe for the floating bar directly in the JSX using arbitrary values or global CSS would be ideal, but Tailwind covers most of it. */}
       <style dangerouslySetInnerHTML={{__html: `
+        @keyframes sway {
+          0%, 100% { transform: translateX(-30px); }
+          50% { transform: translateX(10px); }
+        }
         @keyframes slideUp {
           from { transform: translate(-50%, 100%); opacity: 0; }
           to { transform: translate(-50%, 0); opacity: 1; }
