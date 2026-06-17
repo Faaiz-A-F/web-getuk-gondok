@@ -35,7 +35,7 @@ const Header = () => (
   <header className="flex h-18 items-center justify-between border-b-4 border-amber-700 bg-amber-50 px-8 lg:px-32.5">
     <div className="flex items-center gap-3">
       <Image
-        src="/logo getuk_20260505_231853_0000(1).png"
+        src="/logo/13.png"
         alt="Getuk Gondok Logo"
         width={60}
         height={60}
