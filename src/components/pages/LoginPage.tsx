@@ -7,15 +7,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#4A1D0B]">
-      {/* Main Container - Full screen responsive without max-width limit */}
-      <div className="w-full px-6 md:px-10 lg:px-16">
-        {/* Grid Layout - 2 columns on desktop, 1 on mobile */}
-        <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-12">
-          
-          {/* LEFT SECTION - DECORATIVE AREA (Hidden on mobile) */}
-          <div className="hidden lg:flex items-center justify-center relative">
+      <div className="w-full px-4 sm:px-6 md:px-10 lg:px-16">
+        <div className="relative grid min-h-screen grid-cols-1 items-center">
+
+          <div className="hidden lg:flex items-center justify-center absolute inset-0 pointer-events-none">
             {/* Background Decorative Elements */}
-            <div className="absolute inset-0 overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 rounded-3xl">
               {/* Large Brown Circle - Back */}
               <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#6B3410] opacity-40"></div>
               
@@ -50,8 +47,8 @@ export default function LoginPage() {
           </div>
           
           {/* RIGHT SECTION - LOGIN CARD */}
-          <div className="flex items-center justify-center w-full py-8 lg:py-0">
-            <div className="w-full max-w-sm bg-[#F7F7F5] rounded-3xl shadow-2xl p-8 md:p-10">
+          <div className="relative z-10 flex items-center justify-center w-full py-6 sm:py-8 lg:py-0">
+            <div className="w-full max-w-md bg-[#F7F7F5] rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
               
               {/* Logo Icon - User Avatar Style */}
               <div className="flex justify-center mb-8">
@@ -70,12 +67,12 @@ export default function LoginPage() {
               </div>
               
               {/* Heading */}
-              <h1 className="text-3xl font-bold text-[#4A1D0B] text-center mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#4A1D0B] text-center mb-2 leading-tight">
                 Welcome Back
               </h1>
               
               {/* Subheading */}
-              <p className="text-center text-sm text-[#8B6F47] mb-8">
+              <p className="text-center text-sm text-[#8B6F47] mb-8 max-w-xs mx-auto">
                 Masuk untuk melanjutkan ke dashboard
               </p>
               
@@ -133,17 +130,17 @@ export default function LoginPage() {
                 </div>
                 
                 {/* Remember me & Forgot Password */}
-                <div className="flex items-center justify-between gap-3 pt-4">
+                <div className="flex flex-col items-start gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
                       className="w-4 h-4 accent-[#C87536] cursor-pointer rounded border-2 border-[#E8D4C4]"
                     />
-                    <span className="text-xs text-[#4A1D0B]">Remember me</span>
+                    <span className="text-sm text-[#4A1D0B] leading-none">Remember me</span>
                   </label>
                   <a 
                     href="#" 
-                    className="text-xs text-[#C87536] hover:text-[#A85E2E] font-semibold transition-colors duration-200"
+                    className="text-sm text-[#C87536] hover:text-[#A85E2E] font-semibold transition-colors duration-200"
                   >
                     Forgot password?
                   </a>
