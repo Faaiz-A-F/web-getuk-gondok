@@ -34,8 +34,8 @@ export function Footer() {
                 <div>
                   <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Sosial Media</h4>
                   <ul className="space-y-3 text-sm">
-                    <li><a href="#" className="hover:text-amber-400 transition-colors">@getukkondok (Instagram)</a></li>
-                    <li><a href="#" className="hover:text-amber-400 transition-colors">@getukkondok_magelang (TikTok)</a></li>
+                    <li><a href="https://www.instagram.com/getukgondok/" className="hover:text-amber-400 transition-colors">@getukgondok (Instagram)</a></li>
+                    <li><a href="https://www.tiktok.com/@getukgondok_magelang" className="hover:text-amber-400 transition-colors">@getukgondok_magelang (TikTok)</a></li>
                   </ul>
                 </div>
     
