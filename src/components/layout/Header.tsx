@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { useContext, useState } from "react";
 import { CartContext } from "@/context/CartContext";
 
@@ -26,8 +27,12 @@ export function Header() {
                </div>
    
                <div className="hidden md:flex items-center gap-6">
-                 <button className="text-gray-600 hover:text-amber-700 font-medium transition">Katalog</button>
-                 <button className="text-gray-600 hover:text-amber-700 font-medium transition">Tentang Kami</button>
+                 <Link href="/catalogue" className="text-gray-600 hover:text-amber-700 font-medium transition">
+                   Katalog
+                 </Link>
+                 <Link href="/about-us" className="text-gray-600 hover:text-amber-700 font-medium transition">
+                   Tentang Kami
+                 </Link>
                  <div className="h-6 w-px bg-gray-200"></div>
                  <button className="px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-full font-semibold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                    Pesan Sekarang
@@ -51,7 +56,9 @@ export function Header() {
            {menuOpen && (
              <div className="md:hidden absolute top-20 right-0 left-0 bg-white shadow-xl border-t border-amber-100 py-4 px-4 flex flex-col gap-2">
                <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">Katalog</button>
-               <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">Tentang Kami</button>
+               <Link href="/about-us" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">
+                 Tentang Kami
+               </Link>
                <button className="w-full mt-2 px-4 py-3 bg-amber-700 text-white rounded-lg font-semibold text-center">
                  Pesan Sekarang
                </button>
