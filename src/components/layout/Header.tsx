@@ -1,10 +1,14 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { useContext, useState } from "react";
 import { CartContext } from "@/context/CartContext";
+import { User, LogOut, Settings, ShoppingCart } from "lucide-react";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     
   return (
    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-amber-100">
@@ -34,9 +38,59 @@ export function Header() {
                    Tentang Kami
                  </Link>
                  <div className="h-6 w-px bg-gray-200"></div>
-                 <button className="px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-full font-semibold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                   Pesan Sekarang
-                 </button>
+                 
+                 {/* Cart Icon */}
+                 <Link href="/cart" className="p-2 text-gray-600 hover:text-amber-700 transition relative">
+                   <ShoppingCart className="w-6 h-6" />
+                 </Link>
+
+                 {/* Auth Section */}
+                 {isLoggedIn ? (
+                   <div className="relative">
+                     <button 
+                       onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+                       className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-amber-50 transition"
+                     >
+                       <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center text-white font-semibold">
+                         U
+                       </div>
+                     </button>
+
+                     {/* Account Dropdown Menu */}
+                     {accountMenuOpen && (
+                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                         <Link href="/account" className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50 text-gray-700 font-medium">
+                           <User className="w-4 h-4" />
+                           My Account
+                         </Link>
+                         <Link href="/account" className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50 text-gray-700 font-medium">
+                           <Settings className="w-4 h-4" />
+                           Settings
+                         </Link>
+                         <div className="border-t border-gray-200 my-2"></div>
+                         <button 
+                           onClick={() => {
+                             setIsLoggedIn(false);
+                             setAccountMenuOpen(false);
+                           }}
+                           className="w-full text-left flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-600 font-medium"
+                         >
+                           <LogOut className="w-4 h-4" />
+                           Logout
+                         </button>
+                       </div>
+                     )}
+                   </div>
+                 ) : (
+                   <div className="flex items-center gap-3">
+                     <Link href="/login" className="px-4 py-2.5 text-amber-700 hover:text-amber-900 font-semibold transition">
+                       Login
+                     </Link>
+                     <Link href="/register" className="px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-full font-semibold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                       Sign Up
+                     </Link>
+                   </div>
+                 )}
                </div>
    
                <div className="md:hidden">
@@ -55,13 +109,44 @@ export function Header() {
    
            {menuOpen && (
              <div className="md:hidden absolute top-20 right-0 left-0 bg-white shadow-xl border-t border-amber-100 py-4 px-4 flex flex-col gap-2">
-               <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">Katalog</button>
+               <Link href="/catalogue" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">Katalog</Link>
                <Link href="/about-us" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium">
                  Tentang Kami
                </Link>
-               <button className="w-full mt-2 px-4 py-3 bg-amber-700 text-white rounded-lg font-semibold text-center">
-                 Pesan Sekarang
-               </button>
+               <Link href="/cart" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium flex items-center gap-2">
+                 <ShoppingCart className="w-4 h-4" />
+                 Keranjang
+               </Link>
+               <div className="border-t border-gray-200 my-2"></div>
+               
+               {/* Mobile Auth Section */}
+               {isLoggedIn ? (
+                 <>
+                   <Link href="/account" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium flex items-center gap-2">
+                     <User className="w-4 h-4" />
+                     Akun Saya
+                   </Link>
+                   <button 
+                     onClick={() => {
+                       setIsLoggedIn(false);
+                       setMenuOpen(false);
+                     }}
+                     className="w-full text-left px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 font-medium flex items-center gap-2"
+                   >
+                     <LogOut className="w-4 h-4" />
+                     Logout
+                   </button>
+                 </>
+               ) : (
+                 <>
+                   <Link href="/login" className="w-full text-center px-4 py-3 rounded-lg border-2 border-amber-700 text-amber-700 font-semibold hover:bg-amber-50">
+                     Login
+                   </Link>
+                   <Link href="/register" className="w-full mt-2 px-4 py-3 bg-amber-700 text-white rounded-lg font-semibold text-center hover:bg-amber-800">
+                     Sign Up
+                   </Link>
+                 </>
+               )}
              </div>
            )}
          </nav>
