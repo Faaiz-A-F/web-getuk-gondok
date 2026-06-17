@@ -31,6 +31,9 @@ export function Header() {
                </div>
    
                <div className="hidden md:flex items-center gap-6">
+                <Link href="/login" className="text-gray-600 hover:text-amber-700 font-medium transition">
+                   Login
+                 </Link>
                  <Link href="/catalogue" className="text-gray-600 hover:text-amber-700 font-medium transition">
                    Katalog
                  </Link>
