@@ -19,14 +19,26 @@ export function Header() {
           </div>
         </Link>
         <ul className="flex gap-6">
+              <Link href="/catalogue">Catalogue</Link>
+            </li>
+            <li>
+              <Link href="/about-us">About us</Link>
+            </li>
+            <li>
+              <Link href="/account">Account</Link>
+            <Link href="/catalogue">Catalogue</Link>
+          </li>
           <li>
-            <Link href="/products">Products</Link>
+            <Link href="/account">Account</Link>
           </li>
           <li>
             <Link href="/cart">Cart</Link>
           </li>
           <li>
             <Link href="/login">Login</Link>
+          </li>
+          <li>
+            <Link href="/admin">Admin</Link>
           </li>
         </ul>
       </nav>
