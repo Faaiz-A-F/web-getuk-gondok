@@ -31,16 +31,12 @@ export function Header() {
                </div>
    
                <div className="hidden md:flex items-center gap-6">
-                <Link href="/login" className="text-gray-600 hover:text-amber-700 font-medium transition">
-                   Login
-                 </Link>
                  <Link href="/catalogue" className="text-gray-600 hover:text-amber-700 font-medium transition">
                    Katalog
                  </Link>
                  <Link href="/about-us" className="text-gray-600 hover:text-amber-700 font-medium transition">
                    Tentang Kami
                  </Link>
-                 <div className="h-6 w-px bg-gray-200"></div>
                  
                  {/* Cart Icon */}
                  <Link href="/cart" className="p-2 text-gray-600 hover:text-amber-700 transition relative">
