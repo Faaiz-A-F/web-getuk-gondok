@@ -11,13 +11,13 @@ export function Header() {
            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
              <div className="flex justify-between items-center h-20">
                <div className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
-                 <div className="bg-amber-100 p-2 rounded-xl">
+                 <div className="bg-transparent p-1 rounded-xl">
                    <Image
-                     src="/logo/1_20260505_231853_0000(1).png"
+                     src="/logo/13.png"
                      alt="Getuk Gondok Logo"
-                     width={50}
-                     height={50}
-                     className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                     width={64}
+                     height={64}
+                     className="w-16 h-16 sm:w-16 sm:h-16 object-contain"
                    />
                  </div>
                  <div>

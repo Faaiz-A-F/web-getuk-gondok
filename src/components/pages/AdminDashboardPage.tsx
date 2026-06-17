@@ -37,8 +37,8 @@ const Header = () => (
       <Image
         src="/logo/13.png"
         alt="Getuk Gondok Logo"
-        width={60}
-        height={60}
+        width={100}
+        height={100}
         className="rounded-full"
       />
       <div className="flex flex-col">
