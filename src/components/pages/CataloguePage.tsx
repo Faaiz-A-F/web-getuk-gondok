@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { Header } from "@/components/layout/Header";
 
 const categories = ["Traditional", "Premium", "Box", "Serving", "Combo", "Sweet", "Special", "Deluxe"];
 
 export function CataloguePage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <>
+      <Header />
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="space-y-4">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">Catalogue</p>
         <h1 className="text-4xl font-black tracking-tight text-amber-950">Browse the full product range</h1>
@@ -31,5 +34,6 @@ export function CataloguePage() {
         </Link>
       </div>
     </div>
+    </>
   );
 }
