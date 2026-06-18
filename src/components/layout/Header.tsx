@@ -14,7 +14,7 @@ export function Header() {
    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-amber-100">
            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
              <div className="flex justify-between items-center h-20">
-               <div className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
+               <Link href="/" className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
                  <div className="bg-transparent p-1 rounded-xl">
                    <Image
                      src="/logo/13.png"
@@ -28,7 +28,7 @@ export function Header() {
                    <h1 className="text-xl sm:text-2xl font-black text-amber-950 tracking-tight">Getuk Gondok</h1>
                    <p className="text-xs text-amber-600 font-medium tracking-wide uppercase">Hj. Sri Rahayu</p>
                  </div>
-               </div>
+               </Link>
    
                <div className="hidden md:flex items-center gap-6">
                  <Link href="/catalogue" className="text-gray-600 hover:text-amber-700 font-medium transition">
