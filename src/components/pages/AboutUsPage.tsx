@@ -1,6 +1,10 @@
+import { Header } from "@/components/layout/Header";
+
 export function AboutUsPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+    <>
+      <Header />
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="space-y-4">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">About us</p>
         <h1 className="text-4xl font-black tracking-tight text-amber-950">A family recipe from Magelang</h1>
@@ -23,5 +27,6 @@ export function AboutUsPage() {
         ))}
       </div>
     </div>
+    </>
   );
 }

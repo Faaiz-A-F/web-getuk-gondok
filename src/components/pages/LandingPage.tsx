@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CartContext } from "@/context/CartContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -29,14 +29,25 @@ const products = [
   { id: "20", name: "Kardus Jumbo", category: "Box", image: "/products/22_20260403_214751_0015.png", price: 25000, description: "Kardus jumbo tahan lama kuat" },
 ];
 
+const heroProducts = [products[0], products[4], products[5], products[10]];
+
 export function LandingPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState(new Set<string>());
+  const [heroProductIndex, setHeroProductIndex] = useState(0);
 
   const { addItem } = useContext(CartContext) || {};
   const categories = ["All", "Traditional", "Premium", "Box", "Serving", "Combo", "Sweet", "Special", "Deluxe"];
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setHeroProductIndex((currentIndex) => (currentIndex + 1) % heroProducts.length);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const filteredProducts = products
     .filter((product) => selectedCategory === "All" || product.category === selectedCategory)
@@ -76,6 +87,14 @@ export function LandingPage() {
         price: product.price,
       });
     }
+  };
+
+  const goToPreviousHeroProduct = () => {
+    setHeroProductIndex((currentIndex) => (currentIndex - 1 + heroProducts.length) % heroProducts.length);
+  };
+
+  const goToNextHeroProduct = () => {
+    setHeroProductIndex((currentIndex) => (currentIndex + 1) % heroProducts.length);
   };
 
   const formatPrice = (price: number) => {
@@ -127,9 +146,40 @@ export function LandingPage() {
             </div>
 
             <div className="hidden lg:block relative">
-              <div className="relative w-full h-125 animate-[sway_5s_ease-in-out_infinite]">
-                <Image src="/products/1_20260404_090954_0000.png" alt="Tumpeng Premium" fill className="object-contain drop-shadow-2xl" />
+              <button
+                type="button"
+                onClick={goToPreviousHeroProduct}
+                aria-label="Previous featured product"
+                className="absolute left-[-3.5rem] top-1/2 z-20 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <div className="relative h-125 overflow-hidden">
+                <div
+                  className="flex h-full transition-transform duration-700 ease-in-out"
+                  style={{ transform: `translateX(-${heroProductIndex * 100}%)` }}
+                >
+                  {heroProducts.map((product) => (
+                    <div key={product.id} className="relative h-full min-w-full flex-shrink-0">
+                      <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-2xl" />
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={goToNextHeroProduct}
+                aria-label="Next featured product"
+                className="absolute right-[-3.5rem] top-1/2 z-20 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
