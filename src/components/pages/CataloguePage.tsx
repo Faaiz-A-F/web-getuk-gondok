@@ -101,8 +101,8 @@ export function CataloguePage() {
         {/* Section Atas: Judul & Form Pencarian */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-neutral-200 pb-8">
           <div className="space-y-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">Catalogue</p>
-            <h1 className="text-4xl font-black tracking-tight text-amber-950">Browse the full product range</h1>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">Katalog Produk</p>
+            <h1 className="text-4xl font-black tracking-tight text-amber-950">Getuk Gondok</h1>
             <p className="max-w-xl text-base leading-relaxed text-neutral-600">
               Cari dan temukan hidangan tumpeng hias, jajanan pasar tradisional, serta opsi packaging terbaik untuk momen spesial Anda.
             </p>
@@ -162,23 +162,6 @@ export function CataloguePage() {
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
 
-                  {/* Label Kategori */}
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-white/90 backdrop-blur text-amber-800 text-xs font-bold rounded-full shadow-sm">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  {/* Tombol Checkbox Seleksi */}
-                  <button onClick={() => toggleProduct(product.id)} className="absolute top-4 right-4 z-10">
-                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      isSelected ? "bg-amber-500 border-amber-500 text-white" : "bg-white/80 border-gray-300 text-transparent hover:border-amber-400"
-                    }`}>
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </button>
                 </div>
 
                 {/* Info Produk */}
