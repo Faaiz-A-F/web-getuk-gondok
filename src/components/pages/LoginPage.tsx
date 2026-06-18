@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import link from 'next/link';
 import MagelangImage from '../../assets/images/magelang fiks.png';
 
 export default function LoginPage() {
@@ -39,12 +40,12 @@ export default function LoginPage() {
 
                 {/* Heading */}
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#4A1D0B] text-center mb-2 leading-tight">
-                  Welcome Back
+                  Sugeng Rawuh
                 </h1>
 
                 {/* Subheading */}
                 <p className="text-center text-sm text-[#8B6F47] mb-8 max-w-xs mx-auto">
-                  Masuk untuk melanjutkan ke dashboard
+                  Mlebet kagem nglajengaken dhateng dashboard
                 </p>
 
                 {/* Form */}
@@ -107,13 +108,13 @@ export default function LoginPage() {
                         type="checkbox"
                         className="w-4 h-4 accent-[#C87536] cursor-pointer rounded border-2 border-[#E8D4C4]"
                       />
-                      <span className="text-sm text-[#4A1D0B] leading-none">Remember me</span>
+                      <span className="text-sm text-[#4A1D0B] leading-none">Eling aku</span>
                     </label>
                     <a
                       href="#"
                       className="text-sm text-[#C87536] hover:text-[#A85E2E] font-semibold transition-colors duration-200"
                     >
-                      Forgot password?
+                      Kesupen Password?
                     </a>
                   </div>
 
@@ -135,12 +136,12 @@ export default function LoginPage() {
 
                 {/* Sign up Link */}
                 <div className="text-center text-xs text-[#4A1D0B]">
-                  Belum punya akun?{' '}
+                  Dhereng gadah akun?{' '}
                   <a
-                    href="#"
+                    href="/register"
                     className="text-[#C87536] font-bold hover:text-[#A85E2E] transition-colors duration-200"
                   >
-                    Daftar
+                    Ndamel Akun
                   </a>
                 </div>
               </div>
