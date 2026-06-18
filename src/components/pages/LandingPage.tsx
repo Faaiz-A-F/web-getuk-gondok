@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
-import { CartContext } from "@/context/CartContext";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -32,14 +31,8 @@ const products = [
 const heroProducts = [products[0], products[4], products[5], products[10]];
 
 export function LandingPage() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState(new Set<string>());
   const [heroProductIndex, setHeroProductIndex] = useState(0);
-
-  const { addItem } = useContext(CartContext) || {};
-  const categories = ["All", "Traditional", "Premium", "Box", "Serving", "Combo", "Sweet", "Special", "Deluxe"];
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -49,46 +42,6 @@ export function LandingPage() {
     return () => window.clearInterval(intervalId);
   }, []);
 
-  const filteredProducts = products
-    .filter((product) => selectedCategory === "All" || product.category === selectedCategory)
-    .filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase().trim()));
-
-  const toggleProduct = (id: string) => {
-    const newSelected = new Set(selectedProducts);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedProducts(newSelected);
-  };
-
-  const addSelectedToCart = () => {
-    selectedProducts.forEach((id) => {
-      const product = products.find((item) => item.id === id);
-      if (product && addItem) {
-        addItem({
-          id: `${product.id}-${Date.now()}`,
-          productId: product.id,
-          quantity: 1,
-          price: product.price,
-        });
-      }
-    });
-    setSelectedProducts(new Set());
-  };
-
-  const addSingleToCart = (product: any) => {
-    if (addItem) {
-      addItem({
-        id: `${product.id}-${Date.now()}`,
-        productId: product.id,
-        quantity: 1,
-        price: product.price,
-      });
-    }
-  };
-
   const goToPreviousHeroProduct = () => {
     setHeroProductIndex((currentIndex) => (currentIndex - 1 + heroProducts.length) % heroProducts.length);
   };
@@ -97,17 +50,9 @@ export function LandingPage() {
     setHeroProductIndex((currentIndex) => (currentIndex + 1) % heroProducts.length);
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
   return (
     <div className="min-h-screen bg-neutral-50 font-sans selection:bg-amber-200 selection:text-amber-900">
-    <Header />
+      <Header />
 
       <section className="relative overflow-hidden bg-amber-950 text-white">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
@@ -135,6 +80,7 @@ export function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
+                {/* Input ini bisa dibungkus <form> ke depannya untuk navigasi ke halaman katalog */}
                 <input
                   type="text"
                   placeholder="Cari produk kesukaanmu..."
@@ -234,133 +180,8 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20" id="catalog">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">Katalog Produk</h2>
-            <p className="text-gray-500">Temukan berbagai macam pilihan untuk acaramu.</p>
-          </div>
-
-          <div className="flex overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 hide-scrollbar w-full md:w-auto gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  selectedCategory === cat
-                    ? "bg-amber-700 text-white shadow-md"
-                    : "bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:bg-amber-50"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => {
-            const isSelected = selectedProducts.has(product.id);
-            return (
-              <div
-                key={product.id}
-                className={`group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border-2 ${
-                  isSelected ? "border-amber-500 ring-4 ring-amber-500/20" : "border-transparent"
-                }`}
-              >
-                <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-white/90 backdrop-blur text-amber-800 text-xs font-bold rounded-full shadow-sm">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  <button onClick={() => toggleProduct(product.id)} className="absolute top-4 right-4 z-10">
-                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      isSelected ? "bg-amber-500 border-amber-500 text-white" : "bg-white/80 border-gray-300 text-transparent hover:border-amber-400"
-                    }`}>
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{product.description}</p>
-
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="text-lg font-black text-amber-700">{formatPrice(product.price)}</span>
-                    <button
-                      onClick={() => addSingleToCart(product)}
-                      className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-colors"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-medium text-gray-900">Produk tidak ditemukan</h3>
-            <p className="text-gray-500 mt-2">Coba gunakan kata kunci atau kategori lain.</p>
-          </div>
-        )}
-      </section>
-
-      {selectedProducts.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-[slideUp_0.3s_ease-out]">
-          <div className="bg-gray-900 text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center justify-center w-8 h-8 bg-amber-500 rounded-full font-bold text-sm">
-                {selectedProducts.size}
-              </span>
-              <span className="font-medium hidden sm:inline">Produk Terpilih</span>
-            </div>
-            <div className="h-6 w-px bg-gray-700"></div>
-            <button
-              onClick={addSelectedToCart}
-              className="bg-amber-500 hover:bg-amber-400 text-gray-950 px-6 py-2 rounded-full font-bold transition-colors"
-            >
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-      )}
-
       <Footer />
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes sway {
-          0%, 100% { transform: translateX(-30px); }
-          50% { transform: translateX(10px); }
-        }
-        @keyframes slideUp {
-          from { transform: translate(-50%, 100%); opacity: 0; }
-          to { transform: translate(-50%, 0); opacity: 1; }
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}} />
     </div>
   );
 }
