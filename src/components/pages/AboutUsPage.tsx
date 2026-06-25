@@ -1,14 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 
 const heroProducts = [
-  { id: "1", name: "Tumpeng Hias", category: "Special", image: "/products/1_20260404_090954_0000.png" },
-  { id: "5", name: "Yangko", category: "Traditional", image: "/products/7_20260403_214750_0000.png" },
-  { id: "6", name: "Paket Mix", category: "Combo", image: "/products/8_20260403_214750_0001.png" },
-  { id: "11", name: "Nampan Set", category: "Serving", image: "/products/13_20260403_214750_0006.png" },
+  { id: "1", name: "Tumpeng Hias", category: "Special", video: "/sudah dipotong/video tumpeng.mp4" },
+  { id: "5", name: "Yangko", category: "Traditional", video: "/sudah dipotong/video 2.mp4" },
+  { id: "6", name: "Paket Mix", category: "Combo", video: "/sudah dipotong/video 3.mp4" },
+  { id: "11", name: "Nampan Set", category: "Serving", video: "/sudah dipotong/video 4.mp4" },
 ];
 
 export function AboutUsPage() {
@@ -76,13 +75,16 @@ export function AboutUsPage() {
               >
                 {heroProducts.map((product) => (
                   <div key={product.id} className="relative h-full min-w-full flex-shrink-0 flex items-center justify-center p-4">
-                    <Image 
-                      src={product.image} 
-                      alt={product.name} 
-                      fill 
-                      className="object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.15)] transition-transform duration-500 hover:scale-105" 
-                      priority
-                    />
+                    <video
+                      src={product.video}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="h-full w-full object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.15)] transition-transform duration-500 hover:scale-105"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                 ))}
               </div>
