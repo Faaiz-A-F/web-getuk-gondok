@@ -180,6 +180,22 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="bg-amber-50 py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-8 text-center">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Proses Produksi</p>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-amber-900">
+              Dari Singkong Segar Hingga Oleh-Oleh Premium
+            </h2>
+            <p className="text-base sm:text-lg leading-relaxed text-amber-800 max-w-xl mx-auto">
+              Setiap produk kami dibuat dengan tangan, dimulai dari singkong segar pilihan, kelapa muda, dan gula merah alami.
+              <br />
+              Proses tradisional yang kami pertahankan selama puluhan tahun memastikan rasa autentik dan kualitas terbaik.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <Footer />
 
     </div>
