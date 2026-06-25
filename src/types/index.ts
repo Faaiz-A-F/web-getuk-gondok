@@ -1,32 +1,41 @@
-// Define your types here
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
+export type {
+  User,
+  Product,
+  ProductImage,
+  Category,
+  Order,
+  OrderItem,
+  SiteContent,
+  AdminLog,
+} from '@prisma/client'
+
+export type OrderWithItems = import('@prisma/client').Order & {
+  items: (import('@prisma/client').OrderItem & {
+    product: import('@prisma/client').Product
+  })[]
+  user: import('@prisma/client').User
 }
 
-export interface CartItem {
-  id: string;
-  productId: string;
-  quantity: number;
-  price: number;
+export type ProductWithImages = import('@prisma/client').Product & {
+  images: import('@prisma/client').ProductImage[]
+  category: import('@prisma/client').Category
 }
 
-export interface Order {
-  id: string;
-  userId: string;
-  items: CartItem[];
-  totalPrice: number;
-  status: "pending" | "completed" | "cancelled";
-  createdAt: Date;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: "customer" | "admin";
+export type DashboardStats = {
+  totalRevenue: number
+  totalOrders: number
+  totalCustomers: number
+  totalProducts: number
+  recentOrders: {
+    id: string
+    orderNumber: string
+    userName: string
+    totalAmount: number
+    status: string
+    createdAt: Date
+  }[]
+  revenueByMonth: {
+    month: string
+    revenue: number
+  }[]
 }

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: getuk-gondok-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: getuk_gondok
+      MYSQL_USER: getuk_user
+      MYSQL_PASSWORD: getuk_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - getuk_mysql_data:/var/lib/mysql
+
+volumes:
+  getuk_mysql_data:
