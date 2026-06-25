@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types";
 import { formatPrice } from "@/lib/utils/formatPrice";
@@ -7,12 +8,16 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const productImageSrc = product.image?.trim() ? product.image : "/nobg/1.png";
+
   return (
     <Link href={`/products/${product.id}`}>
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-        <img
-          src={product.image}
+        <Image
+          src={productImageSrc}
           alt={product.name}
+          width={600}
+          height={400}
           className="w-full h-48 object-cover"
         />
         <div className="p-4">
