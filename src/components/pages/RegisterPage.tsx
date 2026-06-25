@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import MagelangImage from '../../assets/images/magelang fiks.png';
 
@@ -16,10 +17,12 @@ export default function RegisterPage() {
       <div className="w-full px-4 sm:px-6 md:px-10 lg:px-16">
         <div className="relative min-h-screen">
           <div className="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden">
-            <img
-              src={MagelangImage.src}
+            <Image
+              src={MagelangImage}
               alt="Magelang"
-              className="w-full h-full object-cover object-center"
+              fill
+              priority
+              className="object-cover object-center"
             />
           </div>
 

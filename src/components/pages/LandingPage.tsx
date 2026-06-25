@@ -6,29 +6,30 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
 const products = [
-  { id: "1", name: "Tumpeng Hias", category: "Special", image: "/products/1_20260404_090954_0000.png", price: 75000, description: "Tumpeng hias premium untuk acara spesial" },
-  { id: "2", name: "Tumpeng Hiasan", category: "Premium", image: "/products/2_20260404_090954_0001.png", price: 85000, description: "Hiasan tumpeng mewah berkualitas tinggi" },
-  { id: "3", name: "Nampan Specialty", category: "Deluxe", image: "/products/3_20260404_090954_0002.png", price: 95000, description: "Nampan specialty dengan desain elegan" },
-  { id: "4", name: "Kardus Packaging", category: "Box", image: "/products/4_20260404_090954_0003.png", price: 15000, description: "Packaging kardus standar yang kuat" },
-  { id: "5", name: "Yangko", category: "Traditional", image: "/products/7_20260403_214750_0000.png", price: 25000, description: "Kue tradisional yang lezat dan otentik" },
-  { id: "6", name: "Paket Mix", category: "Combo", image: "/products/8_20260403_214750_0001.png", price: 120000, description: "Paket mix lengkap untuk berbagai kebutuhan" },
-  { id: "7", name: "Tampah Set", category: "Traditional", image: "/products/9_20260403_214750_0002.png", price: 45000, description: "Set tampah tradisional asli Magelang" },
-  { id: "8", name: "Kardus Kecil", category: "Box", image: "/products/10_20260403_214750_0003.png", price: 10000, description: "Kardus kecil praktis untuk pengiriman" },
-  { id: "9", name: "Kardus Sedang", category: "Box", image: "/products/11_20260403_214750_0004.png", price: 15000, description: "Kardus sedang dengan kekuatan optimal" },
-  { id: "10", name: "Kardus Besar", category: "Box", image: "/products/12_20260403_214750_0005.png", price: 20000, description: "Kardus besar jumbo untuk paket istimewa" },
-  { id: "11", name: "Nampan Set", category: "Serving", image: "/products/13_20260403_214750_0006.png", price: 55000, description: "Set nampan elegan untuk sajian" },
-  { id: "12", name: "Jongkong", category: "Traditional", image: "/products/14_20260403_214750_0007.png", price: 30000, description: "Jongkong autentik rasa istimewa" },
-  { id: "13", name: "Wajik Jadah", category: "Sweet", image: "/products/15_20260403_214750_0008.png", price: 35000, description: "Wajik jadah manis legit tradisional" },
-  { id: "14", name: "Tampah Large", category: "Serving", image: "/products/16_20260403_214751_0009.png", price: 65000, description: "Tampah large berkualitas super" },
-  { id: "15", name: "Klepon", category: "Traditional", image: "/products/17_20260403_214751_0010.png", price: 28000, description: "Klepon kenyal segar gula merah" },
-  { id: "16", name: "Tampah Extra", category: "Serving", image: "/products/18_20260403_214751_0011.png", price: 70000, description: "Tampah extra besar untuk pesta" },
-  { id: "17", name: "Wingko", category: "Sweet", image: "/products/19_20260403_214751_0012.png", price: 32000, description: "Wingko babat terkenal Magelang" },
-  { id: "18", name: "Nampan Deluxe", category: "Serving", image: "/products/20_20260403_214751_0013.png", price: 100000, description: "Nampan deluxe premium eksklusif" },
-  { id: "19", name: "Tampah Premium", category: "Serving", image: "/products/21_20260403_214751_0014.png", price: 120000, description: "Tampah premium untuk acara besar" },
-  { id: "20", name: "Kardus Jumbo", category: "Box", image: "/products/22_20260403_214751_0015.png", price: 25000, description: "Kardus jumbo tahan lama kuat" },
+  { id: "1", name: "Tumpeng Hias", category: "Special", image: "/nobg/1.png", price: 75000, description: "Tumpeng hias premium untuk acara spesial" },
+  { id: "2", name: "Tumpeng Hiasan", category: "Premium", image: "/nobg/2.png", price: 85000, description: "Hiasan tumpeng mewah berkualitas tinggi" },
+  { id: "3", name: "Nampan Specialty", category: "Deluxe", image: "/nobg/3.png", price: 95000, description: "Nampan specialty dengan desain elegan" },
+  { id: "4", name: "Kardus Packaging", category: "Box", image: "/nobg/4.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "5", name: "Hampers Premium", category: "Gift", image: "/nobg/5.png", price: 120000, description: "Hampers premium untuk hadiah istimewa" },
+  { id: "6", name: "Getuk Tradisional", category: "Traditional", image: "/nobg/6.png", price: 25000, description: "Getuk tradisional khas Magelang" },
+  { id: "7", name: "Kue Kering", category: "Snack", image: "/nobg/7.png", price: 30000, description: "Kue kering lezat untuk camilan" },
+  { id: "8", name: "Jajanan Pasar", category: "Snack", image: "/nobg/8.png", price: 20000, description: "Jajanan pasar autentik dan enak" },
+  { id: "9", name: "Paket Oleh-Oleh", category: "Gift Set", image: "/nobg/9.png", price: 100000, description: "Paket oleh-oleh lengkap untuk keluarga"},
+  { id: "10", name: "Kue Basah", category: "Snack", image: "/nobg/10.png", price: 35000, description: "Kue basah segar dan lezat" },
+  { id: "11", name: "Kue Tradisional", category: "Traditional", image: "/nobg/11.png", price: 40000, description: "Kue tradisional khas Magelang" },
+  { id: "12", name: "Paket Snack Box", category: "Gift Set", image: "/nobg/12.png", price: 80000, description: "Paket snack box untuk acara spesial" },
+  { id: "13", name: "Kue Kering Premium", category: "Snack", image: "/nobg/13.png", price: 45000, description: "Kue kering premium dengan rasa istimewa" },
+  { id: "14", name: "Hampers Keluarga", category: "Gift Set", image: "/nobg/14.png", price: 150000, description: "Hampers keluarga lengkap dengan berbagai"},
+  { id: "15", name: "Kardus Packaging", category: "Box", image: "/nobg/15.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "16", name: "Kardus Pakaging", category: "Box", image: "/nobg/16.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "17", name: "Kardus Packaging", category: "Box", image: "/nobg/17.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "18", name: "Kardus Packaging", category: "Box", image: "/nobg/18.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "19", name: "Kardus Packaging", category: "Box", image: "/nobg/19.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "20", name: "Kardus Packaging", category: "Box", image: "/nobg/20.png", price: 15000, description: "Packaging kardus standar yang kuat" },
+  { id: "21", name: "Kardus Packaging", category: "Box", image: "/nobg/21.png", price: 15000, description: "Packaging kardus standar yang kuat" },
 ];
 
-const heroProducts = [products[0], products[4], products[5], products[10]];
+const heroProducts = products.filter((product) => Boolean(product));
 
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,11 +109,23 @@ export function LandingPage() {
                   className="flex h-full transition-transform duration-700 ease-in-out"
                   style={{ transform: `translateX(-${heroProductIndex * 100}%)` }}
                 >
-                  {heroProducts.map((product) => (
-                    <div key={product.id} className="relative h-full min-w-full flex-shrink-0">
-                      <Image src={product.image} alt={product.name} fill className="object-contain drop-shadow-2xl" />
-                    </div>
-                  ))}
+                  {heroProducts.map((product) => {
+                    const heroImageSrc = product.image?.trim() ? product.image : "/nobg/1.png";
+                    const heroImageAlt = product.name?.trim() ? product.name : "Featured product";
+
+                    return (
+                      <div key={`${product.id}-${product.name}`} className="relative h-full min-w-full flex-shrink-0">
+                        <Image
+                          src={heroImageSrc}
+                          alt={heroImageAlt}
+                          fill
+                          priority
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                          className="object-contain drop-shadow-2xl"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
