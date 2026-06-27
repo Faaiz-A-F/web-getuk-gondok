@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { formatPrice } from "@/lib/utils/formatPrice";
 
 const products = [
   { id: "1", name: "Tumpeng Hias", category: "Special", image: "/nobg/1.png", price: 75000, description: "Tumpeng hias premium untuk acara spesial" },
@@ -30,6 +32,45 @@ const products = [
 ];
 
 const heroProducts = products.filter((product) => Boolean(product));
+const featuredProducts = products.slice(0, 3);
+const benefits = [
+  {
+    title: "Resep Warisan",
+    description: "Diproduksi dengan cara tradisional yang diwariskan turun-temurun dan tetap menjaga cita rasa autentik.",
+  },
+  {
+    title: "Bahan Pilihan",
+    description: "Menggunakan singkong segar, kelapa muda, dan gula merah alami untuk kualitas terbaik di setiap produk.",
+  },
+  {
+    title: "Kemasan Premium",
+    description: "Tersedia dalam berbagai pilihan kemasan modern yang cocok untuk hadiah, hampers, maupun acara spesial.",
+  },
+];
+
+const steps = [
+  { title: "Pilih Produk", description: "Temukan produk favorit Anda dari koleksi unggulan kami." },
+  { title: "Konsultasi Pesanan", description: "Kami bantu menyesuaikan jumlah, kemasan, dan kebutuhan acara Anda." },
+  { title: "Pesanan Siap Dikirim", description: "Produk dipersiapkan dengan rapi dan dikirim tepat waktu ke lokasi Anda." },
+];
+
+const testimonials = [
+  {
+    name: "Dewi P.",
+    role: "Customer",
+    quote: "Rasa getuknya masih sama enak dan autentik seperti yang saya kenal sejak kecil. Packaging-nya juga sangat elegan.",
+  },
+  {
+    name: "Rizky A.",
+    role: "Pembeli Hampers",
+    quote: "Saya memesannya untuk acara keluarga dan hasilnya sangat memuaskan. Semua tamu memberi pujian.",
+  },
+  {
+    name: "Siti M.",
+    role: "Pemesan Khusus",
+    quote: "Pelayanannya cepat, komunikasinya jelas, dan kualitas produk sangat konsisten. Sangat recommended.",
+  },
+];
 
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,7 +122,6 @@ export function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                {/* Input ini bisa dibungkus <form> ke depannya untuk navigasi ke halaman katalog */}
                 <input
                   type="text"
                   placeholder="Cari produk kesukaanmu..."
@@ -89,6 +129,21 @@ export function LandingPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="block w-full pl-11 pr-4 py-4 rounded-full border-0 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-500 sm:text-lg shadow-xl"
                 />
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link
+                  href="/catalogue"
+                  className="inline-flex items-center justify-center rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-amber-950 transition hover:bg-amber-300"
+                >
+                  Lihat Katalog
+                </Link>
+                <Link
+                  href="/about-us"
+                  className="inline-flex items-center justify-center rounded-full border border-amber-300/60 px-6 py-3 text-sm font-semibold text-amber-100 transition hover:bg-white/10"
+                >
+                  Kenali Brand Kami
+                </Link>
               </div>
             </div>
 
@@ -193,18 +248,143 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="bg-white py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Koleksi Unggulan</p>
+              <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight text-neutral-900">
+                Produk favorit yang paling sering dipilih pelanggan
+              </h2>
+            </div>
+            <Link href="/catalogue" className="inline-flex items-center text-sm font-semibold text-amber-700 hover:text-amber-800">
+              Lihat semua produk
+              <span className="ml-2">→</span>
+            </Link>
+          </div>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {featuredProducts.map((product) => (
+              <div key={product.id} className="group overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
+                <div className="relative h-56 overflow-hidden bg-amber-50">
+                  <Image
+                    src={product.image || "/nobg/1.png"}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-contain transition duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-800">
+                      {product.category}
+                    </span>
+                    <span className="text-sm font-semibold text-neutral-900">{formatPrice(product.price)}</span>
+                  </div>
+                  <h3 className="mt-4 text-xl font-semibold text-neutral-900">{product.name}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-600">{product.description}</p>
+                  <Link href="/catalogue" className="mt-5 inline-flex items-center text-sm font-semibold text-amber-700 hover:text-amber-800">
+                    Pesan sekarang
+                    <span className="ml-2">→</span>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="bg-amber-50 py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+            <div className="space-y-6">
+              <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Mengapa Memilih Kami</p>
+              <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-amber-900">
+                Kepercayaan pelanggan dibangun dari kualitas yang konsisten.
+              </h2>
+              <p className="text-base sm:text-lg leading-relaxed text-amber-800">
+                Kami menggabungkan tradisi, ketelitian, dan pelayanan yang personal agar setiap pesanan terasa istimewa.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {benefits.map((benefit) => (
+                <div key={benefit.title} className="rounded-3xl border border-amber-200 bg-white p-6 shadow-sm">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-lg font-semibold text-amber-800">
+                    ✦
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-neutral-900">{benefit.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-600">{benefit.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-8 text-center">
-            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Proses Produksi</p>
-            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-amber-900">
-              Dari Singkong Segar Hingga Oleh-Oleh Premium
+            <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">Cara Pesan</p>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-neutral-900">
+              Proses yang sederhana, cepat, dan nyaman
             </h2>
-            <p className="text-base sm:text-lg leading-relaxed text-amber-800 max-w-xl mx-auto">
-              Setiap produk kami dibuat dengan tangan, dimulai dari singkong segar pilihan, kelapa muda, dan gula merah alami.
-              <br />
-              Proses tradisional yang kami pertahankan selama puluhan tahun memastikan rasa autentik dan kualitas terbaik.
-            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            {steps.map((step, index) => (
+              <div key={step.title} className="rounded-3xl border border-neutral-200 bg-neutral-50 p-7 text-left shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-lg font-semibold text-amber-800">
+                  0{index + 1}
+                </div>
+                <h3 className="mt-5 text-xl font-semibold text-neutral-900">{step.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-neutral-600">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#5a2500] py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-8 text-center">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Testimoni Pelanggan</p>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-white">
+              Apa kata mereka tentang produk kami
+            </h2>
+          </div>
+
+          <div className="mt-12 grid gap-8 lg:grid-cols-3">
+            {testimonials.map((item) => (
+              <div key={item.name} className="rounded-3xl border border-white/10 bg-white/10 p-7 text-left backdrop-blur-sm">
+                <p className="text-sm leading-7 text-amber-50">“{item.quote}”</p>
+                <div className="mt-6">
+                  <div className="font-semibold text-white">{item.name}</div>
+                  <div className="text-sm text-amber-200">{item.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl rounded-[2rem] border border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-12 text-center shadow-[0_16px_50px_rgba(201,122,45,0.12)] sm:px-10 lg:px-16">
+          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Siap memesan?</p>
+          <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold leading-tight text-neutral-900">
+            Jadikan momen Anda lebih istimewa dengan oleh-oleh autentik dari Getuk Gondok.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-neutral-700">
+            Hubungi kami untuk pemesanan khusus, hampers, maupun kebutuhan acara besar dengan desain kemasan yang elegan.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link href="/catalogue" className="inline-flex items-center justify-center rounded-full bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-amber-700">
+              Pilih Produk Sekarang
+            </Link>
+            <Link href="/about-us" className="inline-flex items-center justify-center rounded-full border border-amber-300 px-6 py-3 text-sm font-semibold text-amber-800 transition hover:bg-white">
+              Hubungi Kami
+            </Link>
           </div>
         </div>
       </section>
