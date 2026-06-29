@@ -32,18 +32,20 @@ import {
 } from "recharts";
 
 const Header = () => (
-  <header className="flex h-18 items-center justify-between border-b-4 border-amber-700 bg-amber-50 px-8 lg:px-32.5">
-    <div className="flex items-center gap-3">
-      <Image
-        src="/logo/13.png"
-        alt="Getuk Gondok Logo"
-        width={100}
-        height={100}
-        className="rounded-full"
-      />
-      <div className="flex flex-col">
-        <div className="text-2xl font-bold text-amber-900">Getuk Gondok</div>
-        <div className="text-xs font-semibold text-amber-600">Hj. Sri Rahayu</div>
+  <header className="sticky top-0 z-50 flex h-20 items-center justify-between bg-white/80 backdrop-blur-md px-8 shadow-sm border-b border-amber-100 lg:px-32.5">
+    <div className="flex items-center gap-4 cursor-pointer">
+      <div className="bg-transparent p-1 rounded-xl">
+        <Image
+          src="/logo/13.png"
+          alt="Getuk Gondok Logo"
+          width={64}
+          height={64}
+          className="w-16 h-16 object-contain"
+        />
+      </div>
+      <div>
+        <h1 className="text-xl sm:text-2xl font-black text-amber-950 tracking-tight">Getuk Gondok</h1>
+        <p className="text-xs text-amber-600 font-medium tracking-wide uppercase">Hj. Sri Rahayu</p>
       </div>
     </div>
 
@@ -143,7 +145,7 @@ const chartData = [
 
 export function AdminDashboardPage() {
   return (
-    <div className="min-h-screen bg-amber-950">
+    <div className="min-h-screen bg-amber-50">
       <Header />
       <NavBar />
 
