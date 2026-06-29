@@ -370,21 +370,34 @@ export function LandingPage() {
       </section>
 
       <section className="bg-white py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-12 text-center shadow-[0_16px_50px_rgba(201,122,45,0.12)] sm:px-10 lg:px-16">
-          <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Siap memesan?</p>
-          <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold leading-tight text-neutral-900">
-            Jadikan momen Anda lebih istimewa dengan oleh-oleh autentik dari Getuk Gondok.
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-neutral-700">
-            Hubungi kami untuk pemesanan khusus, hampers, maupun kebutuhan acara besar dengan desain kemasan yang elegan.
-          </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href="/catalogue" className="inline-flex items-center justify-center rounded-full bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-amber-700">
-              Pilih Produk Sekarang
-            </Link>
-            <Link href="/about-us" className="inline-flex items-center justify-center rounded-full border border-amber-300 px-6 py-3 text-sm font-semibold text-amber-800 transition hover:bg-white">
-              Hubungi Kami
-            </Link>
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
+          <div className="relative overflow-hidden rounded-[2rem] border border-amber-100 shadow-[0_16px_50px_rgba(201,122,45,0.12)]">
+            <Image
+              src="/design bg/1.png"
+              alt="Latar belakang produk Getuk Gondok"
+              fill
+              priority
+              className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-950/80 via-amber-900/70 to-orange-800/70" />
+
+            <div className="relative z-10 px-6 py-12 text-center sm:px-10 lg:px-16">
+              <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Siap memesan?</p>
+              <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold leading-tight text-white">
+                Jadikan momen Anda lebih istimewa dengan oleh-oleh autentik dari Getuk Gondok.
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-amber-50">
+                Hubungi kami untuk pemesanan khusus, hampers, maupun kebutuhan acara besar dengan desain kemasan yang elegan.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link href="/catalogue" className="inline-flex items-center justify-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-amber-400">
+                  Pilih Produk Sekarang
+                </Link>
+                <Link href="/about-us" className="inline-flex items-center justify-center rounded-full border border-amber-200/70 px-6 py-3 text-sm font-semibold text-amber-50 transition hover:bg-white/10">
+                  Hubungi Kami
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

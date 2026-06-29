@@ -47,10 +47,13 @@ export function Footer() {
                 </div>
     
                 <div>
-                  <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Jam Operasional</h4>
+                  <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Operasional Toko </h4>
                   <ul className="space-y-3 text-sm">
-                    <li className="flex justify-between border-b border-amber-900 pb-2"><span>Senin - Jumat</span> <span>08:00 - 20:00</span></li>
-                    <li className="flex justify-between border-b border-amber-900 pb-2"><span>Sabtu - Minggu</span> <span>07:00 - 21:00</span></li>
+                    <li className="flex justify-between border-b border-amber-900 pb-2"><span>Senin - Minggu</span> <span>08:30 - 16:30</span></li>
+                  </ul>
+                  <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Operasional Rumah Produksi </h4>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex justify-between border-b border-amber-900 pb-2"><span>Senin - Minggu</span> <span>05:30 - 08:30</span></li>
                   </ul>
                 </div>
               </div>
