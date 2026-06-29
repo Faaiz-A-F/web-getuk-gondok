@@ -1,14 +1,14 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useContext, useState } from "react";
-import { CartContext } from "@/context/CartContext";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { User, LogOut, Settings, ShoppingCart } from "lucide-react";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { user, isLoggedIn, logout } = useAuth();
     
   return (
    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm border-b border-amber-100">
@@ -51,7 +51,7 @@ export function Header() {
                        className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-amber-50 transition"
                      >
                        <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center text-white font-semibold">
-                         U
+                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                        </div>
                      </button>
 
@@ -67,16 +67,16 @@ export function Header() {
                            Settings
                          </Link>
                          <div className="border-t border-gray-200 my-2"></div>
-                         <button 
-                           onClick={() => {
-                             setIsLoggedIn(false);
-                             setAccountMenuOpen(false);
-                           }}
-                           className="w-full text-left flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-600 font-medium"
-                         >
-                           <LogOut className="w-4 h-4" />
-                           Logout
-                         </button>
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setAccountMenuOpen(false);
+                        }}
+                        className="w-full text-left flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-600 font-medium"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
                        </div>
                      )}
                    </div>
@@ -127,7 +127,7 @@ export function Header() {
                    </Link>
                    <button 
                      onClick={() => {
-                       setIsLoggedIn(false);
+                       logout();
                        setMenuOpen(false);
                      }}
                      className="w-full text-left px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 font-medium flex items-center gap-2"
