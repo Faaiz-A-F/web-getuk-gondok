@@ -2,14 +2,72 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import MagelangImage from '../../assets/images/magelang fiks.png';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Password and confirm password do not match');
+      return;
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register',
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || null,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Registration failed');
+        setLoading(false);
+        return;
+      }
+
+      // Registration successful, redirect to login
+      router.push('/login?registered=true');
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,6 +105,13 @@ export default function RegisterPage() {
                   Daftar kagem mlebet dhateng website
                 </p>
 
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Full Name */}
@@ -61,7 +126,10 @@ export default function RegisterPage() {
                       <input
                         type="text"
                         id="name"
+                        value={formData.name}
+                        onChange={handleChange}
                         placeholder="Nama Lengkap"
+                        required
                         className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
                     </div>
@@ -79,7 +147,10 @@ export default function RegisterPage() {
                       <input
                         type="email"
                         id="email"
+                        value={formData.email}
+                        onChange={handleChange}
                         placeholder="Email"
+                        required
                         className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
                     </div>
@@ -97,6 +168,8 @@ export default function RegisterPage() {
                       <input
                         type="tel"
                         id="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
                         placeholder="Nomor Telepon"
                         className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
@@ -115,7 +188,11 @@ export default function RegisterPage() {
                       <input
                         type={showPassword ? 'text' : 'password'}
                         id="password"
+                        value={formData.password}
+                        onChange={handleChange}
                         placeholder="Password"
+                        required
+                        minLength={6}
                         className="w-full h-12 pl-12 pr-12 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
                       <button
@@ -148,7 +225,10 @@ export default function RegisterPage() {
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         id="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
                         placeholder="Konfirmasi Password"
+                        required
                         className="w-full h-12 pl-12 pr-12 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
                       <button
@@ -173,6 +253,7 @@ export default function RegisterPage() {
                   <label className="flex items-start space-x-2 cursor-pointer pt-2">
                     <input
                       type="checkbox"
+                      required
                       className="mt-1 w-4 h-4 accent-[#C87536] rounded border-2 border-[#E8D4C4]"
                     />
                     <span className="text-sm text-[#4A1D0B] leading-5">
@@ -183,9 +264,10 @@ export default function RegisterPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full h-12 bg-[#C87536] text-white font-bold rounded-xl hover:bg-[#A85E2E] active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg text-base mt-6"
+                    disabled={loading}
+                    className="w-full h-12 bg-[#C87536] text-white font-bold rounded-xl hover:bg-[#A85E2E] active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg text-base mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Daftar
+                    {loading ? 'Loading...' : 'Daftar'}
                   </button>
                 </form>
 

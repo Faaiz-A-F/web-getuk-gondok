@@ -2,10 +2,51 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import MagelangImage from '../../assets/images/magelang fiks.png';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed');
+        setLoading(false);
+        return;
+      }
+
+      // Store user data in localStorage (in production, use proper auth)
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Redirect based on role
+      if (data.user.role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8E8BD]">
@@ -50,8 +91,15 @@ export default function LoginPage() {
                   Mlebet kagem nglajengaken dhateng dashboard
                 </p>
 
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
                 {/* Form */}
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Email Input */}
                   <div>
                     <label htmlFor="email" className="block text-xs font-semibold text-[#4A1D0B] mb-2 uppercase tracking-wide">
@@ -64,7 +112,10 @@ export default function LoginPage() {
                       <input
                         type="email"
                         id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email"
+                        required
                         className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
                     </div>
@@ -82,7 +133,10 @@ export default function LoginPage() {
                       <input
                         type={showPassword ? 'text' : 'password'}
                         id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
+                        required
                         className="w-full h-12 pl-12 pr-12 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
                       <button
@@ -123,9 +177,10 @@ export default function LoginPage() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full h-12 bg-[#C87536] text-white font-bold rounded-xl hover:bg-[#A85E2E] active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg text-base mt-8"
+                    disabled={loading}
+                    className="w-full h-12 bg-[#C87536] text-white font-bold rounded-xl hover:bg-[#A85E2E] active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg text-base mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Masuk
+                    {loading ? 'Loading...' : 'Masuk'}
                   </button>
                 </form>
 
