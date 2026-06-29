@@ -1,22 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
   Bell,
-  Box,
   ChevronRight,
   DollarSign,
-  FileText,
-  Grid3x3,
-  Home,
+  FileBarChart,
   LayoutDashboard,
-  LogIn,
-  Mail,
   Package,
   Percent,
+  Receipt,
   Search,
   Settings,
   ShoppingCart,
@@ -72,24 +68,99 @@ const Header = () => (
   </header>
 );
 
-const NavBar = () => {
-  const menuItems = [
-    { icon: Home, label: "Dashboard", active: false },
-    { icon: Grid3x3, label: "UI Elements", active: false },
-    { icon: Box, label: "Components", active: false },
-    { icon: LogIn, label: "Authentication", active: false },
-    { icon: FileText, label: "Extra Pages", active: false },
-    { icon: Mail, label: "Email Templates", active: false },
-    { icon: LayoutDashboard, label: "Layouts", active: true },
+// Placeholder components for each section
+const DashboardContent = () => (
+  <>
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <StatCard icon={<ShoppingCart size={20} />} title="ORDERS" value="1,685" trend="up" percentage="12%" color="#00b3a6" />
+      <StatCard icon={<DollarSign size={20} />} title="REVENUE" value="52,368" trend="down" percentage="28%" color="#ff4d63" />
+      <StatCard icon={<Percent size={20} />} title="AVERAGE PRICE" value="15.8" trend="up" percentage="00%" color="#7dd3fc" />
+      <StatCard icon={<Package size={20} />} title="PRODUCT SOLD" value="2436" trend="up" percentage="84%" color="#f6b739" />
+    </div>
+
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="rounded-lg bg-white p-6 shadow-sm lg:col-span-2">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">Monthly Earning</h3>
+        <ResponsiveContainer width="100%" height={280}>
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#626fd6" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#626fd6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <XAxis dataKey="x" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
+            <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} domain={[0, 9]} />
+            <Tooltip />
+            <Area type="monotone" dataKey="y" stroke="#626fd6" strokeWidth={2} fill="url(#colorArea)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="rounded-lg bg-white p-6 shadow-sm">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">Sales Analytics</h3>
+        <div className="space-y-4 text-sm text-neutral-700">
+          <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+            <span>Online</span>
+            <span className="font-semibold text-amber-700">1,542</span>
+          </div>
+          <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+            <span>Offline</span>
+            <span className="font-semibold text-amber-700">6,451</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Marketing</span>
+            <span className="font-semibold text-amber-700">84,574</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+const PesananContent = () => (
+  <div className="rounded-lg bg-white p-12 shadow-sm text-center">
+    <Receipt size={64} className="mx-auto mb-4 text-amber-300" />
+    <h3 className="text-xl font-semibold text-gray-700 mb-2">Section Pesanan</h3>
+    <p className="text-gray-500">Konten untuk mengelola pesanan akan ditambahkan di sini.</p>
+  </div>
+);
+
+const LaporanKeuanganContent = () => (
+  <div className="rounded-lg bg-white p-12 shadow-sm text-center">
+    <FileBarChart size={64} className="mx-auto mb-4 text-amber-300" />
+    <h3 className="text-xl font-semibold text-gray-700 mb-2">Section Laporan Keuangan</h3>
+    <p className="text-gray-500">Konten untuk laporan keuangan akan ditambahkan di sini.</p>
+  </div>
+);
+
+const LayoutContent = () => (
+  <div className="rounded-lg bg-white p-12 shadow-sm text-center">
+    <LayoutDashboard size={64} className="mx-auto mb-4 text-amber-300" />
+    <h3 className="text-xl font-semibold text-gray-700 mb-2">Section Layout</h3>
+    <p className="text-gray-500">Konten untuk pengaturan layout akan ditambahkan di sini.</p>
+  </div>
+);
+
+type TabType = "dashboard" | "pesanan" | "laporan" | "layout";
+
+const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) => {
+  const menuItems: { id: TabType; icon: React.ElementType; label: string }[] = [
+    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { id: "pesanan", icon: Receipt, label: "Pesanan" },
+    { id: "laporan", icon: FileBarChart, label: "Laporan Keuangan" },
+    { id: "layout", icon: LayoutDashboard, label: "Layout" },
   ];
 
   return (
     <nav className="flex h-14 items-center gap-0 border-b border-amber-700 bg-amber-700 px-8 lg:px-32.5">
       {menuItems.map((item) => (
         <button
-          key={item.label}
+          key={item.id}
+          onClick={() => onTabChange(item.id)}
           className={`flex items-center gap-2 border-b-2 px-6 py-3 text-sm transition-all ${
-            item.active ? "border-[#00b3a6] text-white" : "border-transparent text-white hover:text-gray-300"
+            activeTab === item.id ? "border-[#00b3a6] text-white" : "border-transparent text-white hover:text-gray-300"
           }`}
         >
           <item.icon size={16} />
@@ -98,6 +169,21 @@ const NavBar = () => {
       ))}
     </nav>
   );
+};
+
+const getContentByTab = (tab: TabType) => {
+  switch (tab) {
+    case "dashboard":
+      return <DashboardContent />;
+    case "pesanan":
+      return <PesananContent />;
+    case "laporan":
+      return <LaporanKeuanganContent />;
+    case "layout":
+      return <LayoutContent />;
+    default:
+      return <DashboardContent />;
+  }
 };
 
 interface StatCardProps {
@@ -144,57 +230,15 @@ const chartData = [
 ];
 
 export function AdminDashboardPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+
   return (
     <div className="min-h-screen bg-amber-50">
       <Header />
-      <NavBar />
+      <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="space-y-7 px-8 py-6 lg:px-32.5">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={<ShoppingCart size={20} />} title="ORDERS" value="1,685" trend="up" percentage="12%" color="#00b3a6" />
-          <StatCard icon={<DollarSign size={20} />} title="REVENUE" value="52,368" trend="down" percentage="28%" color="#ff4d63" />
-          <StatCard icon={<Percent size={20} />} title="AVERAGE PRICE" value="15.8" trend="up" percentage="00%" color="#7dd3fc" />
-          <StatCard icon={<Package size={20} />} title="PRODUCT SOLD" value="2436" trend="up" percentage="84%" color="#f6b739" />
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="rounded-lg bg-white p-6 shadow-sm lg:col-span-2">
-            <h3 className="mb-6 text-lg font-semibold text-gray-900">Monthly Earning</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#626fd6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#626fd6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis dataKey="x" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
-                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} domain={[0, 9]} />
-                <Tooltip />
-                <Area type="monotone" dataKey="y" stroke="#626fd6" strokeWidth={2} fill="url(#colorArea)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="rounded-lg bg-white p-6 shadow-sm">
-            <h3 className="mb-6 text-lg font-semibold text-gray-900">Sales Analytics</h3>
-            <div className="space-y-4 text-sm text-neutral-700">
-              <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-                <span>Online</span>
-                <span className="font-semibold text-amber-700">1,542</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-                <span>Offline</span>
-                <span className="font-semibold text-amber-700">6,451</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Marketing</span>
-                <span className="font-semibold text-amber-700">84,574</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {getContentByTab(activeTab)}
       </main>
     </div>
   );
