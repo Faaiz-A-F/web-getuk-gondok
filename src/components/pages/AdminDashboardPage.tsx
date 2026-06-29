@@ -72,10 +72,10 @@ const Header = () => (
 const DashboardContent = () => (
   <>
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <StatCard icon={<ShoppingCart size={20} />} title="ORDERS" value="1,685" trend="up" percentage="12%" color="#00b3a6" />
-      <StatCard icon={<DollarSign size={20} />} title="REVENUE" value="52,368" trend="down" percentage="28%" color="#ff4d63" />
-      <StatCard icon={<Percent size={20} />} title="AVERAGE PRICE" value="15.8" trend="up" percentage="00%" color="#7dd3fc" />
-      <StatCard icon={<Package size={20} />} title="PRODUCT SOLD" value="2436" trend="up" percentage="84%" color="#f6b739" />
+      <StatCard icon={<ShoppingCart size={20} />} title="TOKO" value="48" trend="up" percentage="12%" color="#00b3a6" />
+      <StatCard icon={<ShoppingCart size={20} />} title="RUMAH PRODUKSI" value="32" trend="up" percentage="8%" color="#00b3a6" />
+      <StatCard icon={<DollarSign size={20} />} title="PENDAPATAN" value="Rp 2.5jt" trend="up" percentage="28%" color="#ff4d63" />
+      <StatCard icon={<Package size={20} />} title="TERJUAL" value="156" trend="up" percentage="84%" color="#f6b739" />
     </div>
 
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
