@@ -605,7 +605,7 @@ export function AdminDashboardPage() {
         const data = await response.json();
         
         if (response.ok) {
-          setOrders(data.orders || []);
+          setOrders(data.orders || data || []);
         }
       } catch (error) {
         console.error('Failed to fetch orders:', error);

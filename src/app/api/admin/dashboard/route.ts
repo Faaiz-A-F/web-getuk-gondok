@@ -46,5 +46,9 @@ export async function GET(request: NextRequest) {
       createdAt: o.createdAt,
     })),
     revenueByMonth: Object.entries(revenueByMonth).map(([month, revenue]) => ({ month, revenue })),
+    // Add these for today's stats calculation in frontend
+    storeOrders: 0,
+    houseOrders: 0,
+    totalProductsSold: 0,
   })
 }

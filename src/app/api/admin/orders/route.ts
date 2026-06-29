@@ -29,10 +29,29 @@ export async function GET(request: NextRequest) {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: 'desc' },
-      include: { user: { select: { name: true, email: true } } },
+      include: { 
+        user: { select: { name: true, email: true } },
+        items: {
+          include: { product: { select: { name: true } } }
+        }
+      },
     }),
     prisma.order.count({ where }),
   ])
 
-  return NextResponse.json({ orders, total, page, totalPages: Math.ceil(total / limit) })
+  return NextResponse.json({ 
+    orders: orders.map(o => ({
+      ...o,
+      totalAmount: Number(o.totalAmount),
+      shippingCost: Number(o.shippingCost),
+      items: o.items.map(i => ({
+        ...i,
+        price: Number(i.price),
+        subtotal: Number(i.subtotal),
+      }))
+    })),
+    total, 
+    page, 
+    totalPages: Math.ceil(total / limit) 
+  })
 }
