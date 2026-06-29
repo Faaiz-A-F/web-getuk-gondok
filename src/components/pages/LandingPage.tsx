@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { formatPrice } from "@/lib/utils/formatPrice";
@@ -75,6 +75,8 @@ const testimonials = [
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [heroProductIndex, setHeroProductIndex] = useState(0);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -92,11 +94,32 @@ export function LandingPage() {
     setHeroProductIndex((currentIndex) => (currentIndex + 1) % heroProducts.length);
   };
 
+  const toggleBackgroundAudio = async () => {
+    const audio = audioRef.current;
+
+    if (!audio) {
+      return;
+    }
+
+    if (audio.paused) {
+      try {
+        await audio.play();
+        setIsAudioPlaying(true);
+      } catch {
+        setIsAudioPlaying(false);
+      }
+      return;
+    }
+
+    audio.pause();
+    setIsAudioPlaying(false);
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans selection:bg-amber-200 selection:text-amber-900">
+    <div className="min-h-screen bg-neutral-50 font-sans transition-colors duration-300 selection:bg-amber-200 selection:text-amber-900">
       <Header />
 
-      <section className="relative overflow-hidden bg-amber-950 text-white">
+      <section className="relative overflow-hidden bg-amber-950 text-white shadow-[0_20px_60px_rgba(120,53,15,0.16)]">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
           <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-800 blur-3xl opacity-50"></div>
           <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-700 blur-3xl opacity-40"></div>
@@ -104,7 +127,7 @@ export function LandingPage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 text-center lg:text-left">
+            <div className="space-y-8 rounded-[2rem] border border-white/10 bg-white/10 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:p-8 lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/50 border border-amber-700/50 text-amber-200 text-sm font-medium">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                 Buka & Menerima Pesanan
@@ -265,7 +288,7 @@ export function LandingPage() {
 
           <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="group overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
+              <div key={product.id} className="group overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(0,0,0,0.14)]">
                 <div className="relative h-56 overflow-hidden bg-amber-50">
                   <Image
                     src={product.image || "/nobg/1.png"}
@@ -310,7 +333,7 @@ export function LandingPage() {
 
             <div className="grid gap-6 md:grid-cols-3">
               {benefits.map((benefit) => (
-                <div key={benefit.title} className="rounded-3xl border border-amber-200 bg-white p-6 shadow-sm">
+                <div key={benefit.title} className="rounded-3xl border border-amber-200 bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(201,122,45,0.12)]">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-lg font-semibold text-amber-800">
                     ✦
                   </div>
@@ -334,7 +357,7 @@ export function LandingPage() {
 
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {steps.map((step, index) => (
-              <div key={step.title} className="rounded-3xl border border-neutral-200 bg-neutral-50 p-7 text-left shadow-sm">
+              <div key={step.title} className="rounded-3xl border border-neutral-200 bg-neutral-50 p-7 text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(0,0,0,0.08)]">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-lg font-semibold text-amber-800">
                   0{index + 1}
                 </div>
@@ -357,7 +380,7 @@ export function LandingPage() {
 
           <div className="mt-12 grid gap-8 lg:grid-cols-3">
             {testimonials.map((item) => (
-              <div key={item.name} className="rounded-3xl border border-white/10 bg-white/10 p-7 text-left backdrop-blur-sm">
+              <div key={item.name} className="rounded-3xl border border-white/10 bg-white/10 p-7 text-left backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/15">
                 <p className="text-sm leading-7 text-amber-50">“{item.quote}”</p>
                 <div className="mt-6">
                   <div className="font-semibold text-white">{item.name}</div>
@@ -371,7 +394,7 @@ export function LandingPage() {
 
       <section className="bg-white py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-          <div className="relative overflow-hidden rounded-[2rem] border border-amber-100 shadow-[0_16px_50px_rgba(201,122,45,0.12)]">
+          <div className="relative overflow-hidden rounded-[2rem] border border-amber-100 shadow-[0_20px_60px_rgba(201,122,45,0.16)] transition-all duration-300 ease-out hover:shadow-[0_24px_70px_rgba(201,122,45,0.2)]">
             <Image
               src="/design bg/1.png"
               alt="Latar belakang produk Getuk Gondok"
@@ -401,6 +424,17 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      <button
+        type="button"
+        onClick={toggleBackgroundAudio}
+        className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full border border-amber-200 bg-white/90 px-4 py-3 text-sm font-semibold text-amber-900 shadow-[0_16px_40px_rgba(0,0,0,0.16)] backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:bg-white"
+      >
+        <span className={`h-2.5 w-2.5 rounded-full ${isAudioPlaying ? "bg-green-500 animate-pulse" : "bg-amber-500"}`} />
+        <span>Bengawan Solo {isAudioPlaying ? "• On" : "• Off"}</span>
+      </button>
+
+      <audio ref={audioRef} src="/audio/musik-bengawan-solo-instrumental-keroncong-sorlem-jw-04-wg.wav" loop preload="auto" />
 
       <Footer />
 

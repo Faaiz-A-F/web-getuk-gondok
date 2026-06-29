@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MagelangImage from '../../assets/images/magelang fiks.png';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,8 +35,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Store user data in localStorage (in production, use proper auth)
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Store user data using AuthContext (this will also update localStorage)
+      setUser(data.user);
       
       // Redirect based on role
       if (data.user.role === 'ADMIN') {
