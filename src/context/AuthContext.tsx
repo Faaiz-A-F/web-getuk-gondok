@@ -12,6 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
+  isLoaded: boolean;
   setUser: (user: User | null) => void;
   logout: () => void;
 }
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isLoggedIn: !!user,
+        isLoaded,
         setUser,
         logout,
       }}
