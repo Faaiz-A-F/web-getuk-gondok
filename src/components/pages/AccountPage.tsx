@@ -13,9 +13,17 @@ export function AccountPage() {
     if (!user) return;
     setLoading(true);
     fetch(`/api/user/settings?userId=${user.id}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+      })
       .then((data) => setSettings(data))
-      .catch((e) => console.error("Error fetching settings:", e))
+      .catch((e) => {
+        console.error("Error fetching settings:", e);
+        setSettings({ settings: {} }); // Fallback to empty settings on error
+      })
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -28,6 +36,9 @@ export function AccountPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, settings: payload }),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       setSettings(data);
     } catch (e) {
