@@ -19,6 +19,12 @@ import {
   ShoppingCart,
   Check,
   X,
+  Users,
+  Plus,
+  Edit,
+  Trash2,
+  Key,
+  Shield,
 } from "lucide-react";
 import {
   Area,
@@ -73,7 +79,7 @@ const Header = ({ user }: { user: { name: string } | null }) => (
   </header>
 );
 
-type TabType = "dashboard" | "orders" | "financial" | "layout";
+type TabType = "dashboard" | "orders" | "financial" | "layout" | "users";
 
 interface DashboardData {
   totalOrders: number;
@@ -105,6 +111,19 @@ interface Order {
 
 interface SiteContent {
   [key: string]: Array<{ id: string; key: string; value: string; label: string }>;
+}
+
+interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  role: 'ADMIN' | 'CUSTOMER';
+  createdAt: string;
+  updatedAt: string;
+  orderCount: number;
+  isMainAdmin: boolean;
 }
 
 const DashboardContent = ({ data }: { data: DashboardData | null }) => {
@@ -458,12 +477,475 @@ const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | n
   );
 };
 
+const UsersContent = ({ 
+  users, 
+  loading, 
+  onRefresh,
+  onEdit,
+  onDelete,
+  onResetPassword,
+  onCreate 
+}: { 
+  users: AdminUser[]; 
+  loading: boolean;
+  onRefresh: () => void;
+  onEdit: (user: AdminUser) => void;
+  onDelete: (userId: string) => void;
+  onResetPassword: (userId: string) => void;
+  onCreate: () => void;
+}) => {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-gray-500">Loading users...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-gray-900">Daftar User</h3>
+        <button
+          onClick={onCreate}
+          className="flex items-center gap-2 px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors"
+        >
+          <Plus size={16} />
+          <span>Tambah User</span>
+        </button>
+      </div>
+
+      <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Daftar</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {users.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white font-semibold">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">{user.name}</div>
+                        {user.isMainAdmin && (
+                          <span className="inline-flex items-center gap-1 text-xs text-amber-700">
+                            <Shield size={12} />
+                            Main Admin
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.orderCount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(user.createdAt).toLocaleDateString('id-ID')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center gap-2">
+                      {!user.isMainAdmin && (
+                        <>
+                          <button
+                            onClick={() => onEdit(user)}
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
+                            title="Edit User"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={() => onResetPassword(user.id)}
+                            className="p-2 text-amber-600 hover:bg-amber-100 rounded-lg"
+                            title="Reset Password"
+                          >
+                            <Key size={16} />
+                          </button>
+                          <button
+                            onClick={() => onDelete(user.id)}
+                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg"
+                            title="Hapus User"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
+                      {user.isMainAdmin && (
+                        <span className="text-xs text-gray-400">Protected</span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    No users found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UserModal = ({ 
+  isOpen, 
+  onClose, 
+  user, 
+  onSubmit,
+  loading
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  user: AdminUser | null;
+  onSubmit: (data: any) => void;
+  loading: boolean;
+}) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    phone: '',
+    address: '',
+    role: 'CUSTOMER' as 'ADMIN' | 'CUSTOMER',
+  });
+
+  // Reset form when modal opens for new user
+  useEffect(() => {
+    if (isOpen && !user) {
+      // Only reset when opening for NEW user (user prop is null)
+      setFormData({
+        email: '',
+        password: '',
+        name: '',
+        phone: '',
+        address: '',
+        role: 'CUSTOMER',
+      });
+    } else if (isOpen && user) {
+      // Fill form with user data for EDIT
+      setFormData({
+        email: user.email,
+        password: '',
+        name: user.name,
+        phone: user.phone || '',
+        address: user.address || '',
+        role: user.role,
+      });
+    }
+  }, [isOpen, user]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl w-full max-w-md shadow-2xl border border-amber-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-amber-700 to-amber-600 px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold text-white">{user ? '✏️ Edit User' : '➕ Tambah User Baru'}</h3>
+              <p className="text-amber-100 text-xs mt-1">Lengkapi form di bawah ini</p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Nama Lengkap</label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black placeholder-gray-400"
+              placeholder="Masukkan nama lengkap"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black placeholder-gray-400"
+              placeholder="email@example.com"
+            />
+          </div>
+
+          {!user && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black placeholder-gray-400"
+                placeholder="Minimal 6 karakter"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-2">Pilih Role / Jabatan</label>
+            <div className="relative">
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'CUSTOMER' })}
+                className="w-full px-4 py-3 border-2 border-amber-300 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white appearance-none cursor-pointer text-base font-medium text-black"
+              >
+                <option value="CUSTOMER" className="text-base py-2">👤 User / Customer - Pembeli di website</option>
+                <option value="ADMIN" className="text-base py-2">🛡️ Admin - Pengelola website</option>
+              </select>
+              <ChevronRight size={24} className="absolute right-4 top-1/2 -translate-y-1/2 text-amber-600 rotate-90 pointer-events-none" />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">User bisa belanja, Admin bisa mengelola website</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">No. Telepon <span className="text-gray-400 font-normal">(Opsional)</span></label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black placeholder-gray-400"
+              placeholder="08xxxxxxxxxx"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Alamat <span className="text-gray-400 font-normal">(Opsional)</span></label>
+            <textarea
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white resize-none text-black placeholder-gray-400"
+              rows={2}
+              placeholder="Alamat lengkap"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all font-medium"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-amber-200"
+            >
+              {loading ? '⏳ Menyimpan...' : (user ? '💾 Simpan' : '✅ Buat User')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const ResetPasswordModal = ({ 
+  isOpen, 
+  onClose, 
+  userName,
+  onSubmit,
+  loading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  userName: string;
+  onSubmit: (password: string) => void;
+  loading: boolean;
+}) => {
+  const [newPassword, setNewPassword] = useState('');
+
+  useEffect(() => {
+    setNewPassword('');
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(newPassword);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl w-full max-w-md shadow-2xl border border-amber-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-amber-600 to-amber-500 px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold text-white">🔑 Reset Password</h3>
+              <p className="text-amber-100 text-xs mt-1">Ubah password user {userName}</p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-1">Password Baru</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black"
+                placeholder="Minimal 6 karakter"
+              />
+              <p className="text-xs text-gray-500 mt-1">Gunakan kombinasi huruf dan angka</p>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all font-medium"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={loading || newPassword.length < 6}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-amber-200"
+              >
+                {loading ? '⏳ Mereset...' : '🔄 Reset Password'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DeleteConfirmModal = ({ 
+  isOpen, 
+  onClose, 
+  userName,
+  onConfirm,
+  loading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  userName: string;
+  onConfirm: () => void;
+  loading: boolean;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-white to-red-50 rounded-2xl w-full max-w-md shadow-2xl border border-red-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-red-600 to-red-500 px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold text-white">⚠️ Konfirmasi Hapus</h3>
+              <p className="text-red-100 text-xs mt-1">Tindakan ini tidak dapat dibatalkan</p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+              <Trash2 size={24} className="text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Apakah Anda yakin ingin menghapus user:</p>
+              <p className="font-bold text-gray-900">{userName}</p>
+            </div>
+          </div>
+          
+          <p className="text-xs text-red-500 bg-red-50 rounded-lg p-3 mb-4">
+            ⚠️ Peringatan: Semua data user ini akan dihapus permanen dari sistem.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all font-medium"
+            >
+              Batal
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-red-200"
+            >
+              {loading ? '⏳ Menghapus...' : '🗑️ Hapus User'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) => {
   const menuItems: { id: TabType; icon: React.ElementType; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { id: "orders", icon: Receipt, label: "Pesanan" },
     { id: "financial", icon: FileBarChart, label: "Laporan Keuangan" },
     { id: "layout", icon: LayoutDashboard, label: "Layout" },
+    { id: "users", icon: Users, label: "User Management" },
   ];
 
   return (
@@ -494,6 +976,18 @@ const getContentByTab = (tab: TabType, props: any) => {
       return <FinancialContent orders={props.orders} />;
     case "layout":
       return <LayoutContent siteContent={props.siteContent} onUpdate={props.onUpdateSiteContent} />;
+    case "users":
+      return (
+        <UsersContent 
+          users={props.users} 
+          loading={props.usersLoading}
+          onRefresh={props.onRefreshUsers}
+          onEdit={props.onEditUser}
+          onDelete={props.onDeleteUser}
+          onResetPassword={props.onResetPasswordUser}
+          onCreate={props.onCreateUser}
+        />
+      );
     default:
       return <DashboardContent data={props.dashboardData} />;
   }
@@ -538,6 +1032,16 @@ export function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // User management state
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
 
   // Get user from localStorage
   useEffect(() => {
@@ -749,6 +1253,186 @@ export function AdminDashboardPage() {
     receiptWindow.document.close();
   };
 
+  // Fetch users when users tab is active
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const userData = localStorage.getItem('user');
+      if (!userData) return;
+
+      const adminUser = JSON.parse(userData);
+      if (adminUser.role !== 'ADMIN') return;
+
+      try {
+        setUsersLoading(true);
+        const response = await fetch('/api/admin/users', {
+          headers: { 'Authorization': `Bearer ${adminUser.id}` }
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          setUsers(data.users || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+
+    if (activeTab === 'users') {
+      fetchUsers();
+    }
+  }, [activeTab]);
+
+  // User management handlers
+  const handleRefreshUsers = async () => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setUsersLoading(true);
+      const response = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${adminUser.id}` }
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        setUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error('Failed to refresh users:', error);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleCreateUser = () => {
+    // Just open the modal - form will be reset by UserModal's useEffect
+    setSelectedUser(null);
+    setIsUserModalOpen(true);
+  };
+
+  const handleEditUser = (user: AdminUser) => {
+    setSelectedUser(user);
+    setIsUserModalOpen(true);
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    setUserToDelete(userId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleResetPasswordUser = (userId: string) => {
+    const userToReset = users.find(u => u.id === userId);
+    if (userToReset) {
+      setSelectedUser(userToReset);
+      setIsResetPasswordModalOpen(true);
+    }
+  };
+
+  const handleUserSubmit = async (formData: any) => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setModalLoading(true);
+      const url = selectedUser ? `/api/admin/users/${selectedUser.id}` : '/api/admin/users';
+      const method = selectedUser ? 'PATCH' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminUser.id}`
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setIsUserModalOpen(false);
+        handleRefreshUsers();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to save user');
+      }
+    } catch (error) {
+      console.error('Failed to save user:', error);
+      alert('Failed to save user');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleResetPasswordSubmit = async (newPassword: string) => {
+    if (!selectedUser) return;
+
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setModalLoading(true);
+      const response = await fetch(`/api/admin/users/${selectedUser.id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminUser.id}`
+        },
+        body: JSON.stringify({ newPassword }),
+      });
+
+      if (response.ok) {
+        setIsResetPasswordModalOpen(false);
+        alert('Password reset successfully');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to reset password');
+      }
+    } catch (error) {
+      console.error('Failed to reset password:', error);
+      alert('Failed to reset password');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setModalLoading(true);
+      const response = await fetch(`/api/admin/users/${userToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${adminUser.id}`
+        },
+      });
+
+      if (response.ok) {
+        setIsDeleteModalOpen(false);
+        handleRefreshUsers();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      alert('Failed to delete user');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-amber-50">
       <Header user={user} />
@@ -760,11 +1444,43 @@ export function AdminDashboardPage() {
           orders,
           siteContent,
           loading,
+          users,
+          usersLoading,
           onUpdateStatus: handleUpdateStatus,
           onPrintReceipt: handlePrintReceipt,
           onUpdateSiteContent: handleUpdateSiteContent,
+          onRefreshUsers: handleRefreshUsers,
+          onEditUser: handleEditUser,
+          onDeleteUser: handleDeleteUser,
+          onResetPasswordUser: handleResetPasswordUser,
+          onCreateUser: handleCreateUser,
         })}
       </main>
+
+      {/* Modals */}
+      <UserModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        user={selectedUser}
+        onSubmit={handleUserSubmit}
+        loading={modalLoading}
+      />
+
+      <ResetPasswordModal
+        isOpen={isResetPasswordModalOpen}
+        onClose={() => setIsResetPasswordModalOpen(false)}
+        userName={selectedUser?.name || ''}
+        onSubmit={handleResetPasswordSubmit}
+        loading={modalLoading}
+      />
+
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        userName={users.find(u => u.id === userToDelete)?.name || ''}
+        onConfirm={handleDeleteConfirm}
+        loading={modalLoading}
+      />
     </div>
   );
 }
