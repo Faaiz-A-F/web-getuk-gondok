@@ -8,7 +8,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const productImageSrc = product.image?.trim() ? product.image : "/nobg/1.png";
+  const productImageSrc = "/nobg/1.png";
 
   return (
     <Link href={`/products/${product.id}`}>

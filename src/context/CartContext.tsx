@@ -1,7 +1,16 @@
 "use client";
 
 import { createContext, ReactNode, useState } from "react";
-import type { CartItem } from "@/types";
+
+export interface CartItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  price: number;
+  name?: string;
+  image?: string;
+  pickupLocation?: string;
+}
 
 interface CartContextType {
   items: CartItem[];
@@ -10,19 +19,33 @@ interface CartContextType {
   clearCart: () => void;
 }
 
-export const CartContext = createContext<CartContextType | undefined>(
-  undefined
-);
+export const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = (item: CartItem) => {
-    setItems([...items, item]);
+    setItems((currentItems) => {
+      const existingItem = currentItems.find((cartItem) => cartItem.productId === item.productId);
+
+      if (existingItem) {
+        return currentItems.map((cartItem) =>
+          cartItem.productId === item.productId
+            ? {
+                ...cartItem,
+                quantity: cartItem.quantity + item.quantity,
+                pickupLocation: item.pickupLocation ?? cartItem.pickupLocation,
+              }
+            : cartItem
+        );
+      }
+
+      return [...currentItems, item];
+    });
   };
 
   const removeItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
+    setItems((currentItems) => currentItems.filter((item) => item.id !== id));
   };
 
   const clearCart = () => {
