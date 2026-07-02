@@ -163,7 +163,7 @@ async function main() {
       action: "UPDATE_STATUS",
       entity: "Order",
       entityId: order.id,
-      metadata: { from: "SHIPPED", to: "DELIVERED" },
+      metadata: { from: "PAID", to: "DONE" },
       userId: admin.id,
       orderId: order.id,
     },
