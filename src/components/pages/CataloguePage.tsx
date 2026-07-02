@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CartContext } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -65,9 +66,26 @@ export function CataloguePage() {
   const [pickupLocation, setPickupLocation] = useState<(typeof PICKUP_OPTIONS)[number]["id"]>("rumah-produksi");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isPanelMounted, setIsPanelMounted] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const router = useRouter();
   const { addItem } = useContext(CartContext) || {};
+  const { isLoggedIn, isLoaded } = useAuth();
+
+  // Check authentication when user tries to add to cart or confirm order
+  const checkAuthAndProceed = (action: () => void) => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+    action();
+  };
+
+  // Redirect to login page
+  const handleRedirectToLogin = () => {
+    setShowLoginModal(false);
+    router.push('/login?redirect=/catalogue');
+  };
 
   const filteredProducts = products
     .filter((product) => selectedCategory === "All" || product.category === selectedCategory)
@@ -88,6 +106,10 @@ export function CataloguePage() {
   };
 
   const handleAddProduct = (product: Product) => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
     setCartLines((prev) => {
       const existing = prev.find((line) => line.productId === product.id);
       if (existing) {
@@ -416,6 +438,37 @@ export function CataloguePage() {
       </div>
 
       <Footer />
+
+      {/* Login Required Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fade-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Login Diperlukan</h3>
+              <p className="text-gray-600 mb-6">Anda harus login terlebih dahulu untuk menambahkan produk ke keranjang.</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleRedirectToLogin}
+                  className="w-full bg-amber-600 text-white py-3 rounded-xl font-semibold hover:bg-amber-700 transition"
+                >
+                  Login Sekarang
+                </button>
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
+                >
+                  Batal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Custom Styles Overrides */}
       <style dangerouslySetInnerHTML={{__html: `
