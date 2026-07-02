@@ -1,22 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage";
 import {
   ArrowDown,
   ArrowUp,
-  Bell,
   ChevronRight,
   ChevronLeft,
   DollarSign,
   FileBarChart,
   LayoutDashboard,
   Package,
-  Percent,
   Printer,
   Receipt,
-  Search,
-  Settings,
   ShoppingCart,
   Check,
   X,
@@ -41,53 +37,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const Header = ({ user }: { user: { name: string } | null }) => (
-  <header className="sticky top-0 z-50 flex h-20 items-center justify-between border-b border-amber-200/60 bg-gradient-to-r from-white via-white to-amber-50/50 px-4 shadow-[0_8px_30px_rgba(120,53,15,0.08)] backdrop-blur-md lg:px-32.5">
-    <div className="flex items-center gap-4 cursor-pointer group">
-      <div className="relative rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 p-1.5 shadow-md ring-2 ring-amber-200/50 group-hover:ring-amber-300 transition-all duration-300 group-hover:scale-105">
-        <Image
-          src="/logo/13.png"
-          alt="Getuk Gondok Logo"
-          width={64}
-          height={64}
-          className="h-14 w-14 object-contain"
-        />
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
-      </div>
-      <div className="transition-all duration-300 group-hover:translate-x-1">
-        <h1 className="text-xl font-black tracking-tight text-amber-950 sm:text-2xl">Getuk Gondok</h1>
-        <p className="text-xs font-medium uppercase tracking-wide text-amber-600">Hj. Sri Rahayu</p>
-      </div>
-    </div>
-
-    <div className="ml-auto flex items-center gap-3 sm:gap-5">
-      <div className="group relative flex items-center gap-2 rounded-2xl border-2 border-amber-200/60 bg-gradient-to-r from-amber-50/80 to-white px-4 py-2.5 shadow-sm transition-all duration-300 hover:border-amber-300 hover:shadow-md focus-within:border-amber-400 focus-within:shadow-lg sm:w-64">
-        <Search size={18} className="text-amber-500 transition-colors group-focus-within:text-amber-600" />
-        <input
-          type="text"
-          placeholder="Cari sesuatu..."
-          className="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-        />
-      </div>
-      <button className="relative rounded-xl p-2.5 text-amber-600 transition-all duration-300 hover:bg-amber-100 hover:text-amber-700 hover:scale-110 active:scale-95">
-        <Bell size={20} />
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-red-600 text-[10px] font-bold text-white shadow-lg animate-bounce">
-          3
-        </span>
-      </button>
-      <div className="group relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-br from-[#00b3a6] to-[#00a69a] font-bold text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl">
-        {user?.name?.charAt(0).toUpperCase() || 'A'}
-        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 scale-0 rounded-lg bg-gray-900 px-3 py-1.5 text-xs text-white opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 whitespace-nowrap">
-          {user?.name || 'Admin'}
-        </div>
-      </div>
-      <button className="rounded-xl p-2.5 text-amber-600 transition-all duration-300 hover:bg-amber-100 hover:text-amber-700 hover:scale-110 active:scale-95">
-        <Settings size={20} />
-      </button>
-    </div>
-  </header>
-);
 
 type TabType = "dashboard" | "orders" | "financial" | "layout" | "users";
 
@@ -158,7 +107,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           value={data.storeOrders.toString()} 
           trend="up" 
           percentage="0%" 
-          color="#00b3a6" 
+          color="#f59e0b" 
         />
         <StatCard 
           icon={<ShoppingCart size={20} />} 
@@ -166,7 +115,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           value={data.houseOrders.toString()} 
           trend="up" 
           percentage="0%" 
-          color="#00b3a6" 
+          color="#d97706" 
         />
         <StatCard 
           icon={<DollarSign size={20} />} 
@@ -174,7 +123,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           value={formatCurrency(data.totalRevenue)} 
           trend="up" 
           percentage="0%" 
-          color="#ff4d63" 
+          color="#10b981" 
         />
         <StatCard 
           icon={<Package size={20} />} 
@@ -208,27 +157,15 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
             <AreaChart data={data.revenueByMonth}>
               <defs>
                 <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#626fd6" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#626fd6" stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="colorAreaGlow" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#626fd6" stopOpacity={0.1} />
-                  <stop offset="95%" stopColor="#626fd6" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#d97706" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis dataKey="month" stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
-              <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af', fontSize: 12 }} />
-              <Tooltip 
-                formatter={(value: any) => formatCurrency(Number(value))}
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                  borderRadius: '12px', 
-                  border: '1px solid #e5e7eb',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
-                }}
-              />
-              <Area type="monotone" dataKey="revenue" stroke="#626fd6" strokeWidth={3} fill="url(#colorArea)" />
+              <XAxis dataKey="month" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
+              <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
+              <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
+              <Area type="monotone" dataKey="revenue" stroke="#d97706" strokeWidth={2} fill="url(#colorArea)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -457,25 +394,24 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Revenue */}
-        <div className="group relative overflow-hidden rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-white to-emerald-50/30 p-5 shadow-md transition-all duration-500 hover:shadow-xl hover:border-emerald-300 hover:-translate-y-1">
-          <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-emerald-600">Total Revenue</p>
-              <p className="mt-2 text-xl font-bold text-slate-800">{formatCurrency(totalRevenue)}</p>
-            </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 shadow-inner">
-              <DollarSign size={22} />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-1 text-xs font-medium text-emerald-600">
-            <TrendingUp size={14} />
-            <span>Semua waktu</span>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500">
+          <h4 className="text-sm text-gray-500 mb-2">Total Revenue</h4>
+          <p className="text-2xl font-bold text-amber-700">{formatCurrency(totalRevenue)}</p>
         </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-600">
+          <h4 className="text-sm text-gray-500 mb-2">Total Orders</h4>
+          <p className="text-2xl font-bold text-amber-600">{totalOrders}</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+          <h4 className="text-sm text-gray-500 mb-2">Completed</h4>
+          <p className="text-2xl font-bold text-green-600">{completedOrders}</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
+          <h4 className="text-sm text-gray-500 mb-2">Pending</h4>
+          <p className="text-2xl font-bold text-yellow-600">{pendingOrders}</p>
+        </div>
+      </div>
 
         {/* Total Orders */}
         <div className="group relative overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-br from-white to-blue-50/30 p-5 shadow-md transition-all duration-500 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1">
@@ -546,31 +482,19 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-amber-50 to-amber-100/30">
+            <thead className="bg-amber-50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Bulan</th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Jumlah Pesanan</th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Pendapatan</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Month</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Orders</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Revenue</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-amber-100/50">
               {Object.entries(ordersByMonth).map(([month, data]) => (
-                <tr key={month} className="group/row transition-all duration-300 hover:bg-amber-50/50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-700 font-bold text-sm shadow-inner">
-                        {month.slice(0, 3)}
-                      </div>
-                      <span className="font-semibold text-slate-800 text-sm">{month}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
-                      <Receipt size={12} />
-                      {data.count} Pesanan
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">{formatCurrency(data.revenue)}</td>
+                <tr key={month} className="hover:bg-amber-50/50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{month}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-amber-600">{data.count}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-amber-700 font-semibold">{formatCurrency(data.revenue)}</td>
                 </tr>
               ))}
               {Object.keys(ordersByMonth).length === 0 && (
@@ -1196,35 +1120,19 @@ const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (
   ];
 
   return (
-    <nav className="relative overflow-hidden border-b border-amber-800/50 bg-gradient-to-r from-[#8b4a12] via-[#a0522d] to-[#8b4a12] px-4 shadow-lg lg:px-32.5">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl"></div>
-        <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
-      </div>
-      
-      <div className="relative flex h-14 items-center gap-2 overflow-x-auto scrollbar-hide">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onTabChange(item.id)}
-            className={`group relative flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
-              activeTab === item.id
-                ? "bg-white/95 text-amber-900 shadow-lg shadow-black/10 scale-105"
-                : "text-white/90 hover:bg-white/10 hover:text-white hover:scale-102"
-            }`}
-          >
-            {activeTab === item.id && (
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-200/50 to-amber-100/30 -z-10"></div>
-            )}
-            <item.icon size={18} className={`transition-transform duration-300 ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110'} ${activeTab === item.id ? 'text-amber-700' : ''}`} />
-            <span className="whitespace-nowrap">{item.label}</span>
-            {activeTab === item.id && (
-              <div className="absolute -bottom-px left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-amber-600"></div>
-            )}
-          </button>
-        ))}
-      </div>
+    <nav className="flex h-14 items-center gap-0 border-b border-amber-800 bg-amber-700 px-8 lg:px-32.5">
+      {menuItems.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => onTabChange(item.id)}
+          className={`flex items-center gap-2 border-b-2 px-6 py-3 text-sm transition-all ${
+            activeTab === item.id ? "border-amber-300 text-white font-semibold" : "border-transparent text-white/80 hover:text-white hover:bg-amber-600/50"
+          }`}
+        >
+          <item.icon size={16} />
+          <span>{item.label}</span>
+        </button>
+      ))}
     </nav>
   );
 };
@@ -1266,43 +1174,25 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, trend, percentage, color, icon }: StatCardProps) => (
-  <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-white to-amber-50/30 p-6 shadow-lg transition-all duration-500 hover:shadow-xl hover:border-amber-300 hover:-translate-y-1">
-    {/* Decorative background elements */}
-    <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-amber-100/40 opacity-0 transition-transform duration-700 group-hover:scale-150 group-hover:rotate-12"></div>
-    <div className="absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-amber-100/30 blur-xl"></div>
-    
-    {/* Trend badge */}
-    <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:scale-105"
-      style={{ backgroundColor: `${color}20`, color: color }}>
-      {trend === "up" ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-      <span>{trend === "up" ? "+" : ""}{percentage}</span>
+  <div className="relative flex h-40 flex-col justify-between overflow-hidden rounded-md bg-gradient-to-br from-amber-600 to-amber-700 p-6 shadow-lg">
+    <div
+      className="absolute right-0 top-0 px-3 py-1 text-xs font-medium text-white"
+      style={{ backgroundColor: color, clipPath: "polygon(0 0, 100% 0, 85% 100%, 0 100%)", paddingRight: "16px" }}
+    >
+      {trend === "up" ? "+" : ""}{percentage}
     </div>
-    
-    {/* Icon */}
-    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl shadow-inner transition-all duration-300 group-hover:scale-110"
-      style={{ backgroundColor: `${color}15`, color: color }}>
-      {icon}
-    </div>
-    
-    {/* Content */}
-    <div className="relative z-10">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">{title}</p>
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">{icon}</div>
+    <div>
+      <p className="mb-2 text-xs tracking-wide text-amber-100">{title}</p>
       <div className="flex items-end justify-between">
-        <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
-        {trend === "up" ? (
-          <div className="flex items-center gap-1 rounded-full px-2 py-1" style={{ backgroundColor: `${color}15` }}>
-            <TrendingUp size={14} style={{ color: color }} />
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 rounded-full px-2 py-1" style={{ backgroundColor: `${color}15` }}>
-            <TrendingDown size={14} style={{ color: color }} />
-          </div>
-        )}
+        <h3 className="text-2xl font-semibold text-white">{value}</h3>
+        {trend === "up" ? <ArrowUp size={16} className="text-amber-200" /> : <ArrowDown size={16} className="text-red-200" />}
       </div>
     </div>
-    
-    {/* Bottom decoration */}
-    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-200/30 to-transparent"></div>
+    <div className="flex items-center justify-between">
+      <p className="text-xs text-amber-200">Since last month</p>
+      <ChevronRight size={16} className="text-amber-200" />
+    </div>
   </div>
 );
 
@@ -1715,8 +1605,8 @@ export function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(135deg,_#fff8ed_0%,_#fef3c7_45%,_#fdf7ed_100%)]">
-      <Header user={user} />
+    <div className="min-h-screen bg-amber-50">
+      <HeaderLandingPage />
       <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="space-y-7 px-8 py-6 lg:px-32.5">
