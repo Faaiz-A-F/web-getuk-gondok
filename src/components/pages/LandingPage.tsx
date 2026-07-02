@@ -77,8 +77,10 @@ export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [heroProductIndex, setHeroProductIndex] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const historyCardRef = useRef<HTMLDivElement | null>(null);
+  const historyRevealTimeoutRef = useRef<number | null>(null);
 
   const historyMessage =
     "Getuk Gondok lahir dari resep rumahan yang dijaga sejak 1985. Dari tangan Hj. Sri Rahayu, singkong Magelang diolah menjadi oleh-oleh yang tetap lembut, autentik, dan kini tampil lebih modern.";
@@ -89,6 +91,45 @@ export function LandingPage() {
     }, 5000);
 
     return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const historyCard = historyCardRef.current;
+
+    if (!historyCard) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (historyRevealTimeoutRef.current) {
+          window.clearTimeout(historyRevealTimeoutRef.current);
+          historyRevealTimeoutRef.current = null;
+        }
+
+        setIsHistoryVisible(entry.isIntersecting);
+
+        if (entry.isIntersecting) {
+          setIsHistoryVisible(false);
+          historyRevealTimeoutRef.current = window.setTimeout(() => {
+            setIsHistoryVisible(true);
+            historyRevealTimeoutRef.current = null;
+          }, 3000);
+        }
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(historyCard);
+
+    return () => {
+      observer.disconnect();
+
+      if (historyRevealTimeoutRef.current) {
+        window.clearTimeout(historyRevealTimeoutRef.current);
+        historyRevealTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   const goToPreviousHeroProduct = () => {
@@ -261,11 +302,8 @@ export function LandingPage() {
             </div>
 
             <div className="flex justify-center lg:justify-center">
-              <button
-                type="button"
-                onClick={() => setIsHistoryOpen((currentValue) => !currentValue)}
-                aria-expanded={isHistoryOpen}
-                aria-label="Buka sejarah Getuk Gondok"
+              <div
+                ref={historyCardRef}
                 className="group relative w-full max-w-none overflow-hidden rounded-4xl border border-[#d89a34]/35 bg-[#5a2500] px-6 py-8 text-left shadow-[0_24px_60px_rgba(90,37,0,0.28)] text-[#d89a34] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_30px_70px_rgba(90,37,0,0.34)] sm:px-8 sm:py-10 lg:min-h-[22rem]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#6b2c00]/95 via-transparent to-[#7a3a07]/50" />
@@ -276,31 +314,26 @@ export function LandingPage() {
                     <div className="text-3xl font-semibold tracking-[0.15em] uppercase">Since</div>
                     <div className="flex w-full items-end gap-4">
                       <div className="text-6xl font-extrabold leading-none tabular-nums sm:text-7xl">1985</div>
-                      <span className="mb-2 rounded-full border border-[#d89a34]/40 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-[#f2c47a] transition-transform duration-500 ease-out group-hover:translate-x-1">
-                        Klik Sejarah
-                      </span>
-                  
                     </div>
                     <div className="h-px w-20 bg-[#d89a34]/70" />
                   </div>
 
                   <div
                     className={`space-y-3 text-white/95 transition-all duration-500 ease-out ${
-                      isHistoryOpen ? "translate-x-5 opacity-100" : "translate-x-0 opacity-0"
+                      isHistoryVisible ? "translate-x-5 opacity-100" : "translate-x-0 opacity-0"
                     }`}
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f2c47a]">Sejarah Getuk Gondok</p>
                     <p className="text-base leading-7 text-white/90">{historyMessage}</p>
-                    <p className="text-sm font-medium text-[#f2c47a]">Ketuk lagi untuk menutup.</p>
                   </div>
 
-                  <div className={`text-xl leading-tight text-white/95 transition-all duration-500 ease-out ${isHistoryOpen ? "translate-x-5 opacity-0" : "translate-x-0 opacity-100"}`}>
+                  <div className={`text-xl leading-tight text-white/95 transition-all duration-700 ease-out ${isHistoryVisible ? "translate-x-5 opacity-0" : "translate-x-0 opacity-100"}`}>
                     Magelang,
                     <br />
                     Jawa Tengah
                   </div>
                 </div>
-              </button>
+              </div>
             </div>
           </div>
         </div>

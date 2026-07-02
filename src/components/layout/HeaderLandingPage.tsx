@@ -35,7 +35,7 @@ export function HeaderLandingPage() {
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-amber-900 hover:text-amber-700 transition focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 rounded-lg"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-amber-900 transition hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
           >
