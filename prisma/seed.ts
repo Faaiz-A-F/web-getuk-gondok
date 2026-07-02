@@ -1,5 +1,5 @@
 import { PrismaClient, Role, OrderStatus, PaymentStatus, ContentType } from "@prisma/client"
-import bcrypt from "bcryptjs"
+import * as bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
@@ -142,7 +142,7 @@ async function main() {
   const order = await prisma.order.create({
     data: {
       orderNumber: "GG-0001",
-      status: OrderStatus.DELIVERED,
+      status: OrderStatus.DONE,
       totalAmount: 33000,
       shippingCost: 5000,
       shippingAddress: "Jl. Contoh No. 1, Semarang, Jawa Tengah",
@@ -176,4 +176,4 @@ async function main() {
 
 main()
   .catch((e) => { console.error(e); process.exit(1) })
-  .finally(async () => { await prisma["$disconnect"]() })
+  .finally(async () => { await prisma.$disconnect() })

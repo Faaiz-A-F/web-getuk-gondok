@@ -27,6 +27,8 @@ import {
   Activity,
   Calendar,
   Clock,
+  Filter,
+  XCircle,
 } from "lucide-react";
 import {
   Area,
@@ -218,6 +220,8 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
   onUpdateStatus: (id: string, status: string) => void;
   onPrintReceipt: (order: Order) => void;
 }) => {
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
   };
@@ -225,12 +229,35 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING': return 'bg-amber-100 text-amber-800';
-      case 'PROCESSING': return 'bg-blue-100 text-blue-800';
-      case 'PAID': return 'bg-emerald-100 text-emerald-800';
-      case 'DELIVERED': return 'bg-violet-100 text-violet-800';
-      case 'CANCELLED': return 'bg-rose-100 text-rose-800';
+      case 'PAID': return 'bg-blue-100 text-blue-800';
+      case 'DONE': return 'bg-emerald-100 text-emerald-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
       default: return 'bg-slate-100 text-slate-800';
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'Menunggu Pembayaran';
+      case 'PAID': return 'Sudah Dibayar';
+      case 'DONE': return 'Selesai';
+      case 'CANCELLED': return 'Dibatalkan';
+      default: return status;
+    }
+  };
+
+  // Filter orders based on selected status
+  const filteredOrders = statusFilter === 'ALL' 
+    ? orders 
+    : orders.filter(order => order.status === statusFilter);
+
+  // Count orders by status
+  const orderCounts = {
+    ALL: orders.length,
+    PENDING: orders.filter(o => o.status === 'PENDING').length,
+    PAID: orders.filter(o => o.status === 'PAID').length,
+    DONE: orders.filter(o => o.status === 'DONE').length,
+    CANCELLED: orders.filter(o => o.status === 'CANCELLED').length,
   };
 
   if (loading) {
@@ -252,8 +279,35 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
           </div>
           <span className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-xs font-semibold text-amber-700">
             <Receipt size={14} />
-            {orders.length} Pesanan
+            {filteredOrders.length} Pesanan
           </span>
+        </div>
+        
+        {/* Status Filter */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <Filter size={14} />
+            <span>Filter:</span>
+          </div>
+          {[
+            { value: 'ALL', label: `Semua (${orderCounts.ALL})` },
+            { value: 'PENDING', label: `Menunggu (${orderCounts.PENDING})` },
+            { value: 'PAID', label: `Dibayar (${orderCounts.PAID})` },
+            { value: 'DONE', label: `Selesai (${orderCounts.DONE})` },
+            { value: 'CANCELLED', label: `Batal (${orderCounts.CANCELLED})` },
+          ].map((filter) => (
+            <button
+              key={filter.value}
+              onClick={() => setStatusFilter(filter.value)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                statusFilter === filter.value
+                  ? 'bg-amber-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
         </div>
       </div>
       
@@ -270,7 +324,7 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
             </tr>
           </thead>
           <tbody className="divide-y divide-amber-100/50">
-            {orders.map((order, index) => (
+            {filteredOrders.map((order, index) => (
               <tr key={order.id} className="group transition-all duration-300 hover:bg-amber-50/50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
@@ -294,11 +348,10 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold leading-tight shadow-sm ${getStatusColor(order.status)}`}>
                     {order.status === 'PENDING' && <Clock size={12} />}
-                    {order.status === 'PROCESSING' && <Activity size={12} />}
-                    {order.status === 'DELIVERED' && <Check size={12} />}
-                    {order.status === 'CANCELLED' && <X size={12} />}
                     {order.status === 'PAID' && <DollarSign size={12} />}
-                    {order.status}
+                    {order.status === 'DONE' && <Check size={12} />}
+                    {order.status === 'CANCELLED' && <XCircle size={12} />}
+                    {getStatusLabel(order.status)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">{formatCurrency(order.totalAmount)}</td>
@@ -313,29 +366,62 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                     {order.status === 'PENDING' && (
                       <>
                         <button
-                          onClick={() => onUpdateStatus(order.id, 'PROCESSING')}
-                          className="group/btn rounded-xl p-2 text-blue-600 transition-all duration-300 hover:bg-blue-50 hover:scale-110 hover:shadow-lg"
-                          title="Process Order"
+                          onClick={() => onUpdateStatus(order.id, 'PAID')}
+                          className="group/btn rounded-xl px-3 py-2 bg-blue-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-blue-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
+                          title="Konfirmasi Pembayaran"
                         >
-                          <Check size={16} />
+                          <DollarSign size={14} />
+                          Bayar
                         </button>
                         <button
-                          onClick={() => onUpdateStatus(order.id, 'CANCELLED')}
-                          className="group/btn rounded-xl p-2 text-rose-600 transition-all duration-300 hover:bg-rose-50 hover:scale-110 hover:shadow-lg"
-                          title="Cancel Order"
+                          onClick={() => {
+                            if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+                              onUpdateStatus(order.id, 'CANCELLED');
+                            }
+                          }}
+                          className="group/btn rounded-xl px-3 py-2 bg-red-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-red-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
+                          title="Batalkan Pesanan"
                         >
-                          <X size={16} />
+                          <XCircle size={14} />
+                          Batal
                         </button>
                       </>
                     )}
-                    {order.status === 'PROCESSING' && (
-                      <button
-                        onClick={() => onUpdateStatus(order.id, 'DELIVERED')}
-                        className="group/btn rounded-xl p-2 text-emerald-600 transition-all duration-300 hover:bg-emerald-50 hover:scale-110 hover:shadow-lg"
-                        title="Mark as Done"
-                      >
-                        <Check size={16} />
-                      </button>
+                    {order.status === 'PAID' && (
+                      <>
+                        <button
+                          onClick={() => onUpdateStatus(order.id, 'DONE')}
+                          className="group/btn rounded-xl px-3 py-2 bg-emerald-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-emerald-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
+                          title="Tandai Selesai"
+                        >
+                          <Check size={14} />
+                          Selesai
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+                              onUpdateStatus(order.id, 'CANCELLED');
+                            }
+                          }}
+                          className="group/btn rounded-xl px-3 py-2 bg-red-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-red-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
+                          title="Batalkan Pesanan"
+                        >
+                          <XCircle size={14} />
+                          Batal
+                        </button>
+                      </>
+                    )}
+                    {order.status === 'DONE' && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                        <Check size={12} />
+                        Completed
+                      </span>
+                    )}
+                    {order.status === 'CANCELLED' && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700">
+                        <XCircle size={12} />
+                        Dibatalkan
+                      </span>
                     )}
                     <button
                       onClick={() => onPrintReceipt(order)}
@@ -348,7 +434,7 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                 </td>
               </tr>
             ))}
-            {orders.length === 0 && (
+            {filteredOrders.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
@@ -373,11 +459,11 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
   };
 
   const totalRevenue = orders
-    .filter(o => o.paymentStatus === 'PAID' || o.status === 'DELIVERED')
+    .filter(o => o.paymentStatus === 'PAID' || o.status === 'DONE')
     .reduce((sum, o) => sum + Number(o.totalAmount), 0);
 
   const totalOrders = orders.length;
-  const completedOrders = orders.filter(o => o.status === 'DELIVERED').length;
+  const completedOrders = orders.filter(o => o.status === 'DONE').length;
   const pendingOrders = orders.filter(o => o.status === 'PENDING').length;
 
   const ordersByMonth = orders.reduce((acc, order) => {
@@ -386,7 +472,7 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
       acc[month] = { count: 0, revenue: 0 };
     }
     acc[month].count += 1;
-    if (order.paymentStatus === 'PAID' || order.status === 'DELIVERED') {
+    if (order.paymentStatus === 'PAID' || order.status === 'DONE') {
       acc[month].revenue += Number(order.totalAmount);
     }
     return acc;
@@ -1234,6 +1320,22 @@ export function AdminDashboardPage() {
         const response = await fetch('/api/admin/dashboard', {
           headers: { 'Authorization': `Bearer ${user.id}` }
         });
+        
+        if (response.status === 403) {
+          console.error('Access denied: User is not an admin or session expired');
+          // Clear invalid session
+          localStorage.removeItem('user');
+          window.location.href = '/error?message=Access+denied:+You+do+not+have+admin+privileges';
+          return;
+        }
+        
+        if (response.status === 401) {
+          console.error('Unauthorized: Please login again');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return;
+        }
+        
         const data = await response.json();
         
         if (response.ok) {
@@ -1370,7 +1472,7 @@ export function AdminDashboardPage() {
   };
 
   const handlePrintReceipt = (order: Order) => {
-    // Create a printable receipt
+    // Create a printable receipt optimized for thermal printers (ePos)
     const receiptWindow = window.open('', '_blank');
     if (!receiptWindow) return;
 
@@ -1378,48 +1480,111 @@ export function AdminDashboardPage() {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
     };
 
-    receiptWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Receipt - ${order.orderNumber}</title>
-          <style>
-            body { font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
-            h1 { text-align: center; font-size: 18px; }
-            .info { margin-bottom: 20px; }
-            .item { display: flex; justify-content: space-between; margin: 5px 0; }
-            .total { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; font-weight: bold; }
-            @media print { body { padding: 0; } }
-          </style>
-        </head>
-        <body>
-          <h1>GETUK GONDOK</h1>
-          <p style="text-align:center">Hj. Sri Rahayu</p>
-          <div class="info">
-            <p><strong>Order:</strong> ${order.orderNumber}</p>
-            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString('id-ID')}</p>
-            <p><strong>Customer:</strong> ${order.user.name}</p>
-          </div>
-          <hr>
-          <div class="items">
-            ${order.items.map(item => `
-              <div class="item">
-                <span>${item.quantity}x ${item.product.name}</span>
-                <span>${formatCurrency(item.price * item.quantity)}</span>
-              </div>
-            `).join('')}
-          </div>
-          <div class="total">
-            <div class="item">
-              <span>TOTAL</span>
-              <span>${formatCurrency(order.totalAmount)}</span>
-            </div>
-          </div>
-          <p style="text-align:center;margin-top:20px">Thank you!</p>
-          <script>window.print();</script>
-        </body>
-      </html>
-    `);
+    const formatDate = (date: string) => {
+      return new Date(date).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    // Generate items HTML
+    const itemsHTML = order.items.map(item => 
+      `<div class="item-row">
+        <span class="item-name">${item.product.name}</span>
+        <span class="item-qty">${item.quantity}x</span>
+        <span class="item-price">${formatCurrency(item.price * item.quantity)}</span>
+      </div>`
+    ).join('');
+
+    const receiptHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Struk - ${order.orderNumber}</title>
+  <style>
+    @page { margin: 0; size: 80mm auto; }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Courier New', monospace; 
+      font-size: 12px; 
+      width: 80mm; 
+      margin: 0 auto; 
+      padding: 5mm;
+      background: white;
+    }
+    .center { text-align: center; }
+    .bold { font-weight: bold; }
+    .separator { border-top: 1px dashed #000; margin: 8px 0; }
+    .item-row { 
+      display: flex; 
+      justify-content: space-between; 
+      margin: 3px 0;
+      font-size: 11px;
+    }
+    .item-name { flex: 1; }
+    .item-qty { width: 30px; text-align: center; }
+    .item-price { width: 70px; text-align: right; }
+    .total-row { 
+      display: flex; 
+      justify-content: space-between; 
+      margin: 5px 0;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    .footer { text-align: center; margin-top: 10px; font-size: 10px; }
+    @media print { 
+      body { margin: 0; padding: 0; }
+      @page { margin: 0; size: 80mm auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="center bold" style="font-size: 16px; margin-bottom: 2px;">GETUK GONDOK</div>
+  <div class="center" style="font-size: 10px; margin-bottom: 8px;">Hj. Sri Rahayu</div>
+  
+  <div class="separator"></div>
+  
+  <div style="font-size: 11px;">
+    <div><strong>No. Pesanan:</strong> ${order.orderNumber}</div>
+    <div><strong>Tanggal:</strong> ${formatDate(order.createdAt)}</div>
+    <div><strong>Pelanggan:</strong> ${order.user.name}</div>
+  </div>
+  
+  <div class="separator"></div>
+  
+  <div class="item-row bold">
+    <span class="item-name">Nama</span>
+    <span class="item-qty">Qty</span>
+    <span class="item-price">Harga</span>
+  </div>
+  
+  ${itemsHTML}
+  
+  <div class="separator"></div>
+  
+  <div class="total-row">
+    <span>TOTAL</span>
+    <span>${formatCurrency(order.totalAmount)}</span>
+  </div>
+  
+  <div class="separator"></div>
+  
+  <div class="footer">
+    <div>Terima Kasih atas kunjungan Anda!</div>
+    <div style="margin-top: 5px;">~ GETUK GONDOK ~</div>
+  </div>
+  
+  <script>
+    window.onload = function() {
+      window.print();
+    };
+  </script>
+</body>
+</html>`;
+
+    receiptWindow.document.write(receiptHTML);
     receiptWindow.document.close();
   };
 
