@@ -16,7 +16,6 @@ enum OrderStatus {
   PENDING
   PAID
   DONE
-  DELIVERED
   CANCELLED
 }
 
