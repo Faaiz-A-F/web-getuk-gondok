@@ -1,8 +1,11 @@
 import React from 'react';
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 export function CartPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans antialiased">
+      {/* <Header /> */}
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         
         {/* Header Utama */}
@@ -248,10 +251,12 @@ export function CartPage() {
                 ))}
               </div>
             </div>
-
+            
           </div>
+          
         </div>
       </div>
+      {/* <Footer /> */}
     </div>
   );
 }
