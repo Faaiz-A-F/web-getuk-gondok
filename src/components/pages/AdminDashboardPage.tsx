@@ -101,7 +101,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           value={data.storeOrders.toString()} 
           trend="up" 
           percentage="0%" 
-          color="#00b3a6" 
+          color="#f59e0b" 
         />
         <StatCard 
           icon={<ShoppingCart size={20} />} 
@@ -109,7 +109,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           value={data.houseOrders.toString()} 
           trend="up" 
           percentage="0%" 
-          color="#00b3a6" 
+          color="#d97706" 
         />
         <StatCard 
           icon={<DollarSign size={20} />} 
@@ -117,7 +117,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           value={formatCurrency(data.totalRevenue)} 
           trend="up" 
           percentage="0%" 
-          color="#ff4d63" 
+          color="#10b981" 
         />
         <StatCard 
           icon={<Package size={20} />} 
@@ -136,15 +136,15 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
             <AreaChart data={data.revenueByMonth}>
               <defs>
                 <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#626fd6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#626fd6" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#d97706" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
               <XAxis dataKey="month" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
               <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} />
               <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
-              <Area type="monotone" dataKey="revenue" stroke="#626fd6" strokeWidth={2} fill="url(#colorArea)" />
+              <Area type="monotone" dataKey="revenue" stroke="#d97706" strokeWidth={2} fill="url(#colorArea)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -315,19 +315,19 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500">
           <h4 className="text-sm text-gray-500 mb-2">Total Revenue</h4>
-          <p className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p>
+          <p className="text-2xl font-bold text-amber-700">{formatCurrency(totalRevenue)}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-600">
           <h4 className="text-sm text-gray-500 mb-2">Total Orders</h4>
-          <p className="text-2xl font-bold text-blue-600">{totalOrders}</p>
+          <p className="text-2xl font-bold text-amber-600">{totalOrders}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
           <h4 className="text-sm text-gray-500 mb-2">Completed</h4>
           <p className="text-2xl font-bold text-green-600">{completedOrders}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
           <h4 className="text-sm text-gray-500 mb-2">Pending</h4>
           <p className="text-2xl font-bold text-yellow-600">{pendingOrders}</p>
         </div>
@@ -337,19 +337,19 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Month</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-amber-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Month</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Month</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Orders</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Revenue</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {Object.entries(ordersByMonth).map(([month, data]) => (
-                <tr key={month}>
+                <tr key={month} className="hover:bg-amber-50/50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{month}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data.count}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">{formatCurrency(data.revenue)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-amber-600">{data.count}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-amber-700 font-semibold">{formatCurrency(data.revenue)}</td>
                 </tr>
               ))}
               {Object.keys(ordersByMonth).length === 0 && (
@@ -902,13 +902,13 @@ const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (
   ];
 
   return (
-    <nav className="flex h-14 items-center gap-0 border-b border-amber-700 bg-amber-700 px-8 lg:px-32.5">
+    <nav className="flex h-14 items-center gap-0 border-b border-amber-800 bg-amber-700 px-8 lg:px-32.5">
       {menuItems.map((item) => (
         <button
           key={item.id}
           onClick={() => onTabChange(item.id)}
           className={`flex items-center gap-2 border-b-2 px-6 py-3 text-sm transition-all ${
-            activeTab === item.id ? "border-[#00b3a6] text-white" : "border-transparent text-white hover:text-gray-300"
+            activeTab === item.id ? "border-amber-300 text-white font-semibold" : "border-transparent text-white/80 hover:text-white hover:bg-amber-600/50"
           }`}
         >
           <item.icon size={16} />
@@ -956,24 +956,24 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, trend, percentage, color, icon }: StatCardProps) => (
-  <div className="relative flex h-40 flex-col justify-between overflow-hidden rounded-md bg-[#626fd6] p-6">
+  <div className="relative flex h-40 flex-col justify-between overflow-hidden rounded-md bg-gradient-to-br from-amber-600 to-amber-700 p-6 shadow-lg">
     <div
       className="absolute right-0 top-0 px-3 py-1 text-xs font-medium text-white"
       style={{ backgroundColor: color, clipPath: "polygon(0 0, 100% 0, 85% 100%, 0 100%)", paddingRight: "16px" }}
     >
       {trend === "up" ? "+" : ""}{percentage}
     </div>
-    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white/40">{icon}</div>
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">{icon}</div>
     <div>
-      <p className="mb-2 text-xs tracking-wide text-white/60">{title}</p>
+      <p className="mb-2 text-xs tracking-wide text-amber-100">{title}</p>
       <div className="flex items-end justify-between">
         <h3 className="text-2xl font-semibold text-white">{value}</h3>
-        {trend === "up" ? <ArrowUp size={16} className="text-[#00b3a6]" /> : <ArrowDown size={16} className="text-[#ff4d63]" />}
+        {trend === "up" ? <ArrowUp size={16} className="text-amber-200" /> : <ArrowDown size={16} className="text-red-200" />}
       </div>
     </div>
     <div className="flex items-center justify-between">
-      <p className="text-xs text-white/50">Since last month</p>
-      <ChevronRight size={16} className="text-white/40" />
+      <p className="text-xs text-amber-200">Since last month</p>
+      <ChevronRight size={16} className="text-amber-200" />
     </div>
   </div>
 );
