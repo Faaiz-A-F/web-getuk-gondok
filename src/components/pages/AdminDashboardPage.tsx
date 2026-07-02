@@ -1,21 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage";
 import {
   ArrowDown,
   ArrowUp,
-  Bell,
   ChevronRight,
   DollarSign,
   FileBarChart,
   LayoutDashboard,
   Package,
-  Percent,
   Printer,
   Receipt,
-  Search,
-  Settings,
   ShoppingCart,
   Check,
   X,
@@ -35,49 +31,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const Header = ({ user }: { user: { name: string } | null }) => (
-  <header className="sticky top-0 z-50 flex h-20 items-center justify-between bg-white/80 backdrop-blur-md px-8 shadow-sm border-b border-amber-100 lg:px-32.5">
-    <div className="flex items-center gap-4 cursor-pointer">
-      <div className="bg-transparent p-1 rounded-xl">
-        <Image
-          src="/logo/13.png"
-          alt="Getuk Gondok Logo"
-          width={64}
-          height={64}
-          className="w-16 h-16 object-contain"
-        />
-      </div>
-      <div>
-        <h1 className="text-xl sm:text-2xl font-black text-amber-950 tracking-tight">Getuk Gondok</h1>
-        <p className="text-xs text-amber-600 font-medium tracking-wide uppercase">Hj. Sri Rahayu</p>
-      </div>
-    </div>
-
-    <div className="ml-auto flex items-center gap-6">
-      <div className="flex w-64 items-center gap-2 rounded-full bg-[#414456] px-4 py-2.5">
-        <Search size={18} className="text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search..."
-          className="flex-1 bg-transparent text-sm text-gray-300 outline-none placeholder-gray-500"
-        />
-      </div>
-      <button className="relative text-gray-400 hover:text-gray-300">
-        <Bell size={18} />
-        <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff4d63] text-xs font-bold text-white">
-          3
-        </span>
-      </button>
-      <div className="h-9 w-9 cursor-pointer rounded-full bg-gradient-to-br from-[#00b3a6] to-[#626fd6] flex items-center justify-center text-white font-semibold">
-        {user?.name?.charAt(0).toUpperCase() || 'A'}
-      </div>
-      <button className="text-gray-400 hover:text-gray-300">
-        <Settings size={18} />
-      </button>
-    </div>
-  </header>
-);
 
 type TabType = "dashboard" | "orders" | "financial" | "layout" | "users";
 
@@ -1435,7 +1388,7 @@ export function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-amber-50">
-      <Header user={user} />
+      <HeaderLandingPage />
       <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="space-y-7 px-8 py-6 lg:px-32.5">
