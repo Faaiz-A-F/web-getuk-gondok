@@ -6,6 +6,7 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronRight,
+  ChevronLeft,
   DollarSign,
   FileBarChart,
   LayoutDashboard,
@@ -21,6 +22,11 @@ import {
   Trash2,
   Key,
   Shield,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import {
   Area,
@@ -82,7 +88,7 @@ interface AdminUser {
 const DashboardContent = ({ data }: { data: DashboardData | null }) => {
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
         <p className="text-gray-500">Loading dashboard data...</p>
       </div>
     );
@@ -129,9 +135,24 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 mt-6">
-        <div className="rounded-lg bg-white p-6 shadow-sm lg:col-span-2">
-          <h3 className="mb-6 text-lg font-semibold text-gray-900">Monthly Earning</h3>
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Chart Section */}
+        <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl hover:border-amber-300 lg:col-span-2">
+          {/* Decorative corner */}
+          <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-amber-100/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+          
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-amber-950">Monthly Earning</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Pendapatan bulanan</p>
+            </div>
+            <span className="group/btn relative overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
+              <span className="relative z-10 flex items-center gap-1">
+                <Activity size={12} className="animate-pulse" />
+                Live Update
+              </span>
+            </span>
+          </div>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={data.revenueByMonth}>
               <defs>
@@ -149,16 +170,39 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h3 className="mb-6 text-lg font-semibold text-gray-900">Recent Orders</h3>
-          <div className="space-y-4">
-            {data.recentOrders.slice(0, 5).map((order) => (
-              <div key={order.id} className="flex items-center justify-between border-b border-neutral-100 pb-3">
-                <div>
-                  <span className="font-medium text-gray-800">{order.orderNumber}</span>
-                  <p className="text-xs text-gray-500">{order.userName}</p>
+        {/* Recent Orders Section */}
+        <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl hover:border-amber-300">
+          {/* Decorative corner */}
+          <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-amber-100/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+          
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-amber-950">Recent Orders</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Pesanan terbaru</p>
+            </div>
+            <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+              <Clock size={12} />
+              Today
+            </span>
+          </div>
+          <div className="space-y-3">
+            {data.recentOrders.slice(0, 5).map((order, index) => (
+              <div 
+                key={order.id} 
+                className="group/item group flex items-center justify-between rounded-xl border border-amber-100/60 bg-gradient-to-r from-amber-50/50 to-white/50 p-3 transition-all duration-300 hover:border-amber-200 hover:bg-amber-50/70 hover:shadow-md"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-700 font-bold text-sm shadow-inner">
+                    {order.orderNumber.slice(-3)}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-800 text-sm">{order.orderNumber}</span>
+                    <p className="text-xs text-slate-500">{order.userName}</p>
+                  </div>
                 </div>
-                <span className="font-semibold text-amber-700">{formatCurrency(order.totalAmount)}</span>
+                <span className="font-bold text-amber-700 text-sm group-hover/item:text-amber-900 transition-colors">
+                  {formatCurrency(order.totalAmount)}
+                </span>
               </div>
             ))}
           </div>
@@ -180,71 +224,104 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'PENDING': return 'bg-amber-100 text-amber-800';
       case 'PROCESSING': return 'bg-blue-100 text-blue-800';
-      case 'PAID': return 'bg-green-100 text-green-800';
-      case 'DELIVERED': return 'bg-purple-100 text-purple-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'PAID': return 'bg-emerald-100 text-emerald-800';
+      case 'DELIVERED': return 'bg-violet-100 text-violet-800';
+      case 'CANCELLED': return 'bg-rose-100 text-rose-800';
+      default: return 'bg-slate-100 text-slate-800';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
         <p className="text-gray-500">Loading orders...</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg bg-white shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Daftar Pesanan</h3>
+    <div className="overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 shadow-lg transition-all duration-500">
+      {/* Header */}
+      <div className="border-b border-amber-100/60 bg-gradient-to-r from-amber-50/80 to-white/80 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-amber-950">Daftar Pesanan</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Kelola semua pesanan pelanggan</p>
+          </div>
+          <span className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-xs font-semibold text-amber-700">
+            <Receipt size={14} />
+            {orders.length} Pesanan
+          </span>
+        </div>
       </div>
+      
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gradient-to-r from-amber-50 to-amber-100/30">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Order Number</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Customer</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Status</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Total</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Date</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.orderNumber}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div>{order.user.name}</div>
-                  <div className="text-xs text-gray-400">{order.user.email}</div>
+          <tbody className="divide-y divide-amber-100/50">
+            {orders.map((order, index) => (
+              <tr key={order.id} className="group transition-all duration-300 hover:bg-amber-50/50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-700 font-bold text-sm shadow-inner">
+                      {index + 1}
+                    </div>
+                    <span className="font-semibold text-slate-800 text-sm">{order.orderNumber}</span>
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-slate-500 to-slate-600 font-semibold text-white text-sm">
+                      {order.user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-medium text-slate-800 text-sm">{order.user.name}</div>
+                      <div className="text-xs text-slate-400">{order.user.email}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold leading-tight shadow-sm ${getStatusColor(order.status)}`}>
+                    {order.status === 'PENDING' && <Clock size={12} />}
+                    {order.status === 'PROCESSING' && <Activity size={12} />}
+                    {order.status === 'DELIVERED' && <Check size={12} />}
+                    {order.status === 'CANCELLED' && <X size={12} />}
+                    {order.status === 'PAID' && <DollarSign size={12} />}
                     {order.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(order.totalAmount)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">{formatCurrency(order.totalAmount)}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                    <Calendar size={14} />
+                    {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <div className="flex items-center gap-2">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-1.5">
                     {order.status === 'PENDING' && (
                       <>
                         <button
                           onClick={() => onUpdateStatus(order.id, 'PROCESSING')}
-                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
+                          className="group/btn rounded-xl p-2 text-blue-600 transition-all duration-300 hover:bg-blue-50 hover:scale-110 hover:shadow-lg"
                           title="Process Order"
                         >
                           <Check size={16} />
                         </button>
                         <button
                           onClick={() => onUpdateStatus(order.id, 'CANCELLED')}
-                          className="p-2 text-red-600 hover:bg-red-100 rounded-lg"
+                          className="group/btn rounded-xl p-2 text-rose-600 transition-all duration-300 hover:bg-rose-50 hover:scale-110 hover:shadow-lg"
                           title="Cancel Order"
                         >
                           <X size={16} />
@@ -254,7 +331,7 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                     {order.status === 'PROCESSING' && (
                       <button
                         onClick={() => onUpdateStatus(order.id, 'DELIVERED')}
-                        className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
+                        className="group/btn rounded-xl p-2 text-emerald-600 transition-all duration-300 hover:bg-emerald-50 hover:scale-110 hover:shadow-lg"
                         title="Mark as Done"
                       >
                         <Check size={16} />
@@ -262,7 +339,7 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                     )}
                     <button
                       onClick={() => onPrintReceipt(order)}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                      className="group/btn rounded-xl p-2 text-amber-600 transition-all duration-300 hover:bg-amber-50 hover:scale-110 hover:shadow-lg"
                       title="Print Receipt"
                     >
                       <Printer size={16} />
@@ -273,8 +350,13 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
             ))}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                  No orders found
+                <td colSpan={6} className="px-6 py-16 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                      <Receipt size={32} className="text-amber-400" />
+                    </div>
+                    <p className="text-gray-500 font-medium">Belum ada pesanan</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -290,7 +372,6 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
   };
 
-  // Calculate statistics
   const totalRevenue = orders
     .filter(o => o.paymentStatus === 'PAID' || o.status === 'DELIVERED')
     .reduce((sum, o) => sum + Number(o.totalAmount), 0);
@@ -299,7 +380,6 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
   const completedOrders = orders.filter(o => o.status === 'DELIVERED').length;
   const pendingOrders = orders.filter(o => o.status === 'PENDING').length;
 
-  // Group by month
   const ordersByMonth = orders.reduce((acc, order) => {
     const month = new Date(order.createdAt).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
     if (!acc[month]) {
@@ -333,8 +413,73 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Month</h3>
+        {/* Total Orders */}
+        <div className="group relative overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-br from-white to-blue-50/30 p-5 shadow-md transition-all duration-500 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1">
+          <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-blue-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-blue-600">Total Pesanan</p>
+              <p className="mt-2 text-xl font-bold text-slate-800">{totalOrders}</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shadow-inner">
+              <Receipt size={22} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1 text-xs font-medium text-blue-600">
+            <Package size={14} />
+            <span>Semua pesanan</span>
+          </div>
+        </div>
+
+        {/* Completed */}
+        <div className="group relative overflow-hidden rounded-2xl border border-violet-200/60 bg-gradient-to-br from-white to-violet-50/30 p-5 shadow-md transition-all duration-500 hover:shadow-xl hover:border-violet-300 hover:-translate-y-1">
+          <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-violet-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-violet-600">Selesai</p>
+              <p className="mt-2 text-xl font-bold text-slate-800">{completedOrders}</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-600 shadow-inner">
+              <Check size={22} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1 text-xs font-medium text-violet-600">
+            <TrendingUp size={14} />
+            <span>Pesanan selesai</span>
+          </div>
+        </div>
+
+        {/* Pending */}
+        <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-white to-amber-50/30 p-5 shadow-md transition-all duration-500 hover:shadow-xl hover:border-amber-300 hover:-translate-y-1">
+          <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-amber-600">Menunggu</p>
+              <p className="mt-2 text-xl font-bold text-slate-800">{pendingOrders}</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shadow-inner">
+              <Clock size={22} />
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-1 text-xs font-medium text-amber-600">
+            <Activity size={14} />
+            <span>Perlu diproses</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Revenue Table */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-amber-950">Revenue by Month</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Pendapatan berdasarkan bulan</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5">
+            <FileBarChart size={14} className="text-amber-600" />
+            <span className="text-xs font-semibold text-amber-700">{Object.keys(ordersByMonth).length} Bulan</span>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-amber-50">
@@ -344,7 +489,7 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-amber-700 uppercase">Revenue</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-amber-100/50">
               {Object.entries(ordersByMonth).map(([month, data]) => (
                 <tr key={month} className="hover:bg-amber-50/50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{month}</td>
@@ -354,8 +499,13 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
               ))}
               {Object.keys(ordersByMonth).length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
-                    No financial data available
+                  <td colSpan={3} className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                        <FileBarChart size={32} className="text-amber-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">Belum ada data keuangan</p>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -370,7 +520,7 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
 const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | null; onUpdate: (key: string, value: string) => void }) => {
   if (!siteContent) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
         <p className="text-gray-500">Loading site content...</p>
       </div>
     );
@@ -381,49 +531,79 @@ const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | n
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Highlight Products</h3>
-        <p className="text-sm text-gray-500 mb-4">Configure which products appear as highlights on the landing page.</p>
+      {/* Highlight Products */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-amber-950">Highlight Products</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Konfigurasi produk yang ditampilkan di halaman utama</p>
+          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shadow-inner">
+            <Package size={20} />
+          </div>
+        </div>
         {highlightProducts.length > 0 ? (
           <div className="space-y-4">
-            {highlightProducts.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-                <div className="flex-1">
-                  <label className="text-sm font-medium text-gray-700">{item.label}</label>
-                  <input
-                    type="text"
-                    defaultValue={item.value}
-                    onBlur={(e) => onUpdate(item.key, e.target.value)}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    placeholder="Product ID or slug"
-                  />
+            {highlightProducts.map((item, index) => (
+              <div key={item.id} className="group/item relative overflow-hidden rounded-xl border border-amber-100/60 bg-gradient-to-r from-amber-50/50 to-white/50 p-4 transition-all duration-300 hover:border-amber-200 hover:bg-amber-50/70">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-sm font-semibold text-slate-700">{item.label}</label>
+                    <input
+                      type="text"
+                      defaultValue={item.value}
+                      onBlur={(e) => onUpdate(item.key, e.target.value)}
+                      className="mt-1.5 w-full rounded-lg border-2 border-amber-200 bg-white px-4 py-2.5 text-slate-700 outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-200 placeholder:text-slate-400"
+                      placeholder="Product ID atau slug"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No highlight products configured yet.</p>
+          <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-12">
+            <Package size={40} className="text-amber-300" />
+            <p className="text-sm text-slate-500">Belum ada produk highlight dikonfigurasi</p>
+          </div>
         )}
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Hero Section</h3>
+      {/* Hero Section */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-amber-950">Hero Section</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Kelola konten bagian utama website</p>
+          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600 shadow-inner">
+            <LayoutDashboard size={20} />
+          </div>
+        </div>
         {heroSection.length > 0 ? (
           <div className="space-y-4">
             {heroSection.map((item) => (
-              <div key={item.id} className="p-4 border border-gray-200 rounded-lg">
-                <label className="text-sm font-medium text-gray-700">{item.label}</label>
+              <div key={item.id} className="group/item relative overflow-hidden rounded-xl border border-amber-100/60 bg-gradient-to-r from-amber-50/50 to-white/50 p-4 transition-all duration-300 hover:border-amber-200 hover:bg-amber-50/70">
+                <label className="mb-2 block text-sm font-semibold text-slate-700">{item.label}</label>
                 <textarea
                   defaultValue={item.value}
                   onBlur={(e) => onUpdate(item.key, e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-lg border-2 border-amber-200 bg-white px-4 py-2.5 text-slate-700 outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-200 resize-none placeholder:text-slate-400"
                   rows={3}
                 />
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No hero section content configured yet.</p>
+          <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-12">
+            <LayoutDashboard size={40} className="text-amber-300" />
+            <p className="text-sm text-slate-500">Belum ada konten hero section</p>
+          </div>
         )}
       </div>
     </div>
@@ -449,7 +629,7 @@ const UsersContent = ({
 }) => {
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
         <p className="text-gray-500">Loading users...</p>
       </div>
     );
@@ -457,99 +637,137 @@ const UsersContent = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900">Daftar User</h3>
-        <button
-          onClick={onCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors"
-        >
-          <Plus size={16} />
-          <span>Tambah User</span>
-        </button>
+      {/* Header */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-5 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg">
+              <Users size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-amber-950">Daftar User</h3>
+              <p className="text-xs text-slate-500">Kelola semua user dan admin sistem</p>
+            </div>
+          </div>
+          <button
+            onClick={onCreate}
+            className="group/btn relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 hover:from-amber-700 hover:to-amber-800"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <Plus size={18} className="transition-transform duration-300 group-hover/btn:rotate-90" />
+              Tambah User
+            </span>
+          </button>
+        </div>
       </div>
 
-      <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+      {/* Users Table */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 shadow-lg transition-all duration-500 hover:shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-amber-50 to-amber-100/30">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Orders</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Daftar</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Nama</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Email</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Role</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Orders</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Tanggal Daftar</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+            <tbody className="divide-y divide-amber-100/50">
+              {users.map((user, index) => (
+                <tr key={user.id} className="group transition-all duration-300 hover:bg-amber-50/50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white font-semibold">
-                        {user.name.charAt(0).toUpperCase()}
+                      <div className="relative">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 font-bold text-white shadow-md transition-all duration-300 group-hover:scale-110">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        {user.isMainAdmin && (
+                          <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+                            <Shield size={10} />
+                          </div>
+                        )}
                       </div>
                       <div>
-                        <div className="font-medium text-gray-900">{user.name}</div>
+                        <div className="font-semibold text-slate-800">{user.name}</div>
                         {user.isMainAdmin && (
-                          <span className="inline-flex items-center gap-1 text-xs text-amber-700">
-                            <Shield size={12} />
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+                            <Shield size={10} />
                             Main Admin
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-slate-600">{user.email}</span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-sm ${
+                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                     }`}>
+                      {user.role === 'ADMIN' ? <Shield size={12} /> : <Users size={12} />}
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.orderCount}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.createdAt).toLocaleDateString('id-ID')}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                      <Receipt size={12} />
+                      {user.orderCount} Pesanan
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex items-center gap-2">
-                      {!user.isMainAdmin && (
-                        <>
-                          <button
-                            onClick={() => onEdit(user)}
-                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
-                            title="Edit User"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            onClick={() => onResetPassword(user.id)}
-                            className="p-2 text-amber-600 hover:bg-amber-100 rounded-lg"
-                            title="Reset Password"
-                          >
-                            <Key size={16} />
-                          </button>
-                          <button
-                            onClick={() => onDelete(user.id)}
-                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg"
-                            title="Hapus User"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </>
-                      )}
-                      {user.isMainAdmin && (
-                        <span className="text-xs text-gray-400">Protected</span>
-                      )}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                      <Calendar size={14} />
+                      {new Date(user.createdAt).toLocaleDateString('id-ID')}
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {!user.isMainAdmin ? (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => onEdit(user)}
+                          className="group/btn rounded-xl p-2.5 text-blue-600 transition-all duration-300 hover:bg-blue-50 hover:scale-110 hover:shadow-lg"
+                          title="Edit User"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => onResetPassword(user.id)}
+                          className="group/btn rounded-xl p-2.5 text-amber-600 transition-all duration-300 hover:bg-amber-50 hover:scale-110 hover:shadow-lg"
+                          title="Reset Password"
+                        >
+                          <Key size={16} />
+                        </button>
+                        <button
+                          onClick={() => onDelete(user.id)}
+                          className="group/btn rounded-xl p-2.5 text-rose-600 transition-all duration-300 hover:bg-rose-50 hover:scale-110 hover:shadow-lg"
+                          title="Hapus User"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400">
+                        <Shield size={12} />
+                        Protected
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    No users found
+                  <td colSpan={6} className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                        <Users size={32} className="text-amber-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">Belum ada user</p>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -617,9 +835,9 @@ const UserModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl w-full max-w-md shadow-2xl border border-amber-200 overflow-hidden">
+      <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl w-full max-w-md max-h-[90vh] shadow-2xl border border-amber-200 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-700 to-amber-600 px-6 py-4">
+        <div className="bg-gradient-to-r from-amber-700 to-amber-600 px-6 py-4 flex-shrink-0">
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-lg font-bold text-white">{user ? '✏️ Edit User' : '➕ Tambah User Baru'}</h3>
@@ -634,8 +852,8 @@ const UserModal = ({
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Form - Scrollable */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-amber-200 scrollbar-track-transparent">
           <div>
             <label className="block text-sm font-semibold text-gray-800 mb-1">Nama Lengkap</label>
             <input
@@ -714,7 +932,7 @@ const UserModal = ({
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 sticky bottom-0 bg-gradient-to-br from-white to-amber-50 -mx-6 px-6 pb-2">
             <button
               type="button"
               onClick={onClose}
