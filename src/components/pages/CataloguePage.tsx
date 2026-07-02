@@ -11,29 +11,31 @@ import { Footer } from "@/components/layout/Footer";
 
 // Data Produk Tradisional Magelang
 const products = [
-  { id: "1", name: "Tumpeng Hias", category: "Special", image: "/products/1_20260404_090954_0000.png", price: 75000, description: "Tumpeng hias premium untuk acara spesial" },
-  { id: "2", name: "Tumpeng Hiasan", category: "Premium", image: "/products/2_20260404_090954_0001.png", price: 85000, description: "Hiasan tumpeng mewah berkualitas tinggi" },
-  { id: "3", name: "Nampan Specialty", category: "Deluxe", image: "/products/3_20260404_090954_0002.png", price: 95000, description: "Nampan specialty dengan desain elegan" },
-  { id: "4", name: "Kardus Packaging", category: "Box", image: "/products/4_20260404_090954_0003.png", price: 15000, description: "Packaging kardus standar yang kuat" },
-  { id: "5", name: "Yangko", category: "Traditional", image: "/products/7_20260403_214750_0000.png", price: 25000, description: "Kue tradisional yang lezat dan otentik" },
-  { id: "6", name: "Paket Mix", category: "Combo", image: "/products/8_20260403_214750_0001.png", price: 120000, description: "Paket mix lengkap untuk berbagai kebutuhan" },
-  { id: "7", name: "Tampah Set", category: "Traditional", image: "/products/9_20260403_214750_0002.png", price: 45000, description: "Set tampah tradisional asli Magelang" },
-  { id: "8", name: "Kardus Kecil", category: "Box", image: "/products/10_20260403_214750_0003.png", price: 10000, description: "Kardus kecil praktis untuk pengiriman" },
-  { id: "9", name: "Kardus Sedang", category: "Box", image: "/products/11_20260403_214750_0004.png", price: 15000, description: "Kardus sedang dengan kekuatan optimal" },
-  { id: "10", name: "Kardus Besar", category: "Box", image: "/products/12_20260403_214750_0005.png", price: 20000, description: "Kardus besar jumbo untuk paket istimewa" },
-  { id: "11", name: "Nampan Set", category: "Serving", image: "/products/13_20260403_214750_0006.png", price: 55000, description: "Set nampan elegan untuk sajian" },
-  { id: "12", name: "Jongkong", category: "Traditional", image: "/products/14_20260403_214750_0007.png", price: 30000, description: "Jongkong autentik rasa istimewa" },
-  { id: "13", name: "Wajik Jadah", category: "Sweet", image: "/products/15_20260403_214750_0008.png", price: 35000, description: "Wajik jadah manis legit tradisional" },
-  { id: "14", name: "Tampah Large", category: "Serving", image: "/products/16_20260403_214751_0009.png", price: 65000, description: "Tampah large berkualitas super" },
-  { id: "15", name: "Klepon", category: "Traditional", image: "/products/17_20260403_214751_0010.png", price: 28000, description: "Klepon kenyal segar gula merah" },
-  { id: "16", name: "Tampah Extra", category: "Serving", image: "/products/18_20260403_214751_0011.png", price: 70000, description: "Tampah extra besar untuk pesta" },
-  { id: "17", name: "Wingko", category: "Sweet", image: "/products/19_20260403_214751_0012.png", price: 32000, description: "Wingko babat terkenal Magelang" },
-  { id: "18", name: "Nampan Deluxe", category: "Serving", image: "/products/20_20260403_214751_0013.png", price: 100000, description: "Nampan deluxe premium eksklusif" },
-  { id: "19", name: "Tampah Premium", category: "Serving", image: "/products/21_20260403_214751_0014.png", price: 120000, description: "Tampah premium untuk acara besar" },
-  { id: "20", name: "Kardus Jumbo", category: "Box", image: "/products/22_20260403_214751_0015.png", price: 25000, description: "Kardus jumbo tahan lama kuat" },
+  { id: "1", name: "Kardus Kecil (S)", category: "Kardus", image: "/products/1.webp", price: 10000, description: "Berisi aneka varian: 3 pcs Frambos, 3 pcs Pandan, 3 pcs Gula Jawa, 3 pcs Pelangi, 3 pcs Trio, dan 1 pcs Mawur." },
+  { id: "2", name: "Kardus Sedang (M)", category: "Kardus", image: "/products/2.webp", price: 15000, description: "Berisi aneka varian: 4 pcs Frambos, 4 pcs Pandan, 4 pcs Gula Jawa, 4 pcs Pelangi, 5 pcs Trio, dan 1 pcs Mawur." },
+  { id: "3", name: "Kardus Sedang (L)", category: "Kardus", image: "/products/3.webp", price: 20000, description: "Berisi aneka varian: 6 pcs Frambos, 6 pcs Pandan, 6 pcs Gula Jawa, 6 pcs Pelangi, 6 pcs Trio, dan 2 pcs Mawur." },
+  { id: "4", name: "Kardus Besar (XL)", category: "Kardus", image: "/products/4.webp", price: 25000, description: "Berisi aneka varian: 7 pcs Frambos, 7 pcs Pandan, 7 pcs Gula Jawa, 7 pcs Pelangi, 7 pcs Trio, dan 3 pcs Mawur." },
+  { id: "5", name: "Kardus Mix", category: "Kardus", image: "/products/5.webp", price: 30000, description: "Getuk MIX berisi campuran Getuk, Klepon, Jongkong, Yangko " },
+  { id: "6", name: "Paket Jumbo", category: "Kardus", image: "/products/6.webp", price: 50000, description: "Paket Getuk Komplit 1kg" },
+  { id: "7", name: "Nampan Small (S)", category: "Nampan", image: "/products/7.webp", price: 50000, description: "Paket nampan porsi kecil yang ditata cantik. Pas untuk hantaran personal atau camilan keluarga." },
+  { id: "8", name: "Nampan Medium (M)", category: "Nampan", image: "/products/8.webp", price: 60000, description: "Paket nampan sedang dengan varian getuk hias yang lebih banyak. Sangat cocok untuk hidangan rapat atau kumpul sore." },
+  { id: "9", name: "Nampan Large (L)", category: "Nampan", image: "/products/9.webp", price: 75000, description: "Paket nampan besar untuk porsi sajian bersama yang lebih puas. Pilihan terbaik untuk acara resmi, syukuran, atau buah tangan premium." },
+  { id: "10", name: "Nampan Extra Large (XL)", category: "Nampan", image: "/products/10.webp", price: 100000, description: "Paket nampan jumbo dengan porsi melimpah dan tatanan megah. Pilihan paling pas dan sangat ideal untuk hantaran besar atau acara resmi!" },
+  { id: "11", name: "Tampah Small (S)", category: "Tampah", image: "/products/11.webp", price: 100000, description: "Set tampah bulat ukuran 35 CM. Pas untuk hantaran cantik atau camilan keluarga." },
+  { id: "12", name: "Tampah Medium (M)", category: "Tampah", image: "/products/12.webp", price: 125000, description: "Set tampah ukuran 40 CM dengan varian warna-warni. Ideal untuk rapat atau arisan." },
+  { id: "13", name: "Tampah Large (L)", category: "Tampah", image: "/products/13.webp", price: 150000, description: "Set tampah besar ukuran 45 CM untuk porsi melimpah. Cocok untuk acara syukuran dan pesta." },
+  { id: "14", name: "Tampah Extra Large(XL)", category: "Tampah", image: "/products/14.webp", price: 200000, description: "Set tampah jumbo ukuran 50 CM dengan tatanan getuk hias megah. Pilihan premium terbaik untuk perayaan!" },
+  { id: "15", name: "Tumpeng", category: "Tampah", image: "/products/15.webp", price: 250000, description: "Kreasi tumpeng hias tradisional. Sangat pas sebagai pusat perhatian di acara syukuran atau perayaan spesial!" },
+  { id: "16", name: "Wajik-Jadah Hantaran", category: "Hantaran", image: "/products/16.webp", price: 300000, description: "Paket hantaran besar berisi perpaduan wajik manis dan jadah gurih tradisional. Sangat ideal untuk hantaran resmi, seserahan, atau pelengkap pesta." },
+  { id: "17", name: "Klepon", category: "Jajan Pasar", image: "/products/17.webp", price: 10000, description: "Jajanan tradisional dengan isian gula merah cair dan balutan kelapa parut yang gurih. Manis, lumer di mulut, dan pas untuk camilan" },
+  { id: "18", name: "Jongkong (Ongol-Ongol)", category: "Jajan Pasar", image: "/products/18.webp", price: 10000, description: "Jajanan pasar kenyal dengan cita rasa manis pedas jahe. Nikmat dan praktis sebagai camilan" },
+  { id: "19", name: "Yangko", category: "Jajan Pasar", image: "/products/19.webp", price: 15000, description: "Jajanan tradisional bertekstur kenyal dan lembut dengan isian kacang yang manis dan gurih." },
+  { id: "20", name: "Wajik-Jadah", category: "Jajan Pasar", image: "/products/20.webp", price: 15000, description: "Perpaduan sempurna antara manisnya wajik ketan dan gurihnya jadah tradisional. Cocok untuk camilan bersama keluarga" },
+  { id: "21", name: "Wingko", category: "Jajan Pasar", image: "/products/21.webp", price: 10000, description: "Wingko babat dengan cita rasa kelapa asli yang manis dan gurih alami" }
+
 ];
 
-const categories = ["All", "Traditional", "Premium", "Box", "Serving", "Combo", "Sweet", "Special", "Deluxe"];
+const categories = ["All", "Kardus", "Nampan", "Tampah", "Hantaran", "Jajan Pasar"];
 
 type Product = (typeof products)[number];
 
