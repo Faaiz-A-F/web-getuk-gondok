@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage";
 import {
   ArrowDown,
@@ -29,6 +30,7 @@ import {
   Clock,
   Filter,
   XCircle,
+  FileDown,
 } from "lucide-react";
 import {
   Area,
@@ -39,6 +41,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { generateInvoicePDF } from "@/lib/generateInvoicePDF";
 
 type TabType = "dashboard" | "orders" | "financial" | "layout" | "users";
 
@@ -67,7 +70,8 @@ interface Order {
   paymentStatus: string;
   createdAt: string;
   user: { name: string; email: string };
-  items: Array<{ quantity: number; price: number; product: { name: string } }>;
+  items: Array<{ quantity: number; price: number; subtotal?: number; product: { name: string } }>;
+  notes?: string;
 }
 
 interface SiteContent {
@@ -425,10 +429,10 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                     )}
                     <button
                       onClick={() => onPrintReceipt(order)}
-                      className="group/btn rounded-xl p-2 text-amber-600 transition-all duration-300 hover:bg-amber-50 hover:scale-110 hover:shadow-lg"
-                      title="Print Receipt"
+                      className="group/btn rounded-xl p-2 text-emerald-600 transition-all duration-300 hover:bg-emerald-50 hover:scale-110 hover:shadow-lg flex items-center gap-1"
+                      title="Download PDF Struk"
                     >
-                      <Printer size={16} />
+                      <FileDown size={16} />
                     </button>
                   </div>
                 </td>
@@ -1010,7 +1014,7 @@ const UserModal = ({
             <textarea
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white resize-none text-black placeholder-gray-400"
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all resize-none text-black placeholder-gray-400"
               rows={2}
               placeholder="Alamat lengkap"
             />
@@ -1282,6 +1286,7 @@ const StatCard = ({ title, value, trend, percentage, color, icon }: StatCardProp
 );
 
 export function AdminDashboardPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -1472,120 +1477,9 @@ export function AdminDashboardPage() {
   };
 
   const handlePrintReceipt = (order: Order) => {
-    // Create a printable receipt optimized for thermal printers (ePos)
-    const receiptWindow = window.open('', '_blank');
-    if (!receiptWindow) return;
-
-    const formatCurrency = (amount: number) => {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-    };
-
-    const formatDate = (date: string) => {
-      return new Date(date).toLocaleString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    };
-
-    // Generate items HTML
-    const itemsHTML = order.items.map(item => 
-      `<div class="item-row">
-        <span class="item-name">${item.product.name}</span>
-        <span class="item-qty">${item.quantity}x</span>
-        <span class="item-price">${formatCurrency(item.price * item.quantity)}</span>
-      </div>`
-    ).join('');
-
-    const receiptHTML = `<!DOCTYPE html>
-<html>
-<head>
-  <title>Struk - ${order.orderNumber}</title>
-  <style>
-    @page { margin: 0; size: 80mm auto; }
-    * { box-sizing: border-box; }
-    body { 
-      font-family: 'Courier New', monospace; 
-      font-size: 12px; 
-      width: 80mm; 
-      margin: 0 auto; 
-      padding: 5mm;
-      background: white;
-    }
-    .center { text-align: center; }
-    .bold { font-weight: bold; }
-    .separator { border-top: 1px dashed #000; margin: 8px 0; }
-    .item-row { 
-      display: flex; 
-      justify-content: space-between; 
-      margin: 3px 0;
-      font-size: 11px;
-    }
-    .item-name { flex: 1; }
-    .item-qty { width: 30px; text-align: center; }
-    .item-price { width: 70px; text-align: right; }
-    .total-row { 
-      display: flex; 
-      justify-content: space-between; 
-      margin: 5px 0;
-      font-weight: bold;
-      font-size: 13px;
-    }
-    .footer { text-align: center; margin-top: 10px; font-size: 10px; }
-    @media print { 
-      body { margin: 0; padding: 0; }
-      @page { margin: 0; size: 80mm auto; }
-    }
-  </style>
-</head>
-<body>
-  <div class="center bold" style="font-size: 16px; margin-bottom: 2px;">GETUK GONDOK</div>
-  <div class="center" style="font-size: 10px; margin-bottom: 8px;">Hj. Sri Rahayu</div>
-  
-  <div class="separator"></div>
-  
-  <div style="font-size: 11px;">
-    <div><strong>No. Pesanan:</strong> ${order.orderNumber}</div>
-    <div><strong>Tanggal:</strong> ${formatDate(order.createdAt)}</div>
-    <div><strong>Pelanggan:</strong> ${order.user.name}</div>
-  </div>
-  
-  <div class="separator"></div>
-  
-  <div class="item-row bold">
-    <span class="item-name">Nama</span>
-    <span class="item-qty">Qty</span>
-    <span class="item-price">Harga</span>
-  </div>
-  
-  ${itemsHTML}
-  
-  <div class="separator"></div>
-  
-  <div class="total-row">
-    <span>TOTAL</span>
-    <span>${formatCurrency(order.totalAmount)}</span>
-  </div>
-  
-  <div class="separator"></div>
-  
-  <div class="footer">
-    <div>Terima Kasih atas kunjungan Anda!</div>
-    <div style="margin-top: 5px;">~ GETUK GONDOK ~</div>
-  </div>
-  
-  <script>
-    window.onload = function() {
-      window.print();
-    };
-  </script>
-</body>
-</html>`;
-
-    receiptWindow.document.write(receiptHTML);
-    receiptWindow.document.close();
+    // Redirect to invoice preview page with order ID
+    const orderId = btoa(JSON.stringify(order.id));
+    router.push(`/invoice-preview?order=${orderId}`);
   };
 
   // Fetch users when users tab is active
