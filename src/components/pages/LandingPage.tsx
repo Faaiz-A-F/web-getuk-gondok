@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { formatPrice } from "@/lib/utils/formatPrice";
+import { Heading4 } from "lucide-react";
 
 const products = [
   { id: "1", name: "Tumpeng Hias", category: "Special", image: "/nobg/1.png", price: 75000, description: "Tumpeng hias premium untuk acara spesial" },
@@ -76,7 +77,11 @@ export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [heroProductIndex, setHeroProductIndex] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const historyMessage =
+    "Getuk Gondok lahir dari resep rumahan yang dijaga sejak 1985. Dari tangan Hj. Sri Rahayu, singkong Magelang diolah menjadi oleh-oleh yang tetap lembut, autentik, dan kini tampil lebih modern.";
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -256,64 +261,47 @@ export function LandingPage() {
             </div>
 
             <div className="flex justify-center lg:justify-center">
-              <div className="relative w-full max-w-55 rounded-4xl bg-[#5a2500] px-8 py-10 text-center shadow-[0_24px_60px_rgba(90,37,0,0.28)] text-[#d89a34]">
-                <div className="text-3xl font-semibold tracking-[0.15em] uppercase">Since</div>
-                <div className="mt-2 flex w-full justify-center text-6xl sm:text-7xl font-extrabold leading-none tabular-nums">1985</div>
-                <div className="mx-auto mt-4 h-px w-20 bg-[#d89a34]/70" />
-                <div className="mt-5 text-xl leading-tight text-white/95">
-                  Magelang,
-                  <br />
-                  Jawa Tengah
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+              <button
+                type="button"
+                onClick={() => setIsHistoryOpen((currentValue) => !currentValue)}
+                aria-expanded={isHistoryOpen}
+                aria-label="Buka sejarah Getuk Gondok"
+                className="group relative w-full max-w-none overflow-hidden rounded-4xl border border-[#d89a34]/35 bg-[#5a2500] px-6 py-8 text-left shadow-[0_24px_60px_rgba(90,37,0,0.28)] text-[#d89a34] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_30px_70px_rgba(90,37,0,0.34)] sm:px-8 sm:py-10 lg:min-h-[22rem]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#6b2c00]/95 via-transparent to-[#7a3a07]/50" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,220,160,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_38%)]" />
 
-      <section className="bg-white py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Koleksi Unggulan</p>
-              <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight text-neutral-900">
-                Produk favorit yang paling sering dipilih pelanggan
-              </h2>
-            </div>
-            <Link href="/catalogue" className="inline-flex items-center text-sm font-semibold text-amber-700 hover:text-amber-800">
-              Lihat semua produk
-              <span className="ml-2">→</span>
-            </Link>
-          </div>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="group overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(0,0,0,0.14)]">
-                <div className="relative h-56 overflow-hidden bg-amber-50">
-                  <Image
-                    src={product.image || "/nobg/1.png"}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-contain transition duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-800">
-                      {product.category}
-                    </span>
-                    <span className="text-sm font-semibold text-neutral-900">{formatPrice(product.price)}</span>
+                <div className="relative z-10 flex h-full min-h-[18rem] flex-col justify-between gap-6 sm:min-h-[20rem] lg:min-h-[22rem]">
+                  <div className="space-y-3">
+                    <div className="text-3xl font-semibold tracking-[0.15em] uppercase">Since</div>
+                    <div className="flex w-full items-end gap-4">
+                      <div className="text-6xl font-extrabold leading-none tabular-nums sm:text-7xl">1985</div>
+                      <span className="mb-2 rounded-full border border-[#d89a34]/40 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-[#f2c47a] transition-transform duration-500 ease-out group-hover:translate-x-1">
+                        Klik Sejarah
+                      </span>
+                  
+                    </div>
+                    <div className="h-px w-20 bg-[#d89a34]/70" />
                   </div>
-                  <h3 className="mt-4 text-xl font-semibold text-neutral-900">{product.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-600">{product.description}</p>
-                  <Link href="/catalogue" className="mt-5 inline-flex items-center text-sm font-semibold text-amber-700 hover:text-amber-800">
-                    Pesan sekarang
-                    <span className="ml-2">→</span>
-                  </Link>
+
+                  <div
+                    className={`space-y-3 text-white/95 transition-all duration-500 ease-out ${
+                      isHistoryOpen ? "translate-x-5 opacity-100" : "translate-x-0 opacity-0"
+                    }`}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f2c47a]">Sejarah Getuk Gondok</p>
+                    <p className="text-base leading-7 text-white/90">{historyMessage}</p>
+                    <p className="text-sm font-medium text-[#f2c47a]">Ketuk lagi untuk menutup.</p>
+                  </div>
+
+                  <div className={`text-xl leading-tight text-white/95 transition-all duration-500 ease-out ${isHistoryOpen ? "translate-x-5 opacity-0" : "translate-x-0 opacity-100"}`}>
+                    Magelang,
+                    <br />
+                    Jawa Tengah
+                  </div>
                 </div>
-              </div>
-            ))}
+              </button>
+            </div>
           </div>
         </div>
       </section>
