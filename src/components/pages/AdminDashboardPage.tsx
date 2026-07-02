@@ -411,7 +411,6 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
           <h4 className="text-sm text-gray-500 mb-2">Pending</h4>
           <p className="text-2xl font-bold text-yellow-600">{pendingOrders}</p>
         </div>
-      </div>
 
         {/* Total Orders */}
         <div className="group relative overflow-hidden rounded-2xl border border-blue-200/60 bg-gradient-to-br from-white to-blue-50/30 p-5 shadow-md transition-all duration-500 hover:shadow-xl hover:border-blue-300 hover:-translate-y-1">
