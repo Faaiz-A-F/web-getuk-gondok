@@ -431,10 +431,10 @@ export function LandingPage() {
         className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full border border-amber-200 bg-white/90 px-4 py-3 text-sm font-semibold text-amber-900 shadow-[0_16px_40px_rgba(0,0,0,0.16)] backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:bg-white"
       >
         <span className={`h-2.5 w-2.5 rounded-full ${isAudioPlaying ? "bg-green-500 animate-pulse" : "bg-amber-500"}`} />
-        <span>Bengawan Solo {isAudioPlaying ? "• On" : "• Off"}</span>
+        <span>GETHUK {isAudioPlaying ? "• On" : "• Off"}</span>
       </button>
 
-      <audio ref={audioRef} src="/audio/musik-bengawan-solo-instrumental-keroncong-sorlem-jw-04-wg.wav" loop preload="auto" />
+      <audio ref={audioRef} src="/audio/GETHUK - Asale Saka Telo - Karaoke Keroncong Jawa Nada Pria dan Wanita - Purwaka Musik (128k).wav" loop preload="auto" />
 
       <Footer />
 
