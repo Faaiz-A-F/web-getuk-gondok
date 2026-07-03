@@ -1,13 +1,49 @@
 "use client"
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import MagelangImage from "../../assets/images/magelang fiks.png";
 import { useAuth } from "@/context/AuthContext";
-import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Key, Bell, Settings, ChevronRight } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package } from "lucide-react";
+
+interface OrderItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+  product: {
+    name: string;
+  };
+}
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: string;
+  totalAmount: number;
+  paymentStatus: string;
+  createdAt: string;
+  items: OrderItem[];
+}
 
 export function AccountPage() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "balance" | "bank" | "password">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "orders" | "password">("profile");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    dob: "",
+    phone: "",
+    country: "",
+    city: "",
+    postal: "",
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -22,7 +58,7 @@ export function AccountPage() {
       .then((data) => setSettings(data))
       .catch((e) => {
         console.error("Error fetching settings:", e);
-        setSettings({ settings: {} }); // Fallback to empty settings on error
+        setSettings({ settings: {} });
       })
       .finally(() => setLoading(false));
   }, [user]);
@@ -48,6 +84,62 @@ export function AccountPage() {
     }
   };
 
+  // Fetch orders when orders tab is active
+  useEffect(() => {
+    if (activeTab === "orders" && user) {
+      setOrdersLoading(true);
+      fetch(`/api/orders?userId=${user.id}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.orders) {
+            setOrders(data.orders);
+          } else if (Array.isArray(data)) {
+            setOrders(data);
+          } else {
+            setOrders([]);
+          }
+        })
+        .catch((e) => {
+          console.error("Error fetching orders:", e);
+          setOrders([]);
+        })
+        .finally(() => setOrdersLoading(false));
+    }
+  }, [activeTab, user]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toUpperCase()) {
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-700";
+      case "PAID":
+        return "bg-blue-100 text-blue-700";
+      case "DONE":
+        return "bg-green-100 text-green-700";
+      case "CANCELLED":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   // Fallback defaults if auth context or api isn't ready
   const display = {
     name: user?.name ?? "Natashia Khaleira",
@@ -63,352 +155,439 @@ export function AccountPage() {
 
   const navItems = [
     { id: "profile", label: "My Profile", icon: User },
-    { id: "balance", label: "My Balance", icon: CreditCard },
-    { id: "bank", label: "My Bank", icon: Shield },
-    { id: "password", label: "Change Password", icon: Key },
-  ];
-
-  const sidebarItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Orders", href: "/orders" },
-    { label: "E-commerce", href: "/ecommerce" },
-    { label: "Transactions", href: "/transactions" },
-    { label: "Reports", href: "/reports" },
-    { label: "Vendor Management", href: "/vendor" },
-    { label: "Promotions", href: "/promotions" },
-    { label: "Riders Management", href: "/riders" },
-    { label: "Pages", href: "/pages" },
-    { label: "Contact", href: "/contact" },
-    { label: "About", href: "/about", hasSubmenu: true },
+    { id: "orders", label: "Order History", icon: Package },
+    { id: "password", label: "Change Password", icon: Shield },
   ];
 
   return (
-    <div className="flex min-h-screen bg-neutral-50">
-      {/* Left Sidebar */}
-      <aside className="w-64 flex-shrink-0 bg-white border-r border-neutral-200 hidden lg:flex flex-col">
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-neutral-100">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">G</span>
-          </div>
-          <div>
-            <h1 className="font-bold text-amber-950 text-lg">Getuk</h1>
-            <p className="text-xs text-neutral-500">Gondok Marketplace</p>
-          </div>
+    <div className="min-h-screen bg-[#F8E8BD] relative">
+      {/* Background Image */}
+      <div className="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <Image
+          src={MagelangImage}
+          alt="Magelang"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+      </div>
+
+      <div className="relative z-10">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          {/* Top Header */}
+          <header className="bg-[#4A1D0B]/95 backdrop-blur-md border-b border-[#C87536]/30 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+            <div>
+              <h2 className="text-xl font-bold text-white">
+                {activeTab === "profile" ? "My Profile" : activeTab === "orders" ? "Order History" : "Change Password"}
+              </h2>
+              <p className="text-sm text-[#D29A2A]">Kelola pengaturan akun Anda</p>
+            </div>
+          </header>
+
+          {/* Content Area */}
+          <main className="flex-1 p-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex gap-6">
+                {/* Profile Sidebar */}
+                <div className="w-80 flex-shrink-0 hidden xl:block">
+                  <div className="bg-[#F7F7F5] rounded-2xl shadow-xl p-6 sticky top-24 border border-[#E8D4C4]">
+                    {/* User Card */}
+                    <div className="text-center pb-6 border-b border-[#E8D4C4]">
+                      <div className="relative inline-block">
+                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] mx-auto flex items-center justify-center">
+                          <span className="text-white text-3xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
+                      </div>
+                      <h3 className="mt-4 font-bold text-[#4A1D0B] text-lg">{display.name}</h3>
+                      <p className="text-sm text-[#8B6F47]">{display.email}</p>
+                      <span className="inline-block mt-2 px-3 py-1 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white text-xs font-semibold rounded-full">
+                        {display.role}
+                      </span>
+                    </div>
+
+                    {/* Menu */}
+                    <div className="pt-4 space-y-1">
+                      {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id as any)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                              isActive
+                                ? "bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white shadow-lg"
+                                : "text-[#4A1D0B] hover:bg-[#F8E8BD]"
+                            }`}
+                          >
+                            <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-[#C87536]"}`} />
+                            {item.label}
+                            <ChevronRight className={`w-4 h-4 ml-auto ${isActive ? "text-white" : "text-[#C87536]"}`} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Back to Dashboard Button */}
+                    <div className="pt-4 mt-4 border-t border-[#E8D4C4]">
+                      <a href="/" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Kembali ke Dashboard
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Profile Content */}
+                <div className="flex-1 space-y-6">
+                  {activeTab === "profile" && (
+                    <>
+                      {/* Profile Header Card */}
+                      <div className="bg-gradient-to-r from-[#4A1D0B] to-[#6B3A1D] rounded-2xl p-6 text-white shadow-xl">
+                        <div className="flex items-center gap-6">
+                          <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center">
+                            <span className="text-white text-2xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
+                          </div>
+                          <div className="flex-1">
+                            <h2 className="text-2xl font-bold">{display.name}</h2>
+                            <p className="text-[#D29A2A]">{display.role}</p>
+                            <div className="flex items-center gap-2 mt-2 text-sm text-[#F8E8BD]">
+                              <MapPin className="w-4 h-4" />
+                              {display.location}
+                            </div>
+                          </div>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => {}}
+                              className="px-5 py-2.5 bg-[#F8E8BD] text-[#4A1D0B] font-semibold rounded-xl hover:bg-[#E8D4C4] transition-colors shadow-lg"
+                            >
+                              Edit Profile
+                            </button>
+                            <button
+                              disabled={loading}
+                              onClick={() =>
+                                save({
+                                  location: display.location,
+                                  phone: display.phone,
+                                  dob: display.dob,
+                                  postal: display.postal,
+                                  city: display.city,
+                                  country: display.country,
+                                })
+                              }
+                              className="px-5 py-2.5 bg-[#C87536] text-white font-semibold rounded-xl hover:bg-[#A85E2E] transition-colors disabled:opacity-50 shadow-lg"
+                            >
+                              {loading ? "Saving..." : "Save Changes"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Personal Information Card */}
+                      <div className="bg-[#F7F7F5] rounded-2xl shadow-lg overflow-hidden border border-[#E8D4C4]">
+                        <div className="px-6 py-5 border-b border-[#E8D4C4] bg-gradient-to-r from-[#F8E8BD] to-transparent">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center shadow-md">
+                              <User className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-[#4A1D0B]">Personal Information</h3>
+                              <p className="text-sm text-[#8B6F47]">Detail informasi pribadi Anda</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* First Name */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">First Name</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
+                                {(display.name || "").split(" ")[0]}
+                              </div>
+                            </div>
+                            {/* Last Name */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Last Name</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
+                                {(display.name || "").split(" ").slice(1).join(" ")}
+                              </div>
+                            </div>
+                            {/* Date of Birth */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Date of Birth</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
+                                <Calendar className="w-4 h-4 text-[#C87536]" />
+                                {display.dob}
+                              </div>
+                            </div>
+                            {/* Email */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Email Address</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
+                                <Mail className="w-4 h-4 text-[#C87536]" />
+                                {display.email}
+                              </div>
+                            </div>
+                            {/* Phone */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Phone Number</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
+                                <Phone className="w-4 h-4 text-[#C87536]" />
+                                {display.phone}
+                              </div>
+                            </div>
+                            {/* User Role */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">User Role</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
+                                <Shield className="w-4 h-4 text-[#C87536]" />
+                                {display.role}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Address Card */}
+                      <div className="bg-[#F7F7F5] rounded-2xl shadow-lg overflow-hidden border border-[#E8D4C4]">
+                        <div className="px-6 py-5 border-b border-[#E8D4C4] bg-gradient-to-r from-[#F8E8BD] to-transparent">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E7D32] to-[#388E3C] flex items-center justify-center shadow-md">
+                              <MapPin className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-[#4A1D0B]">Address</h3>
+                              <p className="text-sm text-[#8B6F47]">Alamat pengiriman Anda</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Country */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Country</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
+                                {display.country}
+                              </div>
+                            </div>
+                            {/* City */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">City</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
+                                {display.city}
+                              </div>
+                            </div>
+                            {/* Postal Code */}
+                            <div className="space-y-2">
+                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Postal Code</label>
+                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
+                                {display.postal}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Quick Stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-lg border border-[#E8D4C4]">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1565C0] to-[#1976D2] flex items-center justify-center shadow-md">
+                              <CreditCard className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-[#8B6F47]">Total Orders</p>
+                              <p className="text-2xl font-bold text-[#4A1D0B]">{orders.length}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-lg border border-[#E8D4C4]">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2E7D32] to-[#388E3C] flex items-center justify-center shadow-md">
+                              <MapPin className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-[#8B6F47]">Saved Addresses</p>
+                              <p className="text-2xl font-bold text-[#4A1D0B]">3</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-lg border border-[#E8D4C4]">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7B1FA2] to-[#9C27B0] flex items-center justify-center shadow-md">
+                              <Bell className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-[#8B6F47]">Notifications</p>
+                              <p className="text-2xl font-bold text-[#4A1D0B]">12</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === "orders" && (
+                    <>
+                      {/* Order History Header */}
+                      <div className="bg-[#F7F7F5] rounded-2xl shadow-lg overflow-hidden border border-[#E8D4C4]">
+                        <div className="px-6 py-5 border-b border-[#E8D4C4] bg-gradient-to-r from-[#F8E8BD] to-transparent">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center shadow-md">
+                              <Package className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-[#4A1D0B]">Order History</h3>
+                              <p className="text-sm text-[#8B6F47]">Riwayat pesanan Anda</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6">
+                          {ordersLoading ? (
+                            <div className="flex items-center justify-center py-12">
+                              <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#F8E8BD] border-t-[#C87536]"></div>
+                            </div>
+                          ) : orders.length === 0 ? (
+                            <div className="text-center py-12">
+                              <div className="w-16 h-16 bg-[#F8E8BD] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#E8D4C4]">
+                                <Package className="w-8 h-8 text-[#C87536]" />
+                              </div>
+                              <h3 className="text-lg font-semibold text-[#4A1D0B] mb-2">Belum ada pesanan</h3>
+                              <p className="text-sm text-[#8B6F47] mb-4">Anda belum memiliki riwayat pesanan.</p>
+                              <a href="/catalogue" className="inline-block px-6 py-2.5 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-md">
+                                Mulai Belanja
+                              </a>
+                            </div>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-[#E8D4C4]">
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Order ID</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Tanggal</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Items</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Total</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Status</th>
+                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Pembayaran</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {orders.map((order) => (
+                                    <tr key={order.id} className="border-b border-[#E8D4C4] hover:bg-[#F8E8BD] transition-colors">
+                                      <td className="py-4 px-4">
+                                        <span className="font-mono text-sm font-medium text-[#C87536]">{order.orderNumber}</span>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <div className="flex items-center gap-2 text-sm text-[#4A1D0B]">
+                                          <Clock className="w-4 h-4 text-[#C87536]" />
+                                          {formatDate(order.createdAt)}
+                                        </div>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <div className="text-sm text-[#4A1D0B]">
+                                          {order.items && order.items.length > 0 ? (
+                                            <span>{order.items.length} item{order.items.length > 1 ? "s" : ""}</span>
+                                          ) : (
+                                            <span>-</span>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <span className="font-semibold text-[#C87536]">{formatPrice(Number(order.totalAmount))}</span>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                                          {order.status}
+                                        </span>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                          order.paymentStatus === "PAID" 
+                                            ? "bg-green-100 text-green-700" 
+                                            : order.paymentStatus === "UNPAID"
+                                            ? "bg-yellow-100 text-yellow-700"
+                                            : "bg-gray-100 text-gray-700"
+                                        }`}>
+                                          {order.paymentStatus}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === "password" && (
+                    <>
+                      {/* Change Password Card */}
+                      <div className="bg-[#F7F7F5] rounded-2xl shadow-lg overflow-hidden border border-[#E8D4C4]">
+                        <div className="px-6 py-5 border-b border-[#E8D4C4] bg-gradient-to-r from-[#F8E8BD] to-transparent">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center shadow-md">
+                              <Shield className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-[#4A1D0B]">Change Password</h3>
+                              <p className="text-sm text-[#8B6F47]">Ubah kata sandi akun Anda</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6">
+                          <form className="space-y-4 max-w-md">
+                            <div>
+                              <label className="block text-xs font-semibold text-[#8B6F47] uppercase tracking-wider mb-2">Current Password</label>
+                              <input
+                                type="password"
+                                placeholder="Masukkan password saat ini"
+                                className="w-full px-4 py-3 border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] bg-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-[#8B6F47] uppercase tracking-wider mb-2">New Password</label>
+                              <input
+                                type="password"
+                                placeholder="Masukkan password baru"
+                                className="w-full px-4 py-3 border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] bg-white"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-[#8B6F47] uppercase tracking-wider mb-2">Confirm New Password</label>
+                              <input
+                                type="password"
+                                placeholder="Konfirmasi password baru"
+                                className="w-full px-4 py-3 border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] bg-white"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              className="px-6 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-md"
+                            >
+                              Update Password
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {sidebarItems.map((item, index) => (
-            <a
-              key={index}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                index === 10
-                  ? "text-amber-700 bg-amber-50"
-                  : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-              }`}
-            >
-              <span className={index === 10 ? "text-amber-600" : "text-neutral-400"}>{item.label}</span>
-              {item.hasSubmenu && <ChevronRight className="w-4 h-4 ml-auto" />}
-            </a>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Header */}
-        <header className="bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-          <div>
-            <h2 className="text-xl font-bold text-amber-950">My Profile</h2>
-            <p className="text-sm text-neutral-500">Manage your account settings</p>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Search */}
-            <div className="relative hidden md:block">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
-              />
-            </div>
-            {/* Notifications */}
-            <button className="relative p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50 rounded-lg">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            {/* Settings */}
-            <button className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50 rounded-lg">
-              <Settings className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
-
-        {/* Content Area */}
-        <main className="flex-1 p-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex gap-6">
-              {/* Profile Sidebar */}
-              <div className="w-80 flex-shrink-0 hidden xl:block">
-                <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-24">
-                  {/* User Card */}
-                  <div className="text-center pb-6 border-b border-neutral-100">
-                    <div className="relative inline-block">
-                      <div className="w-24 h-24 rounded-full overflow-hidden bg-amber-100 mx-auto">
-                        <img
-                          src="/images/avatar-placeholder.png"
-                          alt={display.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
-                    </div>
-                    <h3 className="mt-4 font-bold text-amber-950 text-lg">{display.name}</h3>
-                    <p className="text-sm text-neutral-500">{display.email}</p>
-                    <span className="inline-block mt-2 px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
-                      {display.role}
-                    </span>
-                  </div>
-
-                  {/* Menu */}
-                  <div className="pt-4 space-y-1">
-                    {navItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = activeTab === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => setActiveTab(item.id as any)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                            isActive
-                              ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30"
-                              : "text-neutral-600 hover:bg-neutral-50"
-                          }`}
-                        >
-                          <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-neutral-400"}`} />
-                          {item.label}
-                          <ChevronRight className={`w-4 h-4 ml-auto ${isActive ? "text-white" : "text-neutral-300"}`} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Main Profile Content */}
-              <div className="flex-1 space-y-6">
-                {/* Profile Header Card */}
-                <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white">
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-full overflow-hidden bg-white/20 backdrop-blur">
-                      <img
-                        src="/images/avatar-placeholder.png"
-                        alt={display.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-bold">{display.name}</h2>
-                      <p className="text-amber-100">{display.role}</p>
-                      <div className="flex items-center gap-2 mt-2 text-sm text-amber-100">
-                        <MapPin className="w-4 h-4" />
-                        {display.location}
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {}}
-                        className="px-5 py-2.5 bg-white text-amber-600 font-semibold rounded-xl hover:bg-amber-50 transition-colors shadow-lg"
-                      >
-                        Edit Profile
-                      </button>
-                      <button
-                        disabled={loading}
-                        onClick={() =>
-                          save({
-                            location: display.location,
-                            phone: display.phone,
-                            dob: display.dob,
-                            postal: display.postal,
-                            city: display.city,
-                            country: display.country,
-                          })
-                        }
-                        className="px-5 py-2.5 bg-amber-700 text-white font-semibold rounded-xl hover:bg-amber-800 transition-colors disabled:opacity-50"
-                      >
-                        {loading ? "Saving..." : "Save Changes"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Personal Information Card */}
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                  <div className="px-6 py-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                        <User className="w-5 h-5 text-amber-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-amber-950">Personal Information</h3>
-                        <p className="text-sm text-neutral-500">Your personal details</p>
-                      </div>
-                    </div>
-                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 text-neutral-700 font-medium rounded-xl hover:bg-neutral-50 transition-colors">
-                      <span>Edit</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {/* First Name */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">First Name</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium">
-                          {(display.name || "").split(" ")[0]}
-                        </div>
-                      </div>
-                      {/* Last Name */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Last Name</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium">
-                          {(display.name || "").split(" ").slice(1).join(" ")}
-                        </div>
-                      </div>
-                      {/* Date of Birth */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Date of Birth</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-neutral-400" />
-                          {display.dob}
-                        </div>
-                      </div>
-                      {/* Email */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Email Address</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-neutral-400" />
-                          {display.email}
-                        </div>
-                      </div>
-                      {/* Phone */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Phone Number</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-neutral-400" />
-                          {display.phone}
-                        </div>
-                      </div>
-                      {/* User Role */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">User Role</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-neutral-400" />
-                          {display.role}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Address Card */}
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                  <div className="px-6 py-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                        <MapPin className="w-5 h-5 text-emerald-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-amber-950">Address</h3>
-                        <p className="text-sm text-neutral-500">Your shipping addresses</p>
-                      </div>
-                    </div>
-                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 text-neutral-700 font-medium rounded-xl hover:bg-neutral-50 transition-colors">
-                      <span>Edit</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Country */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Country</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium">
-                          {display.country}
-                        </div>
-                      </div>
-                      {/* City */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">City</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium">
-                          {display.city}
-                        </div>
-                      </div>
-                      {/* Postal Code */}
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Postal Code</label>
-                        <div className="px-4 py-3 bg-neutral-50 rounded-xl text-neutral-800 font-medium">
-                          {display.postal}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                        <CreditCard className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-neutral-500">Total Orders</p>
-                        <p className="text-2xl font-bold text-amber-950">124</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                        <MapPin className="w-6 h-6 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-neutral-500">Saved Addresses</p>
-                        <p className="text-2xl font-bold text-amber-950">3</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                        <Bell className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-neutral-500">Notifications</p>
-                        <p className="text-2xl font-bold text-amber-950">12</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
       </div>
     </div>
-  );
-}
-
-// Add Search component inline
-function Search({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
   );
 }
