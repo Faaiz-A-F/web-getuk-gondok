@@ -139,35 +139,104 @@ async function main() {
     })
   }
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber: "GG-0001",
-      status: OrderStatus.DONE,
-      totalAmount: 33000,
-      shippingCost: 5000,
-      shippingAddress: "Jl. Contoh No. 1, Semarang, Jawa Tengah",
-      paymentMethod: "Transfer Bank",
-      paymentStatus: PaymentStatus.PAID,
-      userId: customer.id,
-      items: {
-        create: [
-          { quantity: 1, price: 15000, subtotal: 15000, productId: products[0].id },
-          { quantity: 1, price: 18000, subtotal: 18000, productId: products[1].id },
-        ],
-      },
-    },
+  // Check if order GG-0001 already exists before creating
+  const existingOrder1 = await prisma.order.findUnique({
+    where: { orderNumber: "GG-0001" },
   })
 
-  await prisma.adminLog.create({
-    data: {
-      action: "UPDATE_STATUS",
-      entity: "Order",
-      entityId: order.id,
-      metadata: { from: "PAID", to: "DONE" },
-      userId: admin.id,
-      orderId: order.id,
-    },
+  if (!existingOrder1) {
+    const order1 = await prisma.order.create({
+      data: {
+        orderNumber: "GG-0001",
+        status: OrderStatus.DONE,
+        totalAmount: 33000,
+        shippingCost: 5000,
+        shippingAddress: "Jl. Contoh No. 1, Semarang, Jawa Tengah",
+        paymentMethod: "Transfer Bank",
+        paymentStatus: PaymentStatus.PAID,
+        userId: customer.id,
+        items: {
+          create: [
+            { quantity: 1, price: 15000, subtotal: 15000, productId: products[0].id },
+            { quantity: 1, price: 18000, subtotal: 18000, productId: products[1].id },
+          ],
+        },
+      },
+    })
+
+    await prisma.adminLog.create({
+      data: {
+        action: "UPDATE_STATUS",
+        entity: "Order",
+        entityId: order1.id,
+        metadata: { from: "PAID", to: "DONE" },
+        userId: admin.id,
+        orderId: order1.id,
+      },
+    })
+  }
+
+  // Check if order GG-0002 already exists before creating
+  const existingOrder2 = await prisma.order.findUnique({
+    where: { orderNumber: "GG-0002" },
   })
+
+  if (!existingOrder2) {
+    const order2 = await prisma.order.create({
+      data: {
+        orderNumber: "GG-0002",
+        status: OrderStatus.PAID,
+        totalAmount: 23000,
+        shippingCost: 5000,
+        shippingAddress: "Jl. Contoh No. 2, Semarang, Jawa Tengah",
+        paymentMethod: "Transfer Bank",
+        paymentStatus: PaymentStatus.PAID,
+        userId: customer.id,
+        items: {
+          create: [
+            { quantity: 1, price: 18000, subtotal: 18000, productId: products[1].id },
+            { quantity: 1, price: 5000, subtotal: 5000, productId: products[2].id },
+          ],
+        },
+      },
+    })
+
+    await prisma.adminLog.create({
+      data: {
+        action: "CREATE_ORDER",
+        entity: "Order",
+        entityId: order2.id,
+        metadata: { status: "PAID" },
+        userId: admin.id,
+        orderId: order2.id,
+      },
+    })
+  }
+
+  // Check if order GG-0003 already exists before creating
+  const existingOrder3 = await prisma.order.findUnique({
+    where: { orderNumber: "GG-0003" },
+  })
+
+  if (!existingOrder3) {
+    const order3 = await prisma.order.create({
+      data: {
+        orderNumber: "GG-0003",
+        status: OrderStatus.PENDING,
+        totalAmount: 18000,
+        shippingCost: 0,
+        shippingAddress: "Jl. Contoh No. 3, Semarang, Jawa Tengah",
+        paymentMethod: "COD",
+        paymentStatus: PaymentStatus.UNPAID,
+        userId: customer.id,
+        items: {
+          create: [
+            { quantity: 1, price: 18000, subtotal: 18000, productId: products[3].id },
+          ],
+        },
+      },
+    })
+  }
 
   console.log("Seeding complete!")
   console.log("Admin: admin@getukgondok.com / Admin123!")

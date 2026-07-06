@@ -28,18 +28,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const existing = await prisma.order.findUnique({ where: { id } })
   if (!existing) return NextResponse.json({ error: 'Order not found' }, { status: 404 })
 
-  // Valid status transitions
-  const validTransitions: Record<string, string[]> = {
-    PENDING: ['PAID', 'CANCELLED'],
-    PAID: ['DONE', 'CANCELLED'],
-    DONE: [],
-    CANCELLED: [],
-  }
-
-  // Check if transition is valid
-  if (!validTransitions[existing.status]?.includes(status)) {
+  // Allow any status change (admin can always modify order status)
+  const validStatuses = ['PENDING', 'PAID', 'DONE', 'CANCELLED']
+  if (!validStatuses.includes(status)) {
     return NextResponse.json({ 
-      error: `Invalid status transition from ${existing.status} to ${status}` 
+      error: `Invalid status: ${status}` 
     }, { status: 400 })
   }
 

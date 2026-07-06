@@ -366,67 +366,32 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-1.5">
-                    {order.status === 'PENDING' && (
-                      <>
-                        <button
-                          onClick={() => onUpdateStatus(order.id, 'PAID')}
-                          className="group/btn rounded-xl px-3 py-2 bg-blue-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-blue-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
-                          title="Konfirmasi Pembayaran"
-                        >
-                          <DollarSign size={14} />
-                          Bayar
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
-                              onUpdateStatus(order.id, 'CANCELLED');
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <select
+                        value={order.status}
+                        onChange={(e) => {
+                          const newStatus = e.target.value;
+                          if (newStatus !== order.status) {
+                            if (newStatus === 'CANCELLED') {
+                              if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+                                onUpdateStatus(order.id, newStatus);
+                              }
+                            } else {
+                              onUpdateStatus(order.id, newStatus);
                             }
-                          }}
-                          className="group/btn rounded-xl px-3 py-2 bg-red-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-red-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
-                          title="Batalkan Pesanan"
-                        >
-                          <XCircle size={14} />
-                          Batal
-                        </button>
-                      </>
-                    )}
-                    {order.status === 'PAID' && (
-                      <>
-                        <button
-                          onClick={() => onUpdateStatus(order.id, 'DONE')}
-                          className="group/btn rounded-xl px-3 py-2 bg-emerald-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-emerald-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
-                          title="Tandai Selesai"
-                        >
-                          <Check size={14} />
-                          Selesai
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
-                              onUpdateStatus(order.id, 'CANCELLED');
-                            }
-                          }}
-                          className="group/btn rounded-xl px-3 py-2 bg-red-500 text-white text-xs font-semibold transition-all duration-300 hover:bg-red-600 hover:scale-105 hover:shadow-lg flex items-center gap-1.5"
-                          title="Batalkan Pesanan"
-                        >
-                          <XCircle size={14} />
-                          Batal
-                        </button>
-                      </>
-                    )}
-                    {order.status === 'DONE' && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                        <Check size={12} />
-                        Completed
-                      </span>
-                    )}
-                    {order.status === 'CANCELLED' && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700">
-                        <XCircle size={12} />
-                        Dibatalkan
-                      </span>
-                    )}
+                          }
+                        }}
+                        className={`appearance-none rounded-xl px-3 py-2 pr-8 text-xs font-semibold border-2 cursor-pointer transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1 ${getStatusColor(order.status)} border-transparent hover:border-opacity-50`}
+                        style={{ minWidth: '120px' }}
+                      >
+                        <option value="PENDING" className="bg-amber-50 text-amber-800">⏳ Menunggu</option>
+                        <option value="PAID" className="bg-blue-50 text-blue-800">💰 Dibayar</option>
+                        <option value="DONE" className="bg-emerald-50 text-emerald-800">✅ Selesai</option>
+                        <option value="CANCELLED" className="bg-red-50 text-red-800">❌ Batal</option>
+                      </select>
+                      <ChevronRight size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none rotate-90 opacity-70" />
+                    </div>
                     <button
                       onClick={() => onPrintReceipt(order)}
                       className="group/btn rounded-xl p-2 text-emerald-600 transition-all duration-300 hover:bg-emerald-50 hover:scale-110 hover:shadow-lg flex items-center gap-1"
