@@ -9,35 +9,44 @@ import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-// Data Produk Tradisional Magelang
-const products = [
-  { id: "1", name: "Kardus Kecil (S)", category: "Kardus", image: "/products/1.webp", price: 10000, description: "Berisi aneka varian: 3 pcs Frambos, 3 pcs Pandan, 3 pcs Gula Jawa, 3 pcs Pelangi, 3 pcs Trio, dan 1 pcs Mawur." },
-  { id: "2", name: "Kardus Sedang (M)", category: "Kardus", image: "/products/2.webp", price: 15000, description: "Berisi aneka varian: 4 pcs Frambos, 4 pcs Pandan, 4 pcs Gula Jawa, 4 pcs Pelangi, 5 pcs Trio, dan 1 pcs Mawur." },
-  { id: "3", name: "Kardus Sedang (L)", category: "Kardus", image: "/products/3.webp", price: 20000, description: "Berisi aneka varian: 6 pcs Frambos, 6 pcs Pandan, 6 pcs Gula Jawa, 6 pcs Pelangi, 6 pcs Trio, dan 2 pcs Mawur." },
-  { id: "4", name: "Kardus Besar (XL)", category: "Kardus", image: "/products/4.webp", price: 25000, description: "Berisi aneka varian: 7 pcs Frambos, 7 pcs Pandan, 7 pcs Gula Jawa, 7 pcs Pelangi, 7 pcs Trio, dan 3 pcs Mawur." },
-  { id: "5", name: "Kardus Mix", category: "Kardus", image: "/products/5.webp", price: 30000, description: "Getuk MIX berisi campuran Getuk, Klepon, Jongkong, Yangko " },
-  { id: "6", name: "Paket Jumbo", category: "Kardus", image: "/products/6.webp", price: 50000, description: "Paket Getuk Komplit 1kg" },
-  { id: "7", name: "Nampan Small (S)", category: "Nampan", image: "/products/7.webp", price: 50000, description: "Paket nampan porsi kecil yang ditata cantik. Pas untuk hantaran personal atau camilan keluarga." },
-  { id: "8", name: "Nampan Medium (M)", category: "Nampan", image: "/products/8.webp", price: 60000, description: "Paket nampan sedang dengan varian getuk hias yang lebih banyak. Sangat cocok untuk hidangan rapat atau kumpul sore." },
-  { id: "9", name: "Nampan Large (L)", category: "Nampan", image: "/products/9.webp", price: 75000, description: "Paket nampan besar untuk porsi sajian bersama yang lebih puas. Pilihan terbaik untuk acara resmi, syukuran, atau buah tangan premium." },
-  { id: "10", name: "Nampan Extra Large (XL)", category: "Nampan", image: "/products/10.webp", price: 100000, description: "Paket nampan jumbo dengan porsi melimpah dan tatanan megah. Pilihan paling pas dan sangat ideal untuk hantaran besar atau acara resmi!" },
-  { id: "11", name: "Tampah Small (S)", category: "Tampah", image: "/products/11.webp", price: 100000, description: "Set tampah bulat ukuran 35 CM. Pas untuk hantaran cantik atau camilan keluarga." },
-  { id: "12", name: "Tampah Medium (M)", category: "Tampah", image: "/products/12.webp", price: 125000, description: "Set tampah ukuran 40 CM dengan varian warna-warni. Ideal untuk rapat atau arisan." },
-  { id: "13", name: "Tampah Large (L)", category: "Tampah", image: "/products/13.webp", price: 150000, description: "Set tampah besar ukuran 45 CM untuk porsi melimpah. Cocok untuk acara syukuran dan pesta." },
-  { id: "14", name: "Tampah Extra Large(XL)", category: "Tampah", image: "/products/14.webp", price: 200000, description: "Set tampah jumbo ukuran 50 CM dengan tatanan getuk hias megah. Pilihan premium terbaik untuk perayaan!" },
-  { id: "15", name: "Tumpeng", category: "Tampah", image: "/products/15.webp", price: 250000, description: "Kreasi tumpeng hias tradisional. Sangat pas sebagai pusat perhatian di acara syukuran atau perayaan spesial!" },
-  { id: "16", name: "Wajik-Jadah Hantaran", category: "Hantaran", image: "/products/16.webp", price: 300000, description: "Paket hantaran besar berisi perpaduan wajik manis dan jadah gurih tradisional. Sangat ideal untuk hantaran resmi, seserahan, atau pelengkap pesta." },
-  { id: "17", name: "Klepon", category: "Jajan Pasar", image: "/products/17.webp", price: 10000, description: "Jajanan tradisional dengan isian gula merah cair dan balutan kelapa parut yang gurih. Manis, lumer di mulut, dan pas untuk camilan" },
-  { id: "18", name: "Jongkong (Ongol-Ongol)", category: "Jajan Pasar", image: "/products/18.webp", price: 10000, description: "Jajanan pasar kenyal dengan cita rasa manis pedas jahe. Nikmat dan praktis sebagai camilan" },
-  { id: "19", name: "Yangko", category: "Jajan Pasar", image: "/products/19.webp", price: 15000, description: "Jajanan tradisional bertekstur kenyal dan lembut dengan isian kacang yang manis dan gurih." },
-  { id: "20", name: "Wajik-Jadah", category: "Jajan Pasar", image: "/products/20.webp", price: 15000, description: "Perpaduan sempurna antara manisnya wajik ketan dan gurihnya jadah tradisional. Cocok untuk camilan bersama keluarga" },
-  { id: "21", name: "Wingko", category: "Jajan Pasar", image: "/products/21.webp", price: 10000, description: "Wingko babat dengan cita rasa kelapa asli yang manis dan gurih alami" }
+// Types for database products
+interface DbProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: string | number;
+  stock: number;
+  weight: number;
+  isActive: boolean;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  images: Array<{
+    id: string;
+    url: string;
+    alt: string | null;
+    isPrimary: boolean;
+  }>;
+}
 
-];
+interface DbCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
 
-const categories = ["All", "Kardus", "Nampan", "Tampah", "Hantaran", "Jajan Pasar"];
-
-type Product = (typeof products)[number];
+// Local product type for cart
+type Product = {
+  id: string;
+  name: string;
+  category: string;
+  image: string;
+  price: number;
+  description: string;
+};
 
 type CartLine = {
   key: string;
@@ -70,9 +79,58 @@ export function CataloguePage() {
   const [isPanelMounted, setIsPanelMounted] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // Database state
+  const [dbProducts, setDbProducts] = useState<DbProduct[]>([]);
+  const [dbCategories, setDbCategories] = useState<DbCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const router = useRouter();
   const { addItem } = useContext(CartContext) || {};
   const { isLoggedIn, isLoaded } = useAuth();
+
+  // Fetch products and categories from database
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [productsRes, categoriesRes] = await Promise.all([
+          fetch('/api/products'),
+          fetch('/api/categories')
+        ]);
+
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          setDbProducts(Array.isArray(productsData) ? productsData : []);
+        }
+
+        if (categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json();
+          setDbCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Transform database products to component format
+  const products: Product[] = dbProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    category: p.category.name,
+    image: p.images && p.images.length > 0 
+      ? (p.images.find(img => img.isPrimary)?.url || p.images[0].url) 
+      : '/products/placeholder.webp',
+    price: typeof p.price === 'string' ? parseFloat(p.price) : p.price,
+    description: p.description || 'Deskripsi produk tidak tersedia'
+  }));
+
+  // Transform database categories
+  const categories = ["All", ...dbCategories.map(c => c.name)];
 
   // Check authentication when user tries to add to cart or confirm order
   const checkAuthAndProceed = (action: () => void) => {
@@ -244,41 +302,63 @@ export function CataloguePage() {
         */}
         <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className={isPanelMounted ? "lg:col-span-8" : "lg:col-span-12"}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent"
-                >
-                  <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </div>
-
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
-                    <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{product.description}</p>
-
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-lg font-black text-amber-700">{formatPrice(product.price)}</span>
-                      <button
-                        onClick={() => handleAddProduct(product)}
-                        className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-colors"
-                        aria-label={`Tambah ${product.name}`}
-                      >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                      </button>
+            {/* Loading State */}
+            {loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                    <div className="w-full aspect-square bg-gray-200" />
+                    <div className="p-6 space-y-3">
+                      <div className="h-6 bg-gray-200 rounded w-3/4" />
+                      <div className="h-10 bg-gray-200 rounded w-full" />
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="h-6 bg-gray-200 rounded w-1/3" />
+                        <div className="h-10 w-10 bg-gray-200 rounded-full" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* Products Grid */}
+            {!loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent"
+                  >
+                    <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
+                      <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{product.description}</p>
+
+                      <div className="flex items-center justify-between mt-auto">
+                        <span className="text-lg font-black text-amber-700">{formatPrice(product.price)}</span>
+                        <button
+                          onClick={() => handleAddProduct(product)}
+                          className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-colors"
+                          aria-label={`Tambah ${product.name}`}
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Kondisi Jika Produk Kosong */}
             {filteredProducts.length === 0 && (

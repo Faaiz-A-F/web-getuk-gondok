@@ -43,7 +43,7 @@ import {
 } from "recharts";
 import { generateInvoicePDF } from "@/lib/generateInvoicePDF";
 
-type TabType = "dashboard" | "orders" | "financial" | "layout" | "users";
+type TabType = "dashboard" | "orders" | "financial" | "layout" | "users" | "products";
 
 interface DashboardData {
   totalOrders: number;
@@ -69,7 +69,12 @@ interface Order {
   totalAmount: number;
   paymentStatus: string;
   createdAt: string;
-  user: { name: string; email: string };
+  user: { 
+    name: string; 
+    email: string;
+    phone?: string | null;
+    address?: string | null;
+  };
   items: Array<{ quantity: number; price: number; subtotal?: number; product: { name: string } }>;
   notes?: string;
 }
@@ -89,6 +94,30 @@ interface AdminUser {
   updatedAt: string;
   orderCount: number;
   isMainAdmin: boolean;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  stock: number;
+  weight: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  category: { id: string; name: string; slug: string };
+  images: Array<{ id: string; url: string; alt: string | null; isPrimary: boolean }>;
+  _count?: { orderItems: number };
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  _count?: { products: number };
 }
 
 const DashboardContent = ({ data }: { data: DashboardData | null }) => {
@@ -217,14 +246,231 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
     </>
   );
 };
+const OrderDetailModal = ({ 
+  isOpen, 
+  onClose, 
+  order,
+  onUpdateStatus,
+  onPrintReceipt
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  order: Order | null;
+  onUpdateStatus: (id: string, status: string) => void;
+  onPrintReceipt: (order: Order) => void;
+}) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
 
-const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: { 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'bg-amber-100 text-amber-800';
+      case 'PAID': return 'bg-blue-100 text-blue-800';
+      case 'DONE': return 'bg-emerald-100 text-emerald-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
+      default: return 'bg-slate-100 text-slate-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'Menunggu Pembayaran';
+      case 'PAID': return 'Sudah Dibayar';
+      case 'DONE': return 'Selesai';
+      case 'CANCELLED': return 'Dibatalkan';
+      default: return status;
+    }
+  };
+
+  if (!isOpen || !order) return null;
+
+  const handleStatusChange = (newStatus: string) => {
+    if (newStatus === 'CANCELLED') {
+      if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+        onUpdateStatus(order.id, newStatus);
+        onClose();
+      }
+    } else {
+      onUpdateStatus(order.id, newStatus);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl border border-amber-200 overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-amber-700 to-amber-600 px-6 py-4 flex-shrink-0">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold text-white">📋 Detail Pesanan</h3>
+              <p className="text-amber-100 text-xs mt-1">{order.orderNumber}</p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+          {/* Status Banner */}
+          <div className={`flex items-center justify-between rounded-xl p-4 ${getStatusColor(order.status)}`}>
+            <div className="flex items-center gap-3">
+              {order.status === 'PENDING' && <Clock size={20} />}
+              {order.status === 'PAID' && <DollarSign size={20} />}
+              {order.status === 'DONE' && <Check size={20} />}
+              {order.status === 'CANCELLED' && <XCircle size={20} />}
+              <span className="font-bold text-sm">{getStatusLabel(order.status)}</span>
+            </div>
+            <span className="text-xs opacity-75">
+              {new Date(order.createdAt).toLocaleString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </span>
+          </div>
+
+          {/* Customer Info */}
+          <div className="bg-white rounded-xl border border-amber-200 p-4">
+            <h4 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
+              <Users size={16} />
+              Informasi Pelanggan
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-slate-500">Nama</p>
+                  <p className="font-semibold text-slate-800">{order.user.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Email</p>
+                  <p className="font-semibold text-slate-800">{order.user.email}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-slate-500">No. Telepon</p>
+                  <p className="font-semibold text-slate-800">{order.user.phone || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Alamat</p>
+                  <p className="font-semibold text-slate-800">{order.user.address || '-'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Items */}
+          <div className="bg-white rounded-xl border border-amber-200 p-4">
+            <h4 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
+              <Package size={16} />
+              Item Pesanan
+            </h4>
+            <div className="space-y-3">
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between py-3 border-b border-amber-100 last:border-0">
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">{item.product?.name || 'Produk'}</p>
+                      <p className="text-xs text-slate-500">
+                        {item.quantity} x {formatCurrency(item.price)}
+                      </p>
+                    </div>
+                    <span className="font-bold text-emerald-600">
+                      {formatCurrency(item.subtotal || (item.quantity * item.price))}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 text-center py-4">Tidak ada item</p>
+              )}
+            </div>
+            
+            {/* Total */}
+            <div className="mt-4 pt-4 border-t-2 border-amber-300 flex justify-between items-center">
+              <span className="font-bold text-amber-900">Total Pesanan</span>
+              <span className="text-xl font-bold text-emerald-600">{formatCurrency(order.totalAmount)}</span>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {order.notes && (
+            <div className="bg-white rounded-xl border border-amber-200 p-4">
+              <h4 className="text-sm font-bold text-amber-800 mb-2 flex items-center gap-2">
+                <FileBarChart size={16} />
+                Catatan Pesanan
+              </h4>
+              <p className="text-sm text-slate-600 bg-amber-50 rounded-lg p-3">{order.notes}</p>
+            </div>
+          )}
+
+          {/* Update Status Section */}
+          <div className="bg-white rounded-xl border border-amber-200 p-4">
+            <h4 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
+              <Activity size={16} />
+              Update Status Pesanan
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: 'PENDING', label: '⏳ Menunggu', color: 'bg-amber-100 text-amber-800 hover:bg-amber-200' },
+                { value: 'PAID', label: '💰 Dibayar', color: 'bg-blue-100 text-blue-800 hover:bg-blue-200' },
+                { value: 'DONE', label: '✅ Selesai', color: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' },
+                { value: 'CANCELLED', label: '❌ Batal', color: 'bg-red-100 text-red-800 hover:bg-red-200' },
+              ].map((status) => (
+                <button
+                  key={status.value}
+                  onClick={() => handleStatusChange(status.value)}
+                  disabled={order.status === status.value}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    order.status === status.value 
+                      ? `${status.color} opacity-50 cursor-not-allowed` 
+                      : `${status.color} cursor-pointer`
+                  }`}
+                >
+                  {status.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex gap-3 p-6 border-t border-amber-200 bg-gradient-to-br from-white to-amber-50">
+          <button
+            onClick={() => onPrintReceipt(order)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all font-semibold shadow-lg shadow-emerald-200"
+          >
+            <FileDown size={18} />
+            Download Struk / PDF
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all font-medium"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt, onViewDetail }: { 
   orders: Order[]; 
   loading: boolean;
   onUpdateStatus: (id: string, status: string) => void;
   onPrintReceipt: (order: Order) => void;
+  onViewDetail: (order: Order) => void;
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [dateFilter, setDateFilter] = useState<string>(new Date().toISOString().split('T')[0]);
   
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -250,18 +496,21 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
     }
   };
 
-  // Filter orders based on selected status
-  const filteredOrders = statusFilter === 'ALL' 
-    ? orders 
-    : orders.filter(order => order.status === statusFilter);
+  // Filter orders based on selected status and date
+  const filteredOrders = orders.filter(order => {
+    const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+    const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
+    const matchesDate = orderDate === dateFilter;
+    return matchesStatus && matchesDate;
+  });
 
-  // Count orders by status
+  // Count orders by status for the selected date
   const orderCounts = {
-    ALL: orders.length,
-    PENDING: orders.filter(o => o.status === 'PENDING').length,
-    PAID: orders.filter(o => o.status === 'PAID').length,
-    DONE: orders.filter(o => o.status === 'DONE').length,
-    CANCELLED: orders.filter(o => o.status === 'CANCELLED').length,
+    ALL: orders.filter(o => new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
+    PENDING: orders.filter(o => o.status === 'PENDING' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
+    PAID: orders.filter(o => o.status === 'PAID' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
+    DONE: orders.filter(o => o.status === 'DONE' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
+    CANCELLED: orders.filter(o => o.status === 'CANCELLED' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
   };
 
   if (loading) {
@@ -281,17 +530,29 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
             <h3 className="text-lg font-bold text-amber-950">Daftar Pesanan</h3>
             <p className="text-xs text-slate-500 mt-0.5">Kelola semua pesanan pelanggan</p>
           </div>
-          <span className="flex items-center gap-2 rounded-full bg-amber-100 px-4 py-1.5 text-xs font-semibold text-amber-700">
-            <Receipt size={14} />
-            {filteredOrders.length} Pesanan
-          </span>
+          <div className="flex items-center gap-3">
+            {/* Date Filter */}
+            <div className="flex items-center gap-2 bg-white rounded-xl border-2 border-amber-200 px-4 py-2 shadow-sm">
+              <Calendar size={18} className="text-amber-600" />
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="text-sm font-medium text-slate-700 bg-transparent outline-none cursor-pointer"
+              />
+            </div>
+            <span className="flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-700">
+              <Receipt size={18} />
+              {filteredOrders.length} Pesanan
+            </span>
+          </div>
         </div>
         
         {/* Status Filter */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Filter size={14} />
-            <span>Filter:</span>
+            <span>Filter Status:</span>
           </div>
           {[
             { value: 'ALL', label: `Semua (${orderCounts.ALL})` },
@@ -393,11 +654,20 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt }: {
                       <ChevronRight size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none rotate-90 opacity-70" />
                     </div>
                     <button
+                      onClick={() => onViewDetail(order)}
+                      className="group/btn rounded-xl px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 font-semibold text-sm"
+                      title="Lihat Detail"
+                    >
+                      <FileBarChart size={18} />
+                      <span>Detail</span>
+                    </button>
+                    <button
                       onClick={() => onPrintReceipt(order)}
-                      className="group/btn rounded-xl p-2 text-emerald-600 transition-all duration-300 hover:bg-emerald-50 hover:scale-110 hover:shadow-lg flex items-center gap-1"
+                      className="group/btn rounded-xl px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 font-semibold text-sm"
                       title="Download PDF Struk"
                     >
-                      <FileDown size={16} />
+                      <FileDown size={18} />
+                      <span>PDF</span>
                     </button>
                   </div>
                 </td>
@@ -659,6 +929,444 @@ const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | n
             <p className="text-sm text-slate-500">Belum ada konten hero section</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+const ProductsContent = ({
+  products,
+  categories,
+  loading,
+  onRefresh,
+  onEdit,
+  onDelete,
+  onToggleActive,
+  onCreate
+}: {
+  products: Product[];
+  categories: Category[];
+  loading: boolean;
+  onRefresh: () => void;
+  onEdit: (product: Product) => void;
+  onDelete: (productId: string) => void;
+  onToggleActive: (productId: string, isActive: boolean) => void;
+  onCreate: () => void;
+}) => {
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isActiveFilter, setIsActiveFilter] = useState<string>('ALL');
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = categoryFilter === 'ALL' || product.category.slug === categoryFilter;
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesActive = isActiveFilter === 'ALL' || 
+      (isActiveFilter === 'ACTIVE' && product.isActive) ||
+      (isActiveFilter === 'INACTIVE' && !product.isActive);
+    return matchesCategory && matchesSearch && matchesActive;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
+        <p className="text-gray-500">Loading products...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-5 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg">
+              <Package size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-amber-950">Daftar Produk</h3>
+              <p className="text-xs text-slate-500">Kelola semua produk di katalog</p>
+            </div>
+          </div>
+          <button
+            onClick={onCreate}
+            className="group/btn relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 hover:from-amber-700 hover:to-amber-800"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <Plus size={18} className="transition-transform duration-300 group-hover/btn:rotate-90" />
+              Tambah Produk
+            </span>
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[200px]">
+            <input
+              type="text"
+              placeholder="Cari produk..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border-2 border-amber-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-200 placeholder:text-slate-400"
+            />
+          </div>
+          
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="rounded-lg border-2 border-amber-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all focus:border-amber-500 cursor-pointer"
+          >
+            <option value="ALL">Semua Kategori</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.slug}>{cat.name}</option>
+            ))}
+          </select>
+
+          <select
+            value={isActiveFilter}
+            onChange={(e) => setIsActiveFilter(e.target.value)}
+            className="rounded-lg border-2 border-amber-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition-all focus:border-amber-500 cursor-pointer"
+          >
+            <option value="ALL">Semua Status</option>
+            <option value="ACTIVE">Aktif</option>
+            <option value="INACTIVE">Tidak Aktif</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Products Table */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-amber-50 to-amber-100/30">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Produk</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Kategori</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Harga</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Stok</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Orders</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-amber-100/50">
+              {filteredProducts.map((product) => (
+                <tr key={product.id} className="group transition-all duration-300 hover:bg-amber-50/50">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-amber-100">
+                        {product.images && product.images.length > 0 ? (
+                          <img
+                            src={product.images[0].url}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Package size={24} className="m-auto text-amber-400" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800 truncate max-w-[200px]">{product.name}</p>
+                        <p className="text-xs text-slate-400 truncate max-w-[200px]">{product.description?.substring(0, 50)}...</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1.5 text-xs font-semibold text-violet-700">
+                      {product.category.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">
+                    {formatCurrency(product.price)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      product.stock > 10 ? 'bg-emerald-100 text-emerald-700' :
+                      product.stock > 0 ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {product.stock} pcs
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => onToggleActive(product.id, !product.isActive)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                        product.isActive 
+                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' 
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                      }`}
+                    >
+                      {product.isActive ? (
+                        <>
+                          <Check size={12} />
+                          Aktif
+                        </>
+                      ) : (
+                        <>
+                          <X size={12} />
+                          Tidak Aktif
+                        </>
+                      )}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                      {product._count?.orderItems || 0} orders
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => onEdit(product)}
+                        className="group/btn rounded-xl p-2.5 text-blue-600 transition-all duration-300 hover:bg-blue-50 hover:scale-110 hover:shadow-lg"
+                        title="Edit Produk"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                            onDelete(product.id);
+                          }
+                        }}
+                        className="group/btn rounded-xl p-2.5 text-rose-600 transition-all duration-300 hover:bg-rose-50 hover:scale-110 hover:shadow-lg"
+                        title="Hapus Produk"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredProducts.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                        <Package size={32} className="text-amber-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium">Belum ada produk</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductModal = ({
+  isOpen,
+  onClose,
+  product,
+  categories,
+  onSubmit,
+  loading
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  product: Product | null;
+  categories: Category[];
+  onSubmit: (data: any) => void;
+  loading: boolean;
+}) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    weight: '',
+    categoryId: '',
+    imageUrl: '',
+    isActive: true,
+  });
+
+  useEffect(() => {
+    if (isOpen && product) {
+      setFormData({
+        name: product.name,
+        description: product.description || '',
+        price: product.price.toString(),
+        stock: product.stock.toString(),
+        weight: product.weight.toString(),
+        categoryId: product.category.id,
+        imageUrl: product.images?.[0]?.url || '',
+        isActive: product.isActive,
+      });
+    } else if (isOpen && !product) {
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        stock: '',
+        weight: '',
+        categoryId: categories[0]?.id || '',
+        imageUrl: '',
+        isActive: true,
+      });
+    }
+  }, [isOpen, product, categories]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl w-full max-w-lg max-h-[90vh] shadow-2xl border border-amber-200 overflow-hidden flex flex-col">
+        <div className="bg-gradient-to-r from-amber-700 to-amber-600 px-6 py-4 flex-shrink-0">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold text-white">{product ? '✏️ Edit Produk' : '➕ Tambah Produk Baru'}</h3>
+              <p className="text-amber-100 text-xs mt-1">Lengkapi form di bawah ini</p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            >
+              <X size={18} className="text-white" />
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-amber-200 scrollbar-track-transparent">
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Nama Produk</label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black"
+              placeholder="Masukkan nama produk"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Kategori</label>
+            <select
+              required
+              value={formData.categoryId}
+              onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black cursor-pointer"
+            >
+              <option value="">Pilih Kategori</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-1">Harga (Rp)</label>
+              <input
+                type="number"
+                required
+                min="0"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black"
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-1">Stok</label>
+              <input
+                type="number"
+                required
+                min="0"
+                value={formData.stock}
+                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Berat (gram)</label>
+            <input
+              type="number"
+              required
+              min="0"
+              value={formData.weight}
+              onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black"
+              placeholder="100"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">URL Gambar</label>
+            <input
+              type="text"
+              value={formData.imageUrl}
+              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all bg-white text-black"
+              placeholder="/products/1.webp"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-800 mb-1">Deskripsi</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all resize-none bg-white text-black"
+              rows={3}
+              placeholder="Masukkan deskripsi produk"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                formData.isActive ? 'bg-emerald-500' : 'bg-slate-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                  formData.isActive ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            <span className="text-sm font-medium text-gray-700">
+              {formData.isActive ? 'Produk Aktif' : 'Produk Tidak Aktif'}
+            </span>
+          </div>
+
+          <div className="flex gap-3 pt-4 sticky bottom-0 bg-gradient-to-br from-white to-amber-50 -mx-6 px-6 pb-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all font-medium"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-amber-200"
+            >
+              {loading ? '⏳ Menyimpan...' : (product ? '💾 Simpan' : '✅ Buat Produk')}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -1167,6 +1875,7 @@ const DeleteConfirmModal = ({
 const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) => {
   const menuItems: { id: TabType; icon: React.ElementType; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { id: "products", icon: Package, label: "Produk" },
     { id: "orders", icon: Receipt, label: "Pesanan" },
     { id: "financial", icon: FileBarChart, label: "Laporan Keuangan" },
     { id: "layout", icon: LayoutDashboard, label: "Layout" },
@@ -1195,8 +1904,21 @@ const getContentByTab = (tab: TabType, props: any) => {
   switch (tab) {
     case "dashboard":
       return <DashboardContent data={props.dashboardData} />;
+    case "products":
+      return (
+        <ProductsContent
+          products={props.products}
+          categories={props.categories}
+          loading={props.productsLoading}
+          onRefresh={props.onRefreshProducts}
+          onEdit={props.onEditProduct}
+          onDelete={props.onDeleteProduct}
+          onToggleActive={props.onToggleProductActive}
+          onCreate={props.onCreateProduct}
+        />
+      );
     case "orders":
-      return <OrdersContent orders={props.orders} loading={props.loading} onUpdateStatus={props.onUpdateStatus} onPrintReceipt={props.onPrintReceipt} />;
+      return <OrdersContent orders={props.orders} loading={props.loading} onUpdateStatus={props.onUpdateStatus} onPrintReceipt={props.onPrintReceipt} onViewDetail={props.onViewOrderDetail} />;
     case "financial":
       return <FinancialContent orders={props.orders} />;
     case "layout":
@@ -1268,6 +1990,23 @@ export function AdminDashboardPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  // Products management state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Order detail state
+  const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Handler for viewing order details
+  const handleViewOrderDetail = (order: Order) => {
+    setSelectedOrder(order);
+    setIsOrderDetailOpen(true);
+  };
 
   // Get user from localStorage
   useEffect(() => {
@@ -1627,6 +2366,176 @@ export function AdminDashboardPage() {
     }
   };
 
+  // Fetch products and categories when products tab is active
+  useEffect(() => {
+    const fetchProductsAndCategories = async () => {
+      const userData = localStorage.getItem('user');
+      if (!userData) return;
+
+      const adminUser = JSON.parse(userData);
+      if (adminUser.role !== 'ADMIN') return;
+
+      try {
+        setProductsLoading(true);
+        
+        // Fetch products
+        const productsResponse = await fetch('/api/admin/products', {
+          headers: { 'Authorization': `Bearer ${adminUser.id}` }
+        });
+        const productsData = await productsResponse.json();
+        
+        // Fetch categories
+        const categoriesResponse = await fetch('/api/categories', {
+          headers: { 'Authorization': `Bearer ${adminUser.id}` }
+        });
+        const categoriesData = await categoriesResponse.json();
+        
+        if (productsResponse.ok) {
+          setProducts(productsData.products || productsData || []);
+        }
+        if (categoriesResponse.ok) {
+          setCategories(categoriesData.categories || categoriesData || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    if (activeTab === 'products') {
+      fetchProductsAndCategories();
+    }
+  }, [activeTab]);
+
+  // Products management handlers
+  const handleRefreshProducts = async () => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setProductsLoading(true);
+      const response = await fetch('/api/admin/products', {
+        headers: { 'Authorization': `Bearer ${adminUser.id}` }
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        setProducts(data.products || data || []);
+      }
+    } catch (error) {
+      console.error('Failed to refresh products:', error);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  const handleCreateProduct = () => {
+    setSelectedProduct(null);
+    setIsProductModalOpen(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductModalOpen(true);
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setModalLoading(true);
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${adminUser.id}`
+        },
+      });
+
+      if (response.ok) {
+        handleRefreshProducts();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete product');
+      }
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      alert('Failed to delete product');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleToggleProductActive = async (productId: string, isActive: boolean) => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminUser.id}`
+        },
+        body: JSON.stringify({ isActive }),
+      });
+
+      if (response.ok) {
+        setProducts(products.map(p => p.id === productId ? { ...p, isActive } : p));
+      }
+    } catch (error) {
+      console.error('Failed to toggle product active:', error);
+    }
+  };
+
+  const handleProductSubmit = async (formData: any) => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const adminUser = JSON.parse(userData);
+
+    try {
+      setModalLoading(true);
+      const url = selectedProduct ? `/api/admin/products/${selectedProduct.id}` : '/api/admin/products';
+      const method = selectedProduct ? 'PATCH' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminUser.id}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          price: parseFloat(formData.price),
+          stock: parseInt(formData.stock),
+          weight: parseFloat(formData.weight),
+          images: formData.imageUrl ? [{ url: formData.imageUrl, alt: formData.name, isPrimary: true }] : [],
+        }),
+      });
+
+      if (response.ok) {
+        setIsProductModalOpen(false);
+        handleRefreshProducts();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to save product');
+      }
+    } catch (error) {
+      console.error('Failed to save product:', error);
+      alert('Failed to save product');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-amber-50">
       <HeaderLandingPage />
@@ -1640,14 +2549,23 @@ export function AdminDashboardPage() {
           loading,
           users,
           usersLoading,
+          products,
+          categories,
+          productsLoading,
           onUpdateStatus: handleUpdateStatus,
           onPrintReceipt: handlePrintReceipt,
+          onViewOrderDetail: handleViewOrderDetail,
           onUpdateSiteContent: handleUpdateSiteContent,
           onRefreshUsers: handleRefreshUsers,
           onEditUser: handleEditUser,
           onDeleteUser: handleDeleteUser,
           onResetPasswordUser: handleResetPasswordUser,
           onCreateUser: handleCreateUser,
+          onRefreshProducts: handleRefreshProducts,
+          onEditProduct: handleEditProduct,
+          onDeleteProduct: handleDeleteProduct,
+          onToggleProductActive: handleToggleProductActive,
+          onCreateProduct: handleCreateProduct,
         })}
       </main>
 
@@ -1674,6 +2592,23 @@ export function AdminDashboardPage() {
         userName={users.find(u => u.id === userToDelete)?.name || ''}
         onConfirm={handleDeleteConfirm}
         loading={modalLoading}
+      />
+
+      <ProductModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        product={selectedProduct}
+        categories={categories}
+        onSubmit={handleProductSubmit}
+        loading={modalLoading}
+      />
+
+      <OrderDetailModal
+        isOpen={isOrderDetailOpen}
+        onClose={() => setIsOrderDetailOpen(false)}
+        order={selectedOrder}
+        onUpdateStatus={handleUpdateStatus}
+        onPrintReceipt={handlePrintReceipt}
       />
     </div>
   );

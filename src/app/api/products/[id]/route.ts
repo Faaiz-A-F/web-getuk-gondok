@@ -8,11 +8,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = await requireAdmin(request);
-    if ("error" in auth) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
-
     const { id } = await params;
 
     const product = await prisma.product.findUnique({
@@ -21,9 +16,6 @@ export async function GET(
         category: true,
         images: {
           orderBy: { order: "asc" },
-        },
-        _count: {
-          select: { orderItems: true },
         },
       },
     });
@@ -81,11 +73,11 @@ export async function PATCH(
     // Generate new slug if name changed
     let slug = existing.slug;
     if (name && name !== existing.name) {
-      const baseSlug = name
+      slug = name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
-      slug = `${baseSlug}-${Date.now()}`;
+      slug = `${slug}-${Date.now()}`;
     }
 
     // Update product
@@ -100,6 +92,10 @@ export async function PATCH(
         weight: weight !== undefined ? parseInt(weight) : undefined,
         categoryId,
         isActive,
+      },
+      include: {
+        category: true,
+        images: true,
       },
     });
 
@@ -120,21 +116,20 @@ export async function PATCH(
           order: index,
         })),
       });
+
+      // Refetch product with updated images
+      const updatedProduct = await prisma.product.findUnique({
+        where: { id },
+        include: {
+          category: true,
+          images: { orderBy: { order: "asc" } },
+        },
+      });
+
+      return NextResponse.json(updatedProduct);
     }
 
-    // Refetch product with relations
-    const updatedProduct = await prisma.product.findUnique({
-      where: { id },
-      include: {
-        category: true,
-        images: { orderBy: { order: "asc" } },
-        _count: {
-          select: { orderItems: true },
-        },
-      },
-    });
-
-    return NextResponse.json(updatedProduct);
+    return NextResponse.json(product);
   } catch (error) {
     console.error("Error updating product:", error);
     return NextResponse.json(
