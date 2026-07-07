@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: { 
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, phone: true, address: true } },
         items: {
           include: { product: { select: { name: true } } }
         }

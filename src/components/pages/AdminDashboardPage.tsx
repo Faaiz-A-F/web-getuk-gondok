@@ -75,8 +75,8 @@ interface Order {
     phone?: string | null;
     address?: string | null;
   };
-  items: Array<{ quantity: number; price: number; subtotal?: number; product: { name: string } }>;
-  notes?: string;
+  items: Array<{ quantity: number; price: number; subtotal?: number; note?: string | null; product: { name: string } }>;
+  notes?: string | null;
 }
 
 interface SiteContent {
@@ -376,16 +376,26 @@ const OrderDetailModal = ({
             <div className="space-y-3">
               {order.items && order.items.length > 0 ? (
                 order.items.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between py-3 border-b border-amber-100 last:border-0">
-                    <div className="flex-1">
-                      <p className="font-semibold text-slate-800">{item.product?.name || 'Produk'}</p>
-                      <p className="text-xs text-slate-500">
-                        {item.quantity} x {formatCurrency(item.price)}
-                      </p>
+                  <div key={index} className="py-3 border-b border-amber-100 last:border-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="font-semibold text-slate-800">{item.product?.name || 'Produk'}</p>
+                        <p className="text-xs text-slate-500">
+                          {item.quantity} x {formatCurrency(item.price)}
+                        </p>
+                      </div>
+                      <span className="font-bold text-emerald-600">
+                        {formatCurrency(item.subtotal || (item.quantity * item.price))}
+                      </span>
                     </div>
-                    <span className="font-bold text-emerald-600">
-                      {formatCurrency(item.subtotal || (item.quantity * item.price))}
-                    </span>
+                    {/* Item Note */}
+                    {item.note && (
+                      <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
+                        <p className="text-xs text-amber-700 flex items-center gap-1">
+                          <span className="font-semibold">📝 Catatan:</span> {item.note}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
@@ -401,13 +411,25 @@ const OrderDetailModal = ({
           </div>
 
           {/* Notes */}
-          {order.notes && (
+          {(order.notes || order.items?.some(item => item.note)) && (
             <div className="bg-white rounded-xl border border-amber-200 p-4">
               <h4 className="text-sm font-bold text-amber-800 mb-2 flex items-center gap-2">
                 <FileBarChart size={16} />
                 Catatan Pesanan
               </h4>
-              <p className="text-sm text-slate-600 bg-amber-50 rounded-lg p-3">{order.notes}</p>
+              <div className="space-y-2">
+                {order.notes && (
+                  <div className="bg-amber-50 rounded-lg p-3">
+                    <p className="text-sm text-slate-600">{order.notes}</p>
+                  </div>
+                )}
+                {order.items?.filter(item => item.note).map((item, idx) => (
+                  <div key={idx} className="bg-amber-50/50 rounded-lg p-3 border border-amber-100">
+                    <p className="text-xs text-amber-700 font-semibold">{item.product?.name}:</p>
+                    <p className="text-sm text-slate-600">{item.note}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

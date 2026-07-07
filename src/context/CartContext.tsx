@@ -10,6 +10,7 @@ export interface CartItem {
   name?: string;
   image?: string;
   pickupLocation?: string;
+  note?: string;
 }
 
 interface CartContextType {
@@ -17,6 +18,7 @@ interface CartContextType {
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  updateNote: (id: string, note: string) => void;
   clearCart: () => void;
 }
 
@@ -59,12 +61,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateNote = (id: string, note: string) => {
+    setItems((currentItems) =>
+      currentItems.map((item) => (item.id === id ? { ...item, note } : item))
+    );
+  };
+
   const clearCart = () => {
     setItems([]);
   };
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, updateNote, clearCart }}>
       {children}
     </CartContext.Provider>
   );

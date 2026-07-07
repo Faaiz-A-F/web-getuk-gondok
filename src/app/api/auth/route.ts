@@ -4,13 +4,29 @@ import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, email, password, name, phone } = await request.json()
+    const { action, email, password, name, phone, address } = await request.json()
 
     if (action === 'register') {
       // Validate required fields
       if (!email || !password || !name) {
         return NextResponse.json(
           { error: 'Email, password, and name are required' },
+          { status: 400 }
+        )
+      }
+
+      // Validate phone - must start with +62
+      if (phone && !phone.startsWith('+62')) {
+        return NextResponse.json(
+          { error: 'Phone number must start with +62' },
+          { status: 400 }
+        )
+      }
+
+      // Validate email - must be @gmail.com
+      if (!email.toLowerCase().endsWith('@gmail.com')) {
+        return NextResponse.json(
+          { error: 'Email must be a valid @gmail.com address' },
           { status: 400 }
         )
       }
@@ -37,6 +53,7 @@ export async function POST(request: NextRequest) {
           password: hashedPassword,
           name,
           phone: phone || null,
+          address: address || null,
           role: 'CUSTOMER',
         },
         select: {

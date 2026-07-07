@@ -12,6 +12,7 @@ export default function RegisterPage() {
     name: '',
     email: '',
     phone: '',
+    address: '',
     password: '',
     confirmPassword: '',
   });
@@ -19,23 +20,67 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    
+    // Handle phone number - auto-add +62 prefix
+    if (id === 'phone') {
+      let phoneValue = value;
+      // If user starts typing without +62, add it
+      if (phoneValue && !phoneValue.startsWith('+62')) {
+        if (phoneValue.startsWith('62')) {
+          phoneValue = '+' + phoneValue;
+        } else if (phoneValue.startsWith('0')) {
+          phoneValue = '+62' + phoneValue.slice(1);
+        } else if (phoneValue.match(/^\d+$/)) {
+          phoneValue = '+62' + phoneValue;
+        }
+      }
+      setFormData({ ...formData, phone: phoneValue });
+      return;
+    }
+    
+    setFormData({ ...formData, [id]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
+    // Validate phone number - must start with +62
+    if (!formData.phone || !formData.phone.startsWith('+62')) {
+      setError('Nomor telepon harus diawali dengan +62');
+      return;
+    }
+
+    // Validate phone number format (should be +62 followed by digits)
+    const phoneRegex = /^\+62[0-9]{8,14}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError('Format nomor telepon tidak valid. Contoh: +6281234567890');
+      return;
+    }
+
+    // Validate email - must be @gmail.com
+    if (!formData.email.toLowerCase().endsWith('@gmail.com')) {
+      setError('Email harus menggunakan domain @gmail.com');
+      return;
+    }
+
+    // Validate address - must not be empty
+    if (!formData.address.trim()) {
+      setError('Alamat harus diisi');
+      return;
+    }
+
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError('Password and confirm password do not match');
+      setError('Password dan konfirmasi password tidak cocok');
       return;
     }
 
     // Validate password length
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Password minimal 6 karakter');
       return;
     }
 
@@ -49,7 +94,8 @@ export default function RegisterPage() {
           action: 'register',
           name: formData.name,
           email: formData.email,
-          phone: formData.phone || null,
+          phone: formData.phone,
+          address: formData.address,
           password: formData.password,
         }),
       });
@@ -138,7 +184,7 @@ export default function RegisterPage() {
                   {/* Email */}
                   <div>
                     <label htmlFor="email" className="block text-xs font-semibold text-[#4A1D0B] mb-2 uppercase tracking-wide">
-                      Email
+                      Email <span className="text-[#C87536]">(@gmail.com)</span>
                     </label>
                     <div className="relative flex items-center">
                       <svg className="absolute left-4 w-5 h-5 text-[#C87536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +195,7 @@ export default function RegisterPage() {
                         id="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="Email"
+                        placeholder="contoh@gmail.com"
                         required
                         className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
                       />
@@ -159,19 +205,44 @@ export default function RegisterPage() {
                   {/* Phone */}
                   <div>
                     <label htmlFor="phone" className="block text-xs font-semibold text-[#4A1D0B] mb-2 uppercase tracking-wide">
-                      Nomor Telepon
+                      Nomor Telepon <span className="text-red-500">*</span>
                     </label>
                     <div className="relative flex items-center">
-                      <svg className="absolute left-4 w-5 h-5 text-[#C87536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="absolute left-4 text-[#C87536] font-semibold">+62</span>
+                      <svg className="absolute left-12 w-5 h-5 text-[#C87536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h2.28a2 2 0 011.95 1.57l.57 2.28a2 2 0 01-.4 1.82L8.5 11.5a16 16 0 006.99 6.99l1.88-1.9a2 2 0 011.82-.4l2.28.57A2 2 0 0121 18.72V21a2 2 0 01-2 2h-1C9.82 23 1 14.18 1 3V2a2 2 0 012-2h2z" />
                       </svg>
                       <input
                         type="tel"
                         id="phone"
-                        value={formData.phone}
+                        value={formData.phone.replace(/^\+62/, '')}
                         onChange={handleChange}
-                        placeholder="Nomor Telepon"
-                        className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
+                        placeholder="81234567890"
+                        required
+                        className="w-full h-12 pl-20 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-[#8B6F47] mt-1">Contoh: 81234567890</p>
+                  </div>
+
+                  {/* Address */}
+                  <div>
+                    <label htmlFor="address" className="block text-xs font-semibold text-[#4A1D0B] mb-2 uppercase tracking-wide">
+                      Alamat <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <svg className="absolute left-4 top-3 w-5 h-5 text-[#C87536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <textarea
+                        id="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Jl. Contoh No. 1, Kota, Provinsi"
+                        required
+                        rows={3}
+                        className="w-full px-4 py-3 pl-12 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm resize-none"
                       />
                     </div>
                   </div>

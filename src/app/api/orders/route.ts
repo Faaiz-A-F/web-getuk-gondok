@@ -22,6 +22,14 @@ export async function GET(request: NextRequest) {
               },
             },
           },
+          user: {
+            select: {
+              name: true,
+              email: true,
+              phone: true,
+              address: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
       });
@@ -42,6 +50,8 @@ export async function GET(request: NextRequest) {
             select: {
               name: true,
               email: true,
+              phone: true,
+              address: true,
             },
           },
         },
@@ -62,7 +72,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderNumber, items, subtotal, adminFee, totalAmount, pickupLocation, userId } = body;
+    const { orderNumber, items, subtotal, adminFee, totalAmount, pickupLocation, userId, notes } = body;
 
     // Create order with items
     const order = await prisma.order.create({
@@ -71,6 +81,7 @@ export async function POST(request: NextRequest) {
         totalAmount: totalAmount,
         shippingCost: 0,
         shippingAddress: pickupLocation,
+        notes: notes || null,
         paymentStatus: "UNPAID",
         status: "PENDING",
         userId: userId || null,
@@ -80,6 +91,7 @@ export async function POST(request: NextRequest) {
             quantity: item.quantity,
             price: item.price,
             subtotal: item.price * item.quantity,
+            note: item.note || null,
           })),
         },
       },

@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 const ADMIN_FEE = 2000;
 
 export function CartPage() {
-  const { items, removeItem, updateQuantity, clearCart } = useContext(CartContext) || { items: [], removeItem: () => {}, updateQuantity: () => {}, clearCart: () => {} };
+  const { items, removeItem, updateQuantity, updateNote, clearCart } = useContext(CartContext) || { items: [], removeItem: () => {}, updateQuantity: () => {}, updateNote: () => {}, clearCart: () => {} };
   const { user, isLoggedIn, isLoaded } = useAuth();
   const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -41,7 +41,12 @@ export function CartPage() {
       // Generate order number
       const orderNumber = `ORD-${Date.now()}`;
       
-      // Prepare order data
+      // Prepare order data - combine all item notes into a single order note
+      const combinedNotes = items
+        .filter(item => item.note && item.note.trim())
+        .map(item => `${item.name}: ${item.note}`)
+        .join('; ');
+      
       const orderData = {
         orderNumber,
         items: items.map(item => ({
@@ -49,12 +54,14 @@ export function CartPage() {
           quantity: item.quantity,
           price: item.price,
           name: item.name,
+          note: item.note || null,
         })),
         subtotal,
         adminFee: ADMIN_FEE,
         totalAmount: totalAdmin,
         pickupLocation: items[0]?.pickupLocation || 'rumah-produksi',
         userId: user?.id,
+        notes: combinedNotes || null,
       };
       
       // Call API to create order
@@ -169,57 +176,76 @@ export function CartPage() {
 
                 {/* Cart Items */}
                 {items.map((item) => (
-                  <div key={item.id} className="bg-white rounded-2xl shadow-sm p-4 flex items-center gap-4">
-                    {/* Product Image */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {item.image ? (
-                        <img src={item.image} alt={item.name || 'Product'} className="w-full h-full object-cover rounded-xl" />
-                      ) : (
-                        <span className="text-2xl">🍚</span>
-                      )}
-                    </div>
-                    
-                    {/* Product Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-amber-950 text-base">{item.name || 'Product'}</h3>
-                      <p className="text-xs text-gray-500 mt-0.5">{formatPrice(item.price)} / pcs</p>
-                    </div>
-                    
-                    {/* Quantity Stepper */}
-                    <div className="flex items-center gap-2">
+                  <div key={item.id} className="bg-white rounded-2xl shadow-sm p-4">
+                    <div className="flex items-center gap-4">
+                      {/* Product Image */}
+                      <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name || 'Product'} className="w-full h-full object-cover rounded-xl" />
+                        ) : (
+                          <span className="text-2xl">🍚</span>
+                        )}
+                      </div>
+                      
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-amber-950 text-base">{item.name || 'Product'}</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">{formatPrice(item.price)} / pcs</p>
+                      </div>
+                      
+                      {/* Quantity Stepper */}
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => handleDecrement(item.id, item.quantity)}
+                          className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-200 transition"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          </svg>
+                        </button>
+                        <span className="w-8 text-center font-semibold text-amber-950 text-sm">{item.quantity}</span>
+                        <button 
+                          onClick={() => handleIncrement(item.id, item.quantity)}
+                          className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-200 transition"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </button>
+                      </div>
+                      
+                      {/* Price */}
+                      <div className="font-bold text-amber-950 text-base w-28 text-right">
+                        {formatPrice(item.price * item.quantity)}
+                      </div>
+                      
+                      {/* Delete Button */}
                       <button 
-                        onClick={() => handleDecrement(item.id, item.quantity)}
-                        className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-200 transition"
+                        onClick={() => removeItem(item.id)}
+                        className="w-9 h-9 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>
-                      <span className="w-8 text-center font-semibold text-amber-950 text-sm">{item.quantity}</span>
-                      <button 
-                        onClick={() => handleIncrement(item.id, item.quantity)}
-                        className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-200 transition"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </div>
+                    
+                    {/* Note Input */}
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <div className="flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400 mt-2.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                      </button>
+                        <input
+                          type="text"
+                          placeholder="Tambahkan catatan khusus untuk item ini..."
+                          value={item.note || ''}
+                          onChange={(e) => updateNote(item.id, e.target.value)}
+                          className="flex-1 text-sm text-gray-600 placeholder-gray-400 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition"
+                          maxLength={500}
+                        />
+                      </div>
                     </div>
-                    
-                    {/* Price */}
-                    <div className="font-bold text-amber-950 text-base w-28 text-right">
-                      {formatPrice(item.price * item.quantity)}
-                    </div>
-                    
-                    {/* Delete Button */}
-                    <button 
-                      onClick={() => removeItem(item.id)}
-                      className="w-9 h-9 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
                   </div>
                 ))}
 
