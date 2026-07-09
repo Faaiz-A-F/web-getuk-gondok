@@ -99,7 +99,7 @@ model Order {
   updatedAt       DateTime      @updatedAt
 
   userId     String
-  user       User        @relation(fields: [userId], references: [id])
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderItem[]
   adminLogs  AdminLog[]
 }
@@ -139,7 +139,7 @@ model AdminLog {
   createdAt DateTime @default(now())
 
   userId  String
-  user    User    @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orderId String?
   order   Order?  @relation(fields: [orderId], references: [id])
