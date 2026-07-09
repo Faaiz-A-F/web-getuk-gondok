@@ -114,7 +114,7 @@ export function LandingPage() {
           historyRevealTimeoutRef.current = window.setTimeout(() => {
             setIsHistoryVisible(true);
             historyRevealTimeoutRef.current = null;
-          }, 3000);
+          }, 2000);
         }
       },
       { threshold: 0.35 }
@@ -216,14 +216,14 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="hidden lg:block relative">
+            <div className="hidden lg:block relative pl-12 pr-12">
               <button
                 type="button"
                 onClick={goToPreviousHeroProduct}
                 aria-label="Previous featured product"
-                className="absolute left-[-3.5rem] top-1/2 z-20 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
+                className="absolute left-2 top-1/2 z-20 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -257,9 +257,9 @@ export function LandingPage() {
                 type="button"
                 onClick={goToNextHeroProduct}
                 aria-label="Next featured product"
-                className="absolute right-[-3.5rem] top-1/2 z-20 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
+                className="absolute right-2 top-1/2 z-20 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -320,14 +320,14 @@ export function LandingPage() {
 
                   <div
                     className={`space-y-3 text-white/95 transition-all duration-500 ease-out ${
-                      isHistoryVisible ? "translate-x-5 opacity-100" : "translate-x-0 opacity-0"
+                      isHistoryVisible ? "translate-x-0 opacity-100" : "translate-x-0 opacity-0 max-h-0 overflow-hidden"
                     }`}
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f2c47a]">Sejarah Getuk Gondok</p>
                     <p className="text-base leading-7 text-white/90">{historyMessage}</p>
                   </div>
 
-                  <div className={`text-xl leading-tight text-white/95 transition-all duration-700 ease-out ${isHistoryVisible ? "translate-x-5 opacity-0" : "translate-x-0 opacity-100"}`}>
+                  <div className={`text-xl leading-tight text-white/95 ${isHistoryVisible ? "opacity-80" : "opacity-100"}`}>
                     Magelang,
                     <br />
                     Jawa Tengah
@@ -421,6 +421,7 @@ export function LandingPage() {
               alt="Latar belakang produk Getuk Gondok"
               fill
               priority
+              sizes="100vw"
               className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-amber-950/80 via-amber-900/70 to-orange-800/70" />
@@ -456,7 +457,7 @@ export function LandingPage() {
         <span>GETHUK {isAudioPlaying ? "• On" : "• Off"}</span>
       </button>
 
-      <audio ref={audioRef} src="/audio/GETHUK - Asale Ska Telo - Karaoke Keroncong Jawa Nada Pria dan Wanita - Purwaka Musik (128k).wav" loop preload="auto" />
+      <audio ref={audioRef} src="/audio/GETHUK - Asale Saka Telo - Karaoke Keroncong Jawa Nada Pria dan Wanita - Purwaka Musik (128k).wav" loop preload="auto" />
 
       {/* WhatsApp Floating Button */}
       <a

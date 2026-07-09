@@ -18,17 +18,29 @@ export async function POST(
     const { newPassword } = body
 
     // Validation
-    if (!newPassword) {
+    if (!newPassword || newPassword.length < 6) {
       return NextResponse.json(
-        { error: 'New password is required' },
+        { error: 'Password must be at least 6 characters' },
         { status: 400 }
       )
     }
 
-    if (newPassword.length < 6) {
+    // Get main admin (the first admin created)
+    const mainAdmin = await prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true }
+    })
+
+    // Check if trying to reset main admin password
+    const isTargetMainAdmin = mainAdmin?.id === id
+    const isRequesterMainAdmin = mainAdmin?.id === auth.id
+
+    if (isTargetMainAdmin && !isRequesterMainAdmin) {
+      // Non-main admin trying to reset main admin password - NOT ALLOWED
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
+        { error: 'Cannot reset main admin password' },
+        { status: 403 }
       )
     }
 

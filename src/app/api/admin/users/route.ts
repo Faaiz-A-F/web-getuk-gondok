@@ -53,6 +53,9 @@ export async function GET(request: NextRequest) {
     }),
   ])
 
+  // Check if the requesting admin is the main admin
+  const requestingAdminIsMainAdmin = mainAdmin?.id === auth.id
+
   return NextResponse.json({
     users: users.map(u => ({
       ...u,
@@ -64,6 +67,7 @@ export async function GET(request: NextRequest) {
     page,
     totalPages: Math.ceil(total / limit),
     mainAdminId: mainAdmin?.id,
+    requestingAdminIsMainAdmin, // Add this flag so the frontend knows if current user can reset passwords
   })
 }
 

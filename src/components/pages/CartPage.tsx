@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CartContext } from '@/context/CartContext';
@@ -263,15 +264,18 @@ export function CartPage() {
                 <h2 className="text-white font-black text-2xl lg:text-3xl leading-tight">
                   QRIS<br/>PAYMENT
                 </h2>
-                <div className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center overflow-hidden">
-                  <span className="text-lg">👤</span>
-                </div>
               </div>
 
               {/* QR Code Area - White Box */}
               <div className="bg-white rounded-2xl p-6 mb-6 flex items-center justify-center">
-                <div className="w-40 h-40 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                  <span className="text-gray-400 text-xs text-center px-4">QR Code Placeholder</span>
+                <div className="w-40 h-40 relative rounded-xl overflow-hidden">
+                  <Image
+                    src="/qris copy/qrisgetuk.jpeg"
+                    alt="QRIS Payment Code"
+                    fill
+                    className="object-contain"
+                    sizes="160px"
+                  />
                 </div>
               </div>
 

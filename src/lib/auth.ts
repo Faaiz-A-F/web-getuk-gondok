@@ -14,5 +14,5 @@ export async function requireAdmin(request: NextRequest) {
     return { error: 'Forbidden', status: 403 }
   }
 
-  return { user }
+  return { user, id: user.id }
 }

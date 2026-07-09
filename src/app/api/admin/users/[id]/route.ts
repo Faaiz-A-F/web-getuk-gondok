@@ -24,8 +24,11 @@ export async function PATCH(
       select: { id: true }
     })
 
-    // Check if trying to modify main admin
-    if (mainAdmin?.id === id) {
+    // Check if trying to modify main admin - allow if the requesting admin IS the main admin
+    const isTargetMainAdmin = mainAdmin?.id === id
+    const isRequesterMainAdmin = mainAdmin?.id === auth.id
+    
+    if (isTargetMainAdmin && !isRequesterMainAdmin) {
       return NextResponse.json(
         { error: 'Cannot modify main admin account' },
         { status: 403 }

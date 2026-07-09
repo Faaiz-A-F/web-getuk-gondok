@@ -1401,7 +1401,8 @@ const UsersContent = ({
   onEdit,
   onDelete,
   onResetPassword,
-  onCreate 
+  onCreate,
+  requestingAdminIsMainAdmin 
 }: { 
   users: AdminUser[]; 
   loading: boolean;
@@ -1410,6 +1411,7 @@ const UsersContent = ({
   onDelete: (userId: string) => void;
   onResetPassword: (userId: string) => void;
   onCreate: () => void;
+  requestingAdminIsMainAdmin: boolean;
 }) => {
   if (loading) {
     return (
@@ -1535,10 +1537,26 @@ const UsersContent = ({
                         </button>
                       </div>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400">
-                        <Shield size={12} />
-                        Protected
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => onEdit(user)}
+                          className="group/btn rounded-xl p-2.5 text-blue-600 transition-all duration-300 hover:bg-blue-50 hover:scale-110 hover:shadow-lg"
+                          title="Edit Nama"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => onResetPassword(user.id)}
+                          className="group/btn rounded-xl p-2.5 text-amber-600 transition-all duration-300 hover:bg-amber-50 hover:scale-110 hover:shadow-lg"
+                          title="Reset Password"
+                        >
+                          <Key size={16} />
+                        </button>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400">
+                          <Shield size={12} />
+                          Protected
+                        </span>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -1955,6 +1973,7 @@ const getContentByTab = (tab: TabType, props: any) => {
           onDelete={props.onDeleteUser}
           onResetPassword={props.onResetPasswordUser}
           onCreate={props.onCreateUser}
+          requestingAdminIsMainAdmin={props.requestingAdminIsMainAdmin}
         />
       );
     default:
@@ -2012,6 +2031,7 @@ export function AdminDashboardPage() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [requestingAdminIsMainAdmin, setRequestingAdminIsMainAdmin] = useState(false);
 
   // Products management state
   const [products, setProducts] = useState<Product[]>([]);
@@ -2226,6 +2246,8 @@ export function AdminDashboardPage() {
         
         if (response.ok) {
           setUsers(data.users || []);
+          // Set the requestingAdminIsMainAdmin flag from API response
+          setRequestingAdminIsMainAdmin(data.requestingAdminIsMainAdmin || false);
         }
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -2308,8 +2330,16 @@ export function AdminDashboardPage() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         setIsUserModalOpen(false);
         handleRefreshUsers();
+        
+        // If main admin is editing their own profile, update localStorage
+        if (selectedUser?.isMainAdmin && formData.name) {
+          const updatedUser = { ...adminUser, name: formData.name };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          setUser(updatedUser); // Update state as well
+        }
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to save user');
@@ -2574,6 +2604,7 @@ export function AdminDashboardPage() {
           products,
           categories,
           productsLoading,
+          requestingAdminIsMainAdmin,
           onUpdateStatus: handleUpdateStatus,
           onPrintReceipt: handlePrintReceipt,
           onViewOrderDetail: handleViewOrderDetail,
