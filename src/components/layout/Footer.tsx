@@ -51,6 +51,7 @@ export function Footer() {
                   <ul className="space-y-3 text-sm">
                     <li className="flex justify-between border-b border-amber-900 pb-2"><span>Senin - Minggu</span> <span>08:30 - 16:30</span></li>
                   </ul>
+                  <br />
                   <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Operasional Rumah Produksi </h4>
                   <ul className="space-y-3 text-sm">
                     <li className="flex justify-between border-b border-amber-900 pb-2"><span>Senin - Minggu</span> <span>05:30 - 08:30</span></li>
