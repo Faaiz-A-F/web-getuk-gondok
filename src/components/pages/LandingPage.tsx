@@ -37,22 +37,38 @@ const featuredProducts = products.slice(0, 3);
 const benefits = [
   {
     title: "Resep Warisan",
-    description: "Diproduksi dengan cara tradisional yang diwariskan turun-temurun dan tetap menjaga cita rasa autentik.",
+    description: "Menggunakan resep keluarga yang diwariskan sejak 1985 untuk menjaga cita rasa autentik khas Magelang.",
   },
   {
     title: "Bahan Pilihan",
-    description: "Menggunakan singkong segar, kelapa muda, dan gula merah alami untuk kualitas terbaik di setiap produk.",
+    description: "Bahan-bahan dipilih dengan cermat untuk menghasilkan rasa yang lezat dan tekstur yang lembut.",
   },
   {
-    title: "Kemasan Premium",
-    description: "Tersedia dalam berbagai pilihan kemasan modern yang cocok untuk hadiah, hampers, maupun acara spesial.",
+    title: "Diolah dengan Teliti",
+    description: "Setiap produk diproses dengan penuh ketelitian agar kualitas dan cita rasanya tetap konsisten.",
+  },
+  {
+    title: "Cocok untuk Berbagai Momen",
+    description: "Pilihan tepat sebagai oleh-oleh, hampers, hadiah, maupun sajian untuk berbagai acara spesial.",
   },
 ];
 
 const steps = [
-  { title: "Pilih Produk", description: "Temukan produk favorit Anda dari koleksi unggulan kami." },
-  { title: "Konsultasi Pesanan", description: "Kami bantu menyesuaikan jumlah, kemasan, dan kebutuhan acara Anda." },
-  { title: "Pesanan Siap Dikirim", description: "Produk dipersiapkan dengan rapi dan dikirim tepat waktu ke lokasi Anda." },
+  { 
+    number: "01", 
+    title: "Pilih Produk", 
+    description: "Pilih produk yang Anda inginkan melalui katalog kami." 
+  },
+  { 
+    number: "02", 
+    title: "Konsultasi & Konfirmasi", 
+    description: "Hubungi kami untuk menentukan jumlah, varian, kemasan, dan jadwal pengambilan atau pengiriman." 
+  },
+  { 
+    number: "03", 
+    title: "Produksi & Pengiriman", 
+    description: "Pesanan disiapkan dengan teliti, dikemas dengan rapi, lalu dikirim atau siap diambil sesuai jadwal." 
+  },
 ];
 
 const testimonials = [
@@ -338,25 +354,36 @@ export function LandingPage() {
 
       <section className="bg-amber-50 py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-            <div className="space-y-6">
-              <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">Mengapa Memilih Kami</p>
-              <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-amber-900">
-                Kepercayaan pelanggan dibangun dari kualitas yang konsisten.
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            {/* Left Side - Title & Description */}
+            <div className="space-y-6 lg:sticky lg:top-8">
+              <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">
+                KEUNGGULAN KAMI
+              </p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight text-amber-900">
+                Mengapa Getuk Gondok Hj. Sri Rahayu<br />
+                Menjadi Pilihan Pelanggan?
               </h2>
               <p className="text-base sm:text-lg leading-relaxed text-amber-800">
-                Kami menggabungkan tradisi, ketelitian, dan pelayanan yang personal agar setiap pesanan terasa istimewa.
+                Perpaduan resep warisan, bahan-bahan pilihan, dan proses pembuatan yang teliti menjadikan setiap produk memiliki cita rasa autentik dengan kualitas yang selalu terjaga.
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            {/* Right Side - 2x2 Grid Cards */}
+            <div 
+              className="grid gap-6"
+              style={{ gridTemplateColumns: "repeat(2, minmax(280px, 1fr))" }}
+            >
               {benefits.map((benefit) => (
-                <div key={benefit.title} className="rounded-3xl border border-amber-200 bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(201,122,45,0.12)]">
+                <div 
+                  key={benefit.title} 
+                  className="flex flex-col rounded-3xl border border-amber-200 bg-white p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(201,122,45,0.12)] min-h-[260px]"
+                >
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-lg font-semibold text-amber-800">
                     ✦
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-neutral-900">{benefit.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-600">{benefit.description}</p>
+                  <h3 className="mt-5 text-lg font-semibold text-neutral-900">{benefit.title}</h3>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-600">{benefit.description}</p>
                 </div>
               ))}
             </div>
@@ -365,22 +392,34 @@ export function LandingPage() {
       </section>
 
       <section className="bg-white py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-8 text-center">
-            <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">Cara Pesan</p>
-            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-neutral-900">
-              Proses yang sederhana, cepat, dan nyaman
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Title & Description */}
+          <div className="text-center mb-12">
+            <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">CARA PESAN</p>
+            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight text-neutral-900">
+              Pesan Oleh-Oleh Favorit Anda dalam 3 Langkah Mudah
             </h2>
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-neutral-600 max-w-2xl mx-auto">
+              Kami membuat proses pemesanan menjadi praktis agar Anda dapat menikmati produk Getuk Gondok Hj. Sri Rahayu dengan mudah.
+            </p>
           </div>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={step.title} className="rounded-3xl border border-neutral-200 bg-neutral-50 p-7 text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(0,0,0,0.08)]">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-lg font-semibold text-amber-800">
-                  0{index + 1}
+          {/* Cards Grid - Horizontal Layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {steps.map((step) => (
+              <div 
+                key={step.number} 
+                className="flex flex-col rounded-3xl border border-neutral-200 bg-neutral-50 p-8 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(0,0,0,0.08)] min-h-[220px]"
+              >
+                <div className="flex-shrink-0 mb-5">
+                  <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-amber-700">{step.number}</span>
+                  </div>
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-neutral-900">{step.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-neutral-600">{step.description}</p>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-neutral-900">{step.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-neutral-600">{step.description}</p>
+                </div>
               </div>
             ))}
           </div>
