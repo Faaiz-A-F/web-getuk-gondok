@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Play, Clock, Award, Layers, CheckCircle, Package, Heart, Shield, Star } from "lucide-react";
+import { Play, Clock, Award, Layers, CheckCircle, Package, Heart, Shield, Star, Sparkles, Leaf } from "lucide-react";
 
 export function AboutUsPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -296,27 +296,29 @@ export function AboutUsPage() {
           </div>
         </section>
 
-        {/* ========== WHY CHOOSE US SECTION ========== */}–
+        {/* ========== KEUNGGULAN KAMI SECTION ========== */}
         <section id="why-us" className="py-24 lg:py-32 bg-[#FAF3E8]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-5 gap-12 items-center">
               {/* Content */}
               <div className="lg:col-span-2">
-                <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Mengapa Memilih Kami</p>
-                <h2 className="font-['Playfair_Display'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[#3D2314] mb-4 leading-tight">
-                  Kepercayaan pelanggan dibangun dari kualitas yang konsisten.
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Keunggulan Kami</p>
+                <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
+                  Mengapa Pelanggan
+                  <span className="block">Mempercayai Kami?</span>
                 </h2>
                 <p className="text-lg text-[#5C3D28] leading-relaxed">
-                  Kami menggabungkan tradisi, ketelitian, dan pelayanan yang personal agar setiap pesanan terasa istimewa.
+                  Resep warisan keluarga, bahan-bahan pilihan, serta proses pembuatan yang teliti menjadi komitmen kami dalam menghadirkan Getuk Gondok dengan cita rasa autentik dan kualitas yang konsisten.
                 </p>
               </div>
               
-              {/* Cards */}
-              <div className="lg:col-span-3 grid sm:grid-cols-3 gap-6">
+              {/* Cards Grid - 2x2 on desktop, 2 cols on tablet, 1 col on mobile */}
+              <div className="lg:col-span-3 grid sm:grid-cols-2 gap-6">
                 {[
-                  { icon: Award, title: "Resep Warisan", desc: "Diproduksi dengan cara tradisional yang diwariskan turun-temurun dan tetap menjaga cita rasa autentik." },
-                  { icon: CheckCircle, title: "Bahan Pilihan", desc: "Menggunakan singkong segar, kelapa muda, dan gula merah alami untuk kualitas terbaik." },
-                  { icon: Package, title: "Kemasan Premium", desc: "Tersedia dalam berbagai pilihan kemasan modern yang cocok untuk hadiah dan acara spesial." },
+                  { icon: Award, title: "Resep Warisan", desc: "Menggunakan resep keluarga yang diwariskan secara turun-temurun untuk menjaga cita rasa autentik khas Getuk Gondok." },
+                  { icon: CheckCircle, title: "Bahan Pilihan", desc: "Menggunakan singkong berkualitas dan bahan-bahan pilihan untuk menghasilkan tekstur yang lembut dan rasa yang konsisten." },
+                  { icon: Sparkles, title: "Proses yang Teliti", desc: "Setiap tahap pembuatan dilakukan dengan penuh ketelitian untuk menjaga kualitas, tekstur, dan cita rasa di setiap produk." },
+                  { icon: Package, title: "Kemasan Premium", desc: "Tersedia berbagai pilihan kemasan yang praktis dan menarik, cocok sebagai oleh-oleh, hampers, maupun hadiah." },
                 ].map((card, index) => (
                   <div key={index} className="bg-white rounded-2xl p-6 lg:p-7 text-center border border-[#5C3D28]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#3D2314]/10">
                     <div className="w-14 h-14 bg-[#E8C547] rounded-2xl flex items-center justify-center mx-auto mb-5">
@@ -338,20 +340,21 @@ export function AboutUsPage() {
             <div className="text-center max-w-2xl mx-auto mb-16">
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Galeri Video</p>
               <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
-                Saksi Proses Autentik
+                Mengenal Getuk Gondok
+                <span className="block">Lebih Dekat</span>
               </h2>
               <p className="text-lg text-[#5C3D28] leading-relaxed">
-                Nikmati lebih banyak video yang menunjukkan keindahan proses pembuatan getuk tradisional secara langsung.
+                Saksikan berbagai aktivitas di balik Getuk Gondok Hj. Sri Rahayu, mulai dari proses pembuatan hingga berbagai produk yang kami hadirkan untuk menjaga cita rasa autentik khas Magelang.
               </p>
             </div>
             
             {/* Videos Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { title: "Memilih Singkong Berkualitas", desc: "Tips memilih singkong terbaik untuk getuk yang sempurna." },
-                { title: "Teknik Mengukus Sempurna", desc: "Rahasia mendapatkan tekstur singkong yang tepat." },
-                { title: "Membuat Isi Kacang", desc: "Resep isian kacang premium untuk getuk gondok." },
-                { title: "Pengemasan Tradisional", desc: "Keindahan bungkusan daun pisang yang autentik." },
+                { title: "Proses Pembuatan Getuk", desc: "Lihat bagaimana Getuk Gondok dibuat mulai dari pemilihan singkong hingga siap dinikmati." },
+                { title: "Di Balik Produksi", desc: "Kenali proses produksi yang dilakukan dengan penuh ketelitian untuk menjaga kualitas setiap hari." },
+                { title: "Aneka Produk Kami", desc: "Jelajahi berbagai pilihan Getuk Gondok, jajanan tradisional, hampers, dan sajian khas lainnya." },
+                { title: "Suasana Getuk Gondok", desc: "Lihat aktivitas pelayanan dan suasana usaha keluarga yang terus menjaga tradisi sejak dulu." },
               ].map((video, index) => (
                 <div key={index} className="bg-white rounded-2xl overflow-hidden border border-[#5C3D28]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#3D2314]/10">
                   <div className="relative aspect-video bg-gradient-to-br from-[#5C3D28] to-[#3D2314] flex items-center justify-center cursor-pointer group">
@@ -378,19 +381,20 @@ export function AboutUsPage() {
             <div className="text-center max-w-2xl mx-auto mb-16">
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Nilai-Nilai Kami</p>
               <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
-                Komitmen untuk Kualitas
+                Warisan Nilai,
+                <span className="block">Kepercayaan yang Terjaga</span>
               </h2>
               <p className="text-lg text-[#5C3D28] leading-relaxed">
-                Setiap keputusan yang kami buat didasarkan pada nilai-nilai yang telah kami pegang sejak awal.
+                Sejak awal perjalanan usaha keluarga, kami berpegang pada nilai-nilai yang diwariskan dari generasi ke generasi. Nilai-nilai inilah yang menjadi landasan dalam menjaga kualitas, cita rasa autentik, dan kepercayaan pelanggan hingga saat ini.
               </p>
             </div>
             
             {/* Values Grid */}
             <div className="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[
-                { icon: Layers, title: "Bahan Pilihan", desc: "Menggunakan singkong segar dari petani lokal dan gula Jawa premium untuk rasa autentik." },
-                { icon: Shield, title: "Tanpa Pengawet", desc: "Tanpa bahan tambahan buatan. Kesegaran dan keamanan adalah prioritas utama." },
-                { icon: Heart, title: "Dibuat dengan Cinta", desc: "Setiap getuk dibuat dengan penuh perhatian dan dedikasi, seperti buatan rumah sendiri." },
+                { icon: Award, title: "Resep Warisan", desc: "Resep keluarga yang diwariskan lintas generasi terus dipertahankan untuk menjaga cita rasa autentik khas Getuk Gondok." },
+                { icon: Leaf, title: "Bahan Pilihan", desc: "Menggunakan singkong berkualitas dan bahan-bahan pilihan untuk menghasilkan tekstur yang lembut serta cita rasa yang konsisten." },
+                { icon: Heart, title: "Pelayanan Sepenuh Hati", desc: "Kami melayani setiap pelanggan dengan keramahan, ketulusan, dan perhatian agar setiap pengalaman menjadi lebih berkesan." },
               ].map((value, index) => (
                 <div key={index} className="p-8 bg-white rounded-2xl border border-[#5C3D28]/10 text-center transition-all duration-300 hover:-translate-y-1">
                   <div className="w-14 h-14 bg-[#E8C547] rounded-2xl flex items-center justify-center mx-auto mb-5">
