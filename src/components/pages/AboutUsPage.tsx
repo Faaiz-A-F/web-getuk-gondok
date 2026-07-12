@@ -31,8 +31,8 @@ export function AboutUsPage() {
                 </div>
                 
                 <h1 className="font-['Playfair_Display'] text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4">
-                  Kelezatan
-                  <span className="block text-[#E8C547]">Autentik</span>
+                  Kelezatan Autentik
+                  <span className="block text-[#E8C547]">Getuk Gondok</span>
                 </h1>
                 
                 <p className="font-['Playfair_Display'] text-2xl sm:text-3xl font-normal text-white/60 mb-6">
@@ -40,7 +40,7 @@ export function AboutUsPage() {
                 </p>
                 
                 <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
-                  Oleh-oleh khas Magelang dengan resep warisan. Tumpeng hias, jajanan tradisional, dan hampers premium untuk momen spesial Anda.
+                  Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial.
                 </p>
                 
                 <div className="flex flex-wrap gap-4 justify-center lg:justify-start">

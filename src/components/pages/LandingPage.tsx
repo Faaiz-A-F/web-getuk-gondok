@@ -83,7 +83,7 @@ export function LandingPage() {
   const historyRevealTimeoutRef = useRef<number | null>(null);
 
   const historyMessage =
-    "Getuk Gondok lahir dari resep rumahan yang dijaga sejak 1985. Dari tangan Hj. Sri Rahayu, singkong Magelang diolah menjadi oleh-oleh yang tetap lembut, autentik, dan kini tampil lebih modern.";
+    "Berawal dari resep warisan keluarga, Getuk Gondok Hj. Sri Rahayu terus menghadirkan cita rasa autentik khas Magelang sejak tahun 1985. Dengan bahan-bahan pilihan dan proses pembuatan yang teliti, setiap produk dibuat untuk menghasilkan tekstur yang lembut, rasa yang khas, serta kualitas yang konsisten dari generasi ke generasi.";
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -179,10 +179,10 @@ export function LandingPage() {
                 Buka & Menerima Pesanan
               </div>
               <h1 className="text-5xl lg:text-7xl font-black tracking-tight leading-tight">
-                Kelezatan <span className="text-amber-400">Autentik</span> Sejak 1985.
+                Kelezatan Autentik <span className="text-amber-400">Getuk Gondok</span> Sejak 1985.
               </h1>
               <p className="text-lg lg:text-xl text-amber-100/80 max-w-2xl mx-auto lg:mx-0">
-                Oleh-oleh khas Magelang dengan resep warisan. Tumpeng hias, jajanan tradisional, dan hampers premium untuk momen spesial Anda.
+                Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial-.
               </p>
 
               <div className="relative max-w-md mx-auto lg:mx-0">
@@ -193,7 +193,7 @@ export function LandingPage() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Cari produk kesukaanmu..."
+                  placeholder="Cari produk favorit Anda..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="block w-full pl-11 pr-4 py-4 rounded-full border-0 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-500 sm:text-lg shadow-xl"
@@ -211,7 +211,7 @@ export function LandingPage() {
                   href="/about-us"
                   className="inline-flex items-center justify-center rounded-full border border-amber-300/60 px-6 py-3 text-sm font-semibold text-amber-100 transition hover:bg-white/10"
                 >
-                  Kenali Brand Kami
+                  Tentang Kami
                 </Link>
               </div>
             </div>
@@ -272,31 +272,28 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div className="space-y-8 max-w-2xl">
-              <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">Kenapa Getuk Gondok?</p>
+              <p className="text-sm font-medium tracking-[0.2em] text-neutral-500 uppercase">MENGAPA MEMILIH GETUK GONDOK HJ. SRI RAHAYU?</p>
               <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-[#c97a2d]">
-                Bukan Sekadar Oleh-Oleh.
+                Warisan Rasa Khas Magelang
                 <br />
-                Ini Sepotong Cerita Keluarga.
+                yang Terjaga Sejak 1985
               </h2>
               <p className="text-base sm:text-lg leading-relaxed text-neutral-800 max-w-xl">
-                Sejak 1985, Hj. Sri Rahayu meracik getuk dengan tangan sendiri dan menggunakan singkong segar Magelang,
-                kelapa muda, dan gula merah pilihan. Tidak ada jalan pintas, tidak ada bahan pengawet.
-                <br />
-                Kini hadir dalam berbagai pilihan kemasan modern, tetap dengan resep yang sama: autentik, lembut, dan penuh rasa.
+                Sejak 1985, Getuk Gondok Hj. Sri Rahayu menjaga cita rasa autentik khas Magelang melalui resep warisan keluarga, bahan-bahan pilihan, dan tanpa bahan pengawet. Setiap produk diolah dengan penuh ketelitian untuk menghadirkan tekstur yang lembut, rasa yang autentik, serta kualitas yang konsisten.
               </p>
 
               <div className="grid grid-cols-3 gap-6 sm:gap-10 max-w-xl pt-2">
                 <div>
                   <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">40+</div>
-                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Tahun Pengalaman</div>
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Tahun Menjaga Citra Rasa</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">10+</div>
-                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Varian Produk</div>
+                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">20+</div>
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Pilihan Produk</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">1000+</div>
-                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Pelanggan Setia</div>
+                  <div className="text-3xl sm:text-4xl font-semibold text-[#d89a34]">Ribuan</div>
+                  <div className="mt-2 text-xs sm:text-sm text-neutral-600">Pelanggan Mempercayai Kami</div>
                 </div>
               </div>
             </div>
@@ -323,7 +320,7 @@ export function LandingPage() {
                       isHistoryVisible ? "translate-x-0 opacity-100" : "translate-x-0 opacity-0 max-h-0 overflow-hidden"
                     }`}
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f2c47a]">Sejarah Getuk Gondok</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#f2c47a]">WARISAN RASA YANG TETAP TERJAGA</p>
                     <p className="text-base leading-7 text-white/90">{historyMessage}</p>
                   </div>
 
