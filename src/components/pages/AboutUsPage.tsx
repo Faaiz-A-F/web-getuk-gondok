@@ -415,17 +415,21 @@ export function AboutUsPage() {
           
           <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-              Siap Memesan?
+              Lengkapi Momen Istimewa<br />
+              <span className="text-[#E8C547]">Bersama Getuk Gondok</span>
             </h2>
-            <p className="text-lg text-white/80 mb-10 leading-relaxed">
-              Jadikan momen Anda lebih istimewa dengan oleh-oleh autentik dari Getuk Gondok. Hubungi kami untuk pemesanan khusus, hampers, maupun kebutuhan acara besar.
+            <p className="text-lg text-white/80 mb-6 leading-relaxed">
+              Nikmati cita rasa autentik Getuk Gondok Hj. Sri Rahayu yang dibuat dari resep warisan keluarga dan bahan-bahan pilihan. Cocok sebagai oleh-oleh, sajian keluarga, hampers, maupun berbagai acara spesial.
+            </p>
+            <p className="text-sm text-white/60 mb-10 leading-relaxed">
+              Melayani pemesanan harian, hampers, serta kebutuhan acara keluarga, kantor, dan berbagai momen spesial.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <a 
                 href="/catalogue" 
                 className="inline-flex items-center gap-2 bg-[#E86A17] hover:bg-[#E8C547] text-white hover:text-[#3D2314] px-8 py-4 rounded-lg font-semibold transition-all hover:-translate-y-0.5 shadow-lg"
               >
-                Pilih Produk Sekarang
+                Lihat Katalog
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
@@ -434,7 +438,7 @@ export function AboutUsPage() {
                 href="https://wa.me/6285643730540" 
                 className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-8 py-4 rounded-lg font-semibold transition-all hover:border-white hover:bg-white/10"
               >
-                Hubungi Kami
+                Pesan via WhatsApp
               </a>
             </div>
           </div>
