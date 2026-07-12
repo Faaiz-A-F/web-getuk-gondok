@@ -31,8 +31,8 @@ export function AboutUsPage() {
                 </div>
                 
                 <h1 className="font-['Playfair_Display'] text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4">
-                  Kelezatan Autentik
-                  <span className="block text-[#E8C547]">Getuk Gondok</span>
+                  Warisan Rasa
+                  <span className="block text-[#E8C547]">Getuk Gondok Khas Magelang</span>
                 </h1>
                 
                 <p className="font-['Playfair_Display'] text-2xl sm:text-3xl font-normal text-white/60 mb-6">
@@ -40,7 +40,7 @@ export function AboutUsPage() {
                 </p>
                 
                 <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
-                  Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial.
+                  Selama lebih dari empat dekade, Getuk Gondok Hj. Sri Rahayu menghadirkan cita rasa autentik khas Magelang melalui resep warisan keluarga, bahan-bahan pilihan, dan proses pembuatan yang tetap menjaga kualitas hingga saat ini.
                 </p>
                 
                 <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
@@ -48,7 +48,7 @@ export function AboutUsPage() {
                     href="#craft" 
                     className="inline-flex items-center gap-2 bg-[#E86A17] hover:bg-[#D55A0E] text-white px-7 py-3.5 rounded-lg font-semibold transition-all hover:-translate-y-0.5 shadow-lg"
                   >
-                    Lihat Proses Pembuatan
+                    Ikuti Proses Pembuatan
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
