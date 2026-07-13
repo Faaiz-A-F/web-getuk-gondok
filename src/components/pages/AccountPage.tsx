@@ -44,6 +44,14 @@ export function AccountPage() {
     city: "",
     postal: "",
   });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -546,12 +554,24 @@ export function AccountPage() {
                         </div>
 
                         <div className="p-6">
+                          {passwordSuccess && (
+                            <div className="mb-4 p-4 bg-green-100 border border-green-300 text-green-700 rounded-xl">
+                              {passwordSuccess}
+                            </div>
+                          )}
+                          {passwordError && (
+                            <div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-xl">
+                              {passwordError}
+                            </div>
+                          )}
                           <form className="space-y-4 max-w-md">
                             <div>
                               <label className="block text-xs font-semibold text-[#8B6F47] uppercase tracking-wider mb-2">Current Password</label>
                               <input
                                 type="password"
                                 placeholder="Masukkan password saat ini"
+                                value={passwordForm.currentPassword}
+                                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                                 className="w-full px-4 py-3 border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] bg-white"
                               />
                             </div>
@@ -560,6 +580,8 @@ export function AccountPage() {
                               <input
                                 type="password"
                                 placeholder="Masukkan password baru"
+                                value={passwordForm.newPassword}
+                                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                                 className="w-full px-4 py-3 border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] bg-white"
                               />
                             </div>
@@ -568,14 +590,58 @@ export function AccountPage() {
                               <input
                                 type="password"
                                 placeholder="Konfirmasi password baru"
+                                value={passwordForm.confirmPassword}
+                                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                                 className="w-full px-4 py-3 border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] bg-white"
                               />
                             </div>
                             <button
                               type="button"
-                              className="px-6 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-md"
+                              disabled={passwordLoading || !user}
+                              onClick={async () => {
+                                if (!user) return;
+                                setPasswordError("");
+                                setPasswordSuccess("");
+                                
+                                if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+                                  setPasswordError("Password baru dan konfirmasi password tidak cocok");
+                                  return;
+                                }
+                                
+                                if (passwordForm.newPassword.length < 6) {
+                                  setPasswordError("Password minimal 6 karakter");
+                                  return;
+                                }
+                                
+                                setPasswordLoading(true);
+                                try {
+                                  const res = await fetch("/api/user/change-password", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      userId: user.id,
+                                      currentPassword: passwordForm.currentPassword,
+                                      newPassword: passwordForm.newPassword,
+                                    }),
+                                  });
+                                  
+                                  const data = await res.json();
+                                  
+                                  if (!res.ok) {
+                                    setPasswordError(data.error || "Gagal mengubah password");
+                                  } else {
+                                    setPasswordSuccess("Password berhasil diubah!");
+                                    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                                  }
+                                } catch (error) {
+                                  setPasswordError("Terjadi kesalahan saat mengubah password");
+                                } finally {
+                                  setPasswordLoading(false);
+                                }
+                              }}
+                              className="px-6 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50"
                             >
-                              Update Password
+                              {passwordLoading ? "Menyimpan..." : "Update Password"}
                             </button>
                           </form>
                         </div>
