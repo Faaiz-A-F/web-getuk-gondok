@@ -96,7 +96,6 @@ export function LandingPage() {
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const historyCardRef = useRef<HTMLDivElement | null>(null);
-  const historyRevealTimeoutRef = useRef<number | null>(null);
 
   const historyMessage =
     "Berawal dari resep warisan keluarga, Getuk Gondok Hj. Sri Rahayu terus menghadirkan cita rasa autentik khas Magelang sejak tahun 1985. Dengan bahan-bahan pilihan dan proses pembuatan yang teliti, setiap produk dibuat untuk menghasilkan tekstur yang lembut, rasa yang khas, serta kualitas yang konsisten dari generasi ke generasi.";
@@ -118,20 +117,7 @@ export function LandingPage() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (historyRevealTimeoutRef.current) {
-          window.clearTimeout(historyRevealTimeoutRef.current);
-          historyRevealTimeoutRef.current = null;
-        }
-
         setIsHistoryVisible(entry.isIntersecting);
-
-        if (entry.isIntersecting) {
-          setIsHistoryVisible(false);
-          historyRevealTimeoutRef.current = window.setTimeout(() => {
-            setIsHistoryVisible(true);
-            historyRevealTimeoutRef.current = null;
-          }, 2000);
-        }
       },
       { threshold: 0.35 }
     );
@@ -140,11 +126,6 @@ export function LandingPage() {
 
     return () => {
       observer.disconnect();
-
-      if (historyRevealTimeoutRef.current) {
-        window.clearTimeout(historyRevealTimeoutRef.current);
-        historyRevealTimeoutRef.current = null;
-      }
     };
   }, []);
 
