@@ -246,7 +246,7 @@ export function CataloguePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans selection:bg-amber-200 selection:text-amber-900">
+    <div className="font-['Playfair_Display'] min-h-screen bg-neutral-50 selection:bg-amber-200 selection:text-amber-900">
       <Header />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

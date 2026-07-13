@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage";
+import { Header } from "@/components/layout/Header";
 import {
   ArrowDown,
   ArrowUp,
@@ -2589,8 +2589,8 @@ export function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50">
-      <HeaderLandingPage />
+    <div className="font-['Playfair_Display'] min-h-screen bg-amber-50">
+      <Header />
       <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <main className="space-y-7 px-8 py-6 lg:px-32.5">

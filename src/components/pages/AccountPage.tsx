@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import MagelangImage from "../../assets/images/magelang fiks.png";
 import { useAuth } from "@/context/AuthContext";
+import { Header } from "@/components/layout/Header";
 import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package } from "lucide-react";
 
 interface OrderItem {
@@ -183,15 +184,8 @@ export function AccountPage() {
       <div className="relative z-10">
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          {/* Top Header */}
-          <header className="bg-[#4A1D0B]/95 backdrop-blur-md border-b border-[#C87536]/30 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                {activeTab === "profile" ? "My Profile" : activeTab === "orders" ? "Order History" : "Change Password"}
-              </h2>
-              <p className="text-sm text-[#D29A2A]">Kelola pengaturan akun Anda</p>
-            </div>
-          </header>
+          {/* Header Component */}
+          <Header />
 
           {/* Content Area */}
           <main className="flex-1 p-6">
