@@ -13,7 +13,7 @@ export function AboutUsPage() {
   const previewVideoRef = useRef<HTMLVideoElement>(null);
 
   // Path to the video file (public/Video)
-  const videoSrc = "/Video/getuk-gondok-process.mp4";
+  const videoSrc = "/Video/getuk-gondok-video.mp4";
 
   // Pause video when modal closes
   useEffect(() => {
