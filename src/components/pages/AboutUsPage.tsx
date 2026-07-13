@@ -115,7 +115,7 @@ export function AboutUsPage() {
                   <div className="absolute -left-6 top-1/4 bg-white rounded-2xl p-5 shadow-xl shadow-[#3D2314]/10 border border-[#5C3D28]/10 max-w-[200px]">
                     <div className="text-[#E8C547] text-3xl font-serif mb-2">"</div>
                     <p className="text-[#3D2314] text-sm leading-relaxed italic">
-                      Setiap getuk yang kami buat adalah penghormatan bagi leluhur kami.
+                      Setiap getuk yang kami buat penuh dengan cinta dan dedikasi, menjaga warisan rasa yang telah diwariskan dari generasi ke generasi.
                     </p>
                   </div>
                   
