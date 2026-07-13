@@ -14,113 +14,130 @@ export function AboutUsPage() {
     const handleScroll = () => {
       if (imageRef.current) {
         const rect = imageRef.current.getBoundingClientRect();
-        const scrollY = window.scrollY;
-        const elementTop = rect.top + scrollY;
-        const viewportHeight = window.innerHeight;
-        const elementHeight = rect.height;
-        
-        // Calculate parallax offset based on scroll position relative to element
-        const elementCenter = elementTop + elementHeight / 2;
-        const viewportCenter = scrollY + viewportHeight / 2;
-        const distance = (elementCenter - viewportCenter) * 0.15; // 0.15 is the parallax intensity
-        
+        const distance = -rect.top * 0.15;
         setParallaxOffset(distance);
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial call
+    let ticking = false;
+    const handleScrollRAF = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScrollRAF, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScrollRAF);
   }, []);
+
+  // About us images
+  const aboutImages = [
+    "/about-us/IMG_5931_SnapseedCopy-ezgif.com-jpg-to-webp-converter.webp",
+    "/about-us/IMG_5932_SnapseedCopy-ezgif.com-jpg-to-webp-converter.webp",
+    "/about-us/IMG_5933_SnapseedCopy-ezgif.com-jpg-to-webp-converter.webp",
+    "/about-us/IMG_5934_SnapseedCopy-ezgif.com-jpg-to-webp-converter.webp",
+  ];
 
   return (
     <div className="min-h-screen bg-[#FAF3E8]">
       <Header />
       
       <main>
-        {/* ========== HERO SECTION ========== */}
-        <section className="relative min-h-screen flex items-center bg-[#3D2314] overflow-hidden">
-          {/* Background gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_30%,rgba(232,197,71,0.08)_0%,transparent_50%)]"></div>
-          {/* Bottom fade to cream */}
-          <div className="absolute bottom-0 left-0 right-0 h-[120px] bg-gradient-to-t from-[#FAF3E8] to-transparent"></div>
+        {/* ========== HERO SECTION — EDITORIAL/ABOUT STYLE ========== */}
+        <section className="relative min-h-[85vh] flex items-center bg-[#FAF3E8] overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-[#F5EBE0] to-transparent pointer-events-none"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-[#E8C547]/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#E86A17]/5 rounded-full blur-3xl"></div>
           
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 w-full">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Hero Content */}
-              <div className="text-center lg:text-left">
-                {/* Status Badge */}
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                  <span className="w-2 h-2 bg-[#E86A17] rounded-full animate-pulse"></span>
-                  <span className="text-sm font-medium text-white/90">Buka & Menerima Pesanan</span>
-                </div>
-                
-                <h1 className="font-['Playfair_Display'] text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4">
-                  Warisan Rasa
-                  <span className="block text-[#E8C547]">Getuk Gondok Khas Magelang</span>
+          {/* Decorative line */}
+          <div className="absolute top-32 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#5C3D28]/20 to-transparent"></div>
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
+            {/* Editorial label */}
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-12 h-px bg-[#E86A17]"></div>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#E86A17]">Tentang Kami</span>
+            </div>
+            
+            <div className="grid lg:grid-cols-12 gap-12 items-start">
+              {/* Left Column — Story headline */}
+              <div className="lg:col-span-7">
+                {/* Main headline */}
+                <h1 className="font-['Playfair_Display'] text-5xl sm:text-6xl lg:text-7xl font-bold text-[#3D2314] leading-[1.05] mb-6">
+                  Kisah di Balik
+                  <span className="block text-[#E86A17]">Setiap Gigitan</span>
                 </h1>
                 
-                <p className="font-['Playfair_Display'] text-2xl sm:text-3xl font-normal text-white/60 mb-6">
-                  Sejak 1985.
+                {/* Story intro */}
+                <p className="text-xl text-[#5C3D28] leading-relaxed mb-8 max-w-xl">
+                  Lebih dari sekadar makanan, Getuk Gondok adalah cerita tentang keluarga, tradisi, dan kecintaan yang tak pernah padam terhadap cita rasa autentik khas Magelang.
                 </p>
                 
-                <p className="text-lg text-white/80 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
-                  Selama lebih dari empat dekade, Getuk Gondok Hj. Sri Rahayu menghadirkan cita rasa autentik khas Magelang melalui resep warisan keluarga, bahan-bahan pilihan, dan proses pembuatan yang tetap menjaga kualitas hingga saat ini.
-                </p>
-                
-                <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-                  <a 
-                    href="#craft" 
-                    className="inline-flex items-center gap-2 bg-[#E86A17] hover:bg-[#D55A0E] text-white px-7 py-3.5 rounded-lg font-semibold transition-all hover:-translate-y-0.5 shadow-lg"
-                  >
-                    Ikuti Proses Pembuatan
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </a>
-                  <a 
-                    href="#origin" 
-                    className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-7 py-3.5 rounded-lg font-semibold transition-all hover:border-[#E8C547] hover:text-[#E8C547]"
-                  >
-                    Cerita Kami
-                  </a>
+                {/* Year badge */}
+                <div className="inline-flex items-center gap-4 bg-white rounded-2xl px-6 py-4 shadow-lg shadow-[#3D2314]/5 border border-[#5C3D28]/10">
+                  <div className="w-14 h-14 bg-gradient-to-br from-[#E8C547] to-[#E86A17] rounded-xl flex items-center justify-center">
+                    <span className="font-['Playfair_Display'] font-bold text-white text-lg">85</span>
+                  </div>
+                  <div>
+                    <strong className="block text-[#3D2314] font-bold text-lg font-['Playfair_Display']">Tahun Berdiri</strong>
+                    <span className="text-sm text-[#5C3D28]">Warisan rasa sejak 1943</span>
+                  </div>
                 </div>
               </div>
               
-              {/* Hero Visual */}
-              <div className="relative hidden lg:block">
-                {/* Main Image Frame */}
-                <div className="relative rounded-3xl overflow-hidden aspect-[4/5] bg-gradient-to-br from-[#5C3D28] to-[#3D2314]">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_70%,rgba(232,197,71,0.15)_0%,transparent_60%)]"></div>
-                  <div className="w-full h-full flex flex-col items-center justify-center text-white/40">
-                    <svg className="w-20 h-20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-sm">Foto Produk Getuk Gondok</span>
+              {/* Right Column — Visual narrative */}
+              <div className="lg:col-span-5">
+                <div className="relative">
+                  {/* Main story image */}
+                  <div className="relative rounded-3xl overflow-hidden aspect-[4/5] bg-gradient-to-br from-[#E8C547]/20 to-[#E86A17]/10 border border-[#5C3D28]/15">
+                    <img 
+                      src={aboutImages[0]} 
+                      alt="Kisah Keluarga Pendiri Getuk Gondok"
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {/* Decorative overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-[#3D2314]/80 to-transparent"></div>
+                    <div className="absolute bottom-6 left-6 right-6">
+                      <p className="text-white/90 text-sm font-medium mb-1">Hj. Sri Rahayu</p>
+                      <p className="text-white/60 text-xs">Pewaris Resep & Pendiri Getuk Gondok</p>
+                    </div>
+                  </div>
+                  
+                  {/* Floating quote card */}
+                  <div className="absolute -left-6 top-1/4 bg-white rounded-2xl p-5 shadow-xl shadow-[#3D2314]/10 border border-[#5C3D28]/10 max-w-[200px]">
+                    <div className="text-[#E8C547] text-3xl font-serif mb-2">"</div>
+                    <p className="text-[#3D2314] text-sm leading-relaxed italic">
+                      Setiap getuk yang kami buat adalah penghormatan bagi leluhur kami.
+                    </p>
+                  </div>
+                  
+                  {/* Floating stat */}
+                  <div className="absolute -right-4 bottom-12 bg-[#3D2314] rounded-2xl px-5 py-4 shadow-xl">
+                    <div className="flex items-center gap-3">
+                      <Layers className="w-6 h-6 text-[#E8C547]" />
+                      <div>
+                        <strong className="block text-white font-bold">4 Generasi</strong>
+                        <span className="text-white/60 text-xs">Resep diwariskan</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                
-                {/* Floating Badges */}
-                <div className="absolute bottom-8 -left-8 bg-white rounded-2xl p-4 shadow-2xl flex items-center gap-3">
-                  <div className="w-11 h-11 bg-[#FAF3E8] rounded-xl flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-[#E86A17]" />
-                  </div>
-                  <div>
-                    <strong className="block text-[#3D2314] font-bold text-lg font-['Playfair_Display']">1985</strong>
-                    <span className="text-sm text-[#5C3D28]">Tahun Berdiri</span>
-                  </div>
-                </div>
-                
-                <div className="absolute top-8 -right-4 bg-white rounded-2xl p-4 shadow-2xl flex items-center gap-3">
-                  <div className="w-11 h-11 bg-[#FAF3E8] rounded-xl flex items-center justify-center">
-                    <Layers className="w-6 h-6 text-[#E86A17]" />
-                  </div>
-                  <div>
-                    <strong className="block text-[#3D2314] font-bold">Tradisional</strong>
-                    <span className="text-sm text-[#5C3D28]">Resep Warisan</span>
-                  </div>
-                </div>
+              </div>
+            </div>
+            
+            {/* Bottom scroll indicator */}
+            <div className="mt-16 flex items-center justify-center lg:justify-start gap-3 text-[#5C3D28]/60">
+              <span className="text-sm">Gulir untuk membaca kisah kami</span>
+              <div className="w-6 h-10 border-2 border-[#5C3D28]/30 rounded-full flex justify-center pt-2">
+                <div className="w-1.5 h-3 bg-[#E86A17] rounded-full animate-bounce"></div>
               </div>
             </div>
           </div>
@@ -146,18 +163,24 @@ export function AboutUsPage() {
               <div className="relative">
                 <div 
                   ref={imageRef}
-                  className="relative rounded-3xl overflow-hidden aspect-square bg-gradient-to-br from-[#F5EBE0] to-[#FAF3E8] border border-[#5C3D28]/10 flex flex-col items-center justify-center text-[#5C3D28]"
+                  className="relative rounded-3xl overflow-hidden aspect-square bg-gradient-to-br from-[#F5EBE0] to-[#FAF3E8] border border-[#5C3D28]/10"
                   style={{ transform: `translateY(${parallaxOffset}px)` }}
                 >
-                  <svg className="w-16 h-16 mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-sm opacity-60">Keluarga Pendiri Getuk Gondok</span>
-                  <span className="text-xs opacity-40 mt-1">Warisan resep yang terus dijaga dan diteruskan dari generasi ke generasi.</span>
+                  <img 
+                    src={aboutImages[1]} 
+                    alt="Keluarga Pendiri Getuk Gondok"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 {/* Decorative circles */}
-                <div className="absolute -inset-4 border-2 border-[#E8C547]/30 rounded-full -z-10"></div>
-                <div className="absolute -bottom-4 -right-4 w-2/3 h-2/3 border-2 border-[#E8C547]/20 rounded-full -z-10 bg-[#E8C547]/5"></div>
+                <div 
+                  className="absolute -inset-4 border-2 border-[#E8C547]/30 rounded-full -z-10" 
+                  style={{ transform: `translateY(${parallaxOffset}px)` }}
+                ></div>
+                <div 
+                  className="absolute -bottom-4 -right-4 w-2/3 h-2/3 border-2 border-[#E8C547]/20 rounded-full -z-10 bg-[#E8C547]/5" 
+                  style={{ transform: `translateY(${parallaxOffset}px)` }}
+                ></div>
               </div>
               
               {/* Origin Content */}
@@ -333,143 +356,75 @@ export function AboutUsPage() {
           </div>
         </section>
 
-        {/* ========== MORE VIDEOS SECTION ========== */}
-        <section id="videos" className="py-24 lg:py-32 bg-[#F5EBE0]">
+        {/* ========== GALLERY SECTION ========== */}
+        <section id="gallery" className="py-24 lg:py-32 bg-[#F5EBE0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Galeri Video</p>
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Galeri</p>
               <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
-                Mengenal Getuk Gondok
-                <span className="block">Lebih Dekat</span>
+                Momen Berharga
+                <span className="block text-[#E86A17]">Bersama Getuk Gondok</span>
               </h2>
               <p className="text-lg text-[#5C3D28] leading-relaxed">
-                Saksikan berbagai aktivitas di balik Getuk Gondok Hj. Sri Rahayu, mulai dari proses pembuatan hingga berbagai produk yang kami hadirkan untuk menjaga cita rasa autentik khas Magelang.
+                Kenali lebih dekat perjalanan dan suasana di balik Getuk Gondok Hj. Sri Rahayu melalui galeri foto kami.
               </p>
             </div>
             
-            {/* Videos Grid */}
+            {/* Images Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { title: "Proses Pembuatan Getuk", desc: "Lihat bagaimana Getuk Gondok dibuat mulai dari pemilihan singkong hingga siap dinikmati." },
-                { title: "Di Balik Produksi", desc: "Kenali proses produksi yang dilakukan dengan penuh ketelitian untuk menjaga kualitas setiap hari." },
-                { title: "Aneka Produk Kami", desc: "Jelajahi berbagai pilihan Getuk Gondok, jajanan tradisional, hampers, dan sajian khas lainnya." },
-                { title: "Suasana Getuk Gondok", desc: "Lihat aktivitas pelayanan dan suasana usaha keluarga yang terus menjaga tradisi sejak dulu." },
-              ].map((video, index) => (
-                <div key={index} className="bg-white rounded-2xl overflow-hidden border border-[#5C3D28]/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#3D2314]/10">
-                  <div className="relative aspect-video bg-gradient-to-br from-[#5C3D28] to-[#3D2314] flex items-center justify-center cursor-pointer group">
-                    <div className="w-15 h-15 bg-[#E86A17] rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#E8C547]" style={{width: '60px', height: '60px'}}>
-                      <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <polygon points="5,3 19,12 5,21" />
+              {aboutImages.map((image, index) => (
+                <div 
+                  key={index} 
+                  className="relative rounded-2xl overflow-hidden aspect-square bg-gradient-to-br from-[#5C3D28]/20 to-[#3D2314]/10 group cursor-pointer"
+                >
+                  <img 
+                    src={image} 
+                    alt={`Galeri Getuk Gondok ${index + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-[#3D2314]/0 group-hover:bg-[#3D2314]/30 transition-colors duration-300 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <svg className="w-5 h-5 text-[#3D2314]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                       </svg>
                     </div>
                   </div>
-                  <div className="p-5">
-                    <h4 className="font-['Playfair_Display'] text-lg font-semibold text-[#3D2314] mb-2">{video.title}</h4>
-                    <p className="text-sm text-[#5C3D28]/80 leading-relaxed">{video.desc}</p>
-                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ========== VALUES SECTION ========== */}
-        <section id="values" className="py-24 lg:py-32 bg-[#FAF3E8]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Header */}
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Nilai-Nilai Kami</p>
-              <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
-                Warisan Nilai,
-                <span className="block">Kepercayaan yang Terjaga</span>
-              </h2>
-              <p className="text-lg text-[#5C3D28] leading-relaxed">
-                Sejak awal perjalanan usaha keluarga, kami berpegang pada nilai-nilai yang diwariskan dari generasi ke generasi. Nilai-nilai inilah yang menjadi landasan dalam menjaga kualitas, cita rasa autentik, dan kepercayaan pelanggan hingga saat ini.
-              </p>
-            </div>
-            
-            {/* Values Grid */}
-            <div className="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              {[
-                { icon: Award, title: "Resep Warisan", desc: "Resep keluarga yang diwariskan lintas generasi terus dipertahankan untuk menjaga cita rasa autentik khas Getuk Gondok." },
-                { icon: Leaf, title: "Bahan Pilihan", desc: "Menggunakan singkong berkualitas dan bahan-bahan pilihan untuk menghasilkan tekstur yang lembut serta cita rasa yang konsisten." },
-                { icon: Heart, title: "Pelayanan Sepenuh Hati", desc: "Kami melayani setiap pelanggan dengan keramahan, ketulusan, dan perhatian agar setiap pengalaman menjadi lebih berkesan." },
-              ].map((value, index) => (
-                <div key={index} className="p-8 bg-white rounded-2xl border border-[#5C3D28]/10 text-center transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-[#E8C547] rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <value.icon className="w-7 h-7 text-[#3D2314]" />
-                  </div>
-                  <h4 className="font-['Playfair_Display'] text-xl font-semibold text-[#3D2314] mb-3">{value.title}</h4>
-                  <p className="text-[#5C3D28] leading-relaxed text-sm">{value.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ========== CTA SECTION ========== */}
-        <section id="contact" className="py-24 lg:py-32 bg-gradient-to-br from-[#3D2314] to-[#2A1810] text-center relative overflow-hidden">
-          {/* Background pattern */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'80\' height=\'80\' viewBox=\'0 0 80 80\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23E8C547\' fill-opacity=\'1\'%3E%3Cpath d=\'M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'}}></div>
-          
-          <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-              Lengkapi Momen Istimewa<br />
-              <span className="text-[#E8C547]">Bersama Getuk Gondok</span>
-            </h2>
-            <p className="text-lg text-white/80 mb-6 leading-relaxed">
-              Nikmati cita rasa autentik Getuk Gondok Hj. Sri Rahayu yang dibuat dari resep warisan keluarga dan bahan-bahan pilihan. Cocok sebagai oleh-oleh, sajian keluarga, hampers, maupun berbagai acara spesial.
-            </p>
-            <p className="text-sm text-white/60 mb-10 leading-relaxed">
-              Melayani pemesanan harian, hampers, serta kebutuhan acara keluarga, kantor, dan berbagai momen spesial.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <a 
-                href="/catalogue" 
-                className="inline-flex items-center gap-2 bg-[#E86A17] hover:bg-[#E8C547] text-white hover:text-[#3D2314] px-8 py-4 rounded-lg font-semibold transition-all hover:-translate-y-0.5 shadow-lg"
-              >
-                Lihat Katalog
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </a>
-              <a 
-                href="https://wa.me/6285643730540" 
-                className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-8 py-4 rounded-lg font-semibold transition-all hover:border-white hover:bg-white/10"
-              >
-                Pesan via WhatsApp
-              </a>
-            </div>
-          </div>
-        </section>
+        {/* ========== FOOTER ========== */}
+        <Footer />
       </main>
-      
-      <Footer />
-      
+
       {/* Video Modal */}
       {videoModalOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           onClick={() => setVideoModalOpen(false)}
         >
-          <div className="relative w-full max-w-4xl aspect-video bg-[#3D2314] rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
-              <Play className="w-16 h-16 mb-4 opacity-50" />
-              <p>Video player would appear here</p>
-            </div>
+          <div 
+            className="relative w-full max-w-4xl aspect-video bg-[#3D2314] rounded-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button 
-              className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
               onClick={() => setVideoModalOpen(false)}
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/50">
+              <Play className="w-16 h-16 mb-4" />
+              <p>Video Proses Pembuatan</p>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-

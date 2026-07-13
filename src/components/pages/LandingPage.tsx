@@ -159,7 +159,7 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-sans transition-colors duration-300 selection:bg-amber-200 selection:text-amber-900">
+    <div className="min-h-screen bg-neutral-50 font-['Playfair_Display'] transition-colors duration-300 selection:bg-amber-200 selection:text-amber-900">
       <HeaderLandingPage />
 
       <section className="relative overflow-hidden bg-amber-950 text-white shadow-[0_20px_60px_rgba(120,53,15,0.16)]">
