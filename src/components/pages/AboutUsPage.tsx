@@ -76,7 +76,7 @@ export function AboutUsPage() {
                 </h1>
                 
                 {/* Story intro */}
-                <p className="text-xl text-[#5C3D28] leading-relaxed mb-8 max-w-xl">
+                <p className="font-['Playfair_Display'] text-xl text-[#5C3D28] leading-relaxed mb-8 max-w-xl">
                   Lebih dari sekadar makanan, Getuk Gondok adalah cerita tentang keluarga, tradisi, dan kecintaan yang tak pernah padam terhadap cita rasa autentik khas Magelang.
                 </p>
                 
