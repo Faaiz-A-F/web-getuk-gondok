@@ -9,6 +9,19 @@ export function AboutUsPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const imageRef = useRef<HTMLDivElement>(null);
+  const modalVideoRef = useRef<HTMLVideoElement>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Path to the video file (public/Video)
+  const videoSrc = "/Video/getuk-gondok-process.mp4";
+
+  // Pause video when modal closes
+  useEffect(() => {
+    if (!videoModalOpen && modalVideoRef.current) {
+      modalVideoRef.current.pause();
+      modalVideoRef.current.currentTime = 0;
+    }
+  }, [videoModalOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -275,17 +288,33 @@ export function AboutUsPage() {
             <div className="grid lg:grid-cols-5 gap-12 items-start">
               {/* Video Showcase */}
               <div className="lg:col-span-3">
-                <div className="relative rounded-3xl overflow-hidden aspect-video bg-gradient-to-br from-[#5C3D28] to-[#2A1810]">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer group" onClick={() => setVideoModalOpen(true)}>
-                    {/* Decorative pattern */}
-                    <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'40\' fill=\'none\' stroke=\'%23E8C547\' stroke-width=\'0.3\'/%3E%3C/svg%3E")', backgroundSize: '180px'}}></div>
-                    
-                    {/* Play Button */}
+                <div className="relative rounded-3xl overflow-hidden aspect-video bg-gradient-to-br from-[#5C3D28] to-[#2A1810] group cursor-pointer" onClick={() => setVideoModalOpen(true)}>
+                  {/* Video Preview (muted, autoplay, loop) */}
+                  <video
+                    ref={previewVideoRef}
+                    src={videoSrc}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    muted
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+
+                  {/* Overlay gradient for better text contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#3D2314]/60 via-transparent to-[#3D2314]/20 pointer-events-none"></div>
+
+                  {/* Decorative pattern */}
+                  <div className="absolute inset-0 opacity-10 pointer-events-none" style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'40\' fill=\'none\' stroke=\'%23E8C547\' stroke-width=\'0.3\'/%3E%3C/svg%3E")', backgroundSize: '180px'}}></div>
+
+                  {/* Play Button */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <div className="relative w-22 h-22 bg-[#E86A17] rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#E8C547] shadow-2xl" style={{width: '88px', height: '88px'}}>
                       <svg className="w-9 h-9 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                         <polygon points="5,3 19,12 5,21" />
                       </svg>
                     </div>
+                    <p className="mt-4 text-white/90 text-sm font-medium tracking-wide">Klik untuk memutar video</p>
                   </div>
                 </div>
                 <p className="text-center text-sm text-white/50 mt-5 relative z-10">
@@ -391,7 +420,7 @@ export function AboutUsPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+              ))} 
             </div>
           </div>
         </section>
@@ -402,26 +431,33 @@ export function AboutUsPage() {
 
       {/* Video Modal */}
       {videoModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
           onClick={() => setVideoModalOpen(false)}
         >
-          <div 
-            className="relative w-full max-w-4xl aspect-video bg-[#3D2314] rounded-2xl overflow-hidden"
+          <div
+            className="relative w-full max-w-4xl aspect-video bg-[#3D2314] rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
               onClick={() => setVideoModalOpen(false)}
+              aria-label="Tutup video"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/50">
-              <Play className="w-16 h-16 mb-4" />
-              <p>Video Proses Pembuatan</p>
-            </div>
+            <video
+              ref={modalVideoRef}
+              src={videoSrc}
+              className="w-full h-full object-contain bg-black"
+              controls
+              autoPlay
+              playsInline
+            >
+              Browser Anda tidak mendukung tag video.
+            </video>
           </div>
         </div>
       )}
