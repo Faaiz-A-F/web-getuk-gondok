@@ -15,6 +15,11 @@ export function CartPage() {
   const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showQrisModal, setShowQrisModal] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [currentOrderNumber, setCurrentOrderNumber] = useState<string | null>(null);
+  const [isPaymentDone, setIsPaymentDone] = useState(false);
+  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -73,14 +78,16 @@ export function CartPage() {
       });
       
       if (response.ok) {
-        // Clear cart after successful order
-        clearCart();
-        // Show success notification
-        setShowSuccessModal(true);
+        const data = await response.json();
+        // Keep cart until payment is confirmed, show QRIS modal
+        setCurrentOrderId(data.order?.id ?? data.id ?? null);
+        setCurrentOrderNumber(orderNumber);
+        setIsPaymentDone(false);
+        setShowQrisModal(true);
       } else {
         // Show error notification
-        const data = await response.json();
-        setErrorMessage(data.error || 'Gagal membuat pesanan. Silakan coba lagi.');
+        const errData = await response.json();
+        setErrorMessage(errData.error || 'Gagal membuat pesanan. Silakan coba lagi.');
         setShowErrorModal(true);
       }
     } catch (error) {
@@ -97,6 +104,52 @@ export function CartPage() {
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
     router.push('/');
+  };
+
+  // Close QRIS modal (user cancelled payment — keep order as PENDING)
+  const handleQrisClose = () => {
+    setShowQrisModal(false);
+    setCurrentOrderId(null);
+    setCurrentOrderNumber(null);
+    setIsPaymentDone(false);
+  };
+
+  // Confirm payment is done — update order to PAID, clear cart, show success
+  const handlePaymentComplete = async () => {
+    if (!currentOrderId) {
+      // If for some reason orderId is missing, just clear cart locally and finish
+      clearCart();
+      setShowQrisModal(false);
+      setShowSuccessModal(true);
+      return;
+    }
+
+    setIsConfirmingPayment(true);
+    try {
+      const res = await fetch(`/api/orders/${currentOrderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus: "PAID", status: "PENDING" }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Gagal mengkonfirmasi pembayaran");
+      }
+
+      // Clear cart, close QRIS modal, show success
+      clearCart();
+      setShowQrisModal(false);
+      setIsPaymentDone(true);
+      setShowSuccessModal(true);
+    } catch (e: any) {
+      console.error("Payment confirm error:", e);
+      setErrorMessage(e?.message || "Gagal mengkonfirmasi pembayaran. Silakan coba lagi.");
+      setShowQrisModal(false);
+      setShowErrorModal(true);
+    } finally {
+      setIsConfirmingPayment(false);
+    }
   };
 
   // Calculate subtotal
@@ -266,19 +319,6 @@ export function CartPage() {
                 </h2>
               </div>
 
-              {/* QR Code Area - White Box */}
-              <div className="bg-white rounded-2xl p-6 mb-6 flex items-center justify-center">
-                <div className="w-40 h-40 relative rounded-xl overflow-hidden">
-                  <Image
-                    src="/qris copy/qrisgetuk.jpeg"
-                    alt="QRIS Payment Code"
-                    fill
-                    className="object-contain"
-                    sizes="160px"
-                  />
-                </div>
-              </div>
-
               {/* Floating White Card */}
               <div className="bg-white rounded-2xl p-5 shadow-lg">
                 
@@ -320,9 +360,9 @@ export function CartPage() {
               </div>
             </div>
           </div>
-          
         </div>
       </div>
+      
 
       {/* Login Required Modal */}
       {showLoginModal && (
@@ -362,6 +402,128 @@ export function CartPage() {
         </div>
       )}
 
+      {/* QRIS Payment Modal */}
+      {showQrisModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 lg:p-8 animate-fade-in relative">
+            {/* Close button */}
+            <button
+              onClick={handleQrisClose}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition"
+              aria-label="Tutup"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold mb-3">
+                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                Menunggu Pembayaran
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">QRIS Payment</h3>
+              <p className="text-sm text-gray-500">Scan QRIS di bawah ini untuk membayar</p>
+              {currentOrderNumber && (
+                <p className="text-xs text-gray-400 mt-1 font-mono">{currentOrderNumber}</p>
+              )}
+            </div>
+
+            {/* QR Code Image */}
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="w-56 h-56 bg-white border-2 border-orange-200 rounded-2xl flex items-center justify-center p-3 shadow-inner">
+                  <img
+                    src="/qris%20copy/qrisgetuk.jpeg"
+                    alt="QRIS Code"
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      // Fallback: show placeholder if image missing
+                      const target = e.currentTarget;
+                      target.style.display = "none";
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-full h-full flex flex-col items-center justify-center text-orange-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            <p class="text-xs mt-2 font-medium">QRIS Code</p>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                </div>
+                {/* Corner decorations */}
+                <div className="absolute -top-1 -left-1 w-5 h-5 border-l-2 border-t-2 border-orange-500 rounded-tl-lg"></div>
+                <div className="absolute -top-1 -right-1 w-5 h-5 border-r-2 border-t-2 border-orange-500 rounded-tr-lg"></div>
+                <div className="absolute -bottom-1 -left-1 w-5 h-5 border-l-2 border-b-2 border-orange-500 rounded-bl-lg"></div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 border-r-2 border-b-2 border-orange-500 rounded-br-lg"></div>
+              </div>
+            </div>
+
+            {/* Payment Details */}
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 mb-6 border border-orange-100">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-semibold text-gray-900">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Biaya Admin</span>
+                  <span className="font-semibold text-gray-900">{formatPrice(ADMIN_FEE)}</span>
+                </div>
+                <div className="border-t border-orange-200 my-2"></div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-gray-700">Total Pembayaran</span>
+                  <span className="text-xl font-black text-orange-600">{formatPrice(totalAdmin)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Instruction */}
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5 flex items-start gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-xs text-blue-700 leading-relaxed">
+                Buka aplikasi e-wallet atau m-banking Anda, pilih menu scan QR, dan arahkan ke kode QR di atas. Pastikan nominal sesuai dengan total pembayaran.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handlePaymentComplete}
+                disabled={isConfirmingPayment}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3.5 rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isConfirmingPayment ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Pembayaran Selesai
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleQrisClose}
+                disabled={isConfirmingPayment}
+                className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition disabled:opacity-50"
+              >
+                Bayar Nanti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Success Notification Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -372,8 +534,8 @@ export function CartPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Pesanan Berhasil!</h3>
-              <p className="text-gray-600 mb-6">Pesanan Anda telah masuk ke database dan sedang menunggu konfirmasi pembayaran.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Pembayaran Berhasil!</h3>
+              <p className="text-gray-600 mb-6">Terima kasih! Pesanan Anda telah dibayar dan sedang diproses oleh admin.</p>
               <button
                 onClick={handleSuccessClose}
                 className="w-full bg-amber-600 text-white py-3 rounded-xl font-semibold hover:bg-amber-700 transition"
