@@ -569,7 +569,7 @@ export function AccountPage() {
           alt="Magelang"
           fill
           priority
-          className="object-cover object-center"
+          className="object-cover object-center opacity-50"
         />
       </div>
 
