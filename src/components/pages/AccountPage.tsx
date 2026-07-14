@@ -12,7 +12,7 @@ import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings
 // If defined inside the parent, React unmounts/remounts the input on every
 // state update, causing focus loss and the "can only type one char" bug.
 
-type ProfileField = "firstName" | "lastName" | "phone" | "dob" | "country" | "city" | "postal";
+type ProfileField = "firstName" | "lastName" | "phone" | "address";
 
 interface EditableFieldProps {
   field: ProfileField;
@@ -146,13 +146,20 @@ interface Order {
 }
 
 export function AccountPage() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, isLoaded } = useAuth();
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "orders" | "password">("profile");
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+
+  // ========== Authentication Validation ==========
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push("/login?redirect=/account");
+    }
+  }, [isLoaded, user, router]);
 
   // Sync activeTab with ?tab= query param so deep-links like /account?tab=orders work
   useEffect(() => {
@@ -193,6 +200,12 @@ export function AccountPage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // ========== Cancel Order State ==========
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
 
   // Profile picture state
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -303,9 +316,7 @@ export function AccountPage() {
     lastName: "",
     phone: "",
     dob: "",
-    country: "",
-    city: "",
-    postal: "",
+    address: "",
   });
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -323,9 +334,7 @@ export function AccountPage() {
             lastName: nameParts.slice(1).join(" ") || "",
             phone: data.phone || "",
             dob: data.dob || "",
-            country: data.country || "",
-            city: data.city || "",
-            postal: data.postal || "",
+            address: data.address || "",
           });
         }
       })
@@ -346,9 +355,9 @@ export function AccountPage() {
   const [manualSaved, setManualSaved] = useState<"profile" | "address" | null>(null);
 
   // Personal info fields (excluding address fields)
-  const profileFields = useMemo<ProfileField[]>(() => ["firstName", "lastName", "dob", "phone"], []);
+  const profileFields = useMemo<ProfileField[]>(() => ["firstName", "lastName", "phone"], []);
   // Address fields
-  const addressFields = useMemo<ProfileField[]>(() => ["country", "city", "postal"], []);
+  const addressFields = useMemo<ProfileField[]>(() => ["address"], []);
 
   // Watch profileData for changes (compared to last saved snapshot)
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState({
@@ -356,9 +365,7 @@ export function AccountPage() {
     lastName: "",
     phone: "",
     dob: "",
-    country: "",
-    city: "",
-    postal: "",
+    address: "",
   });
 
   useEffect(() => {
@@ -532,13 +539,11 @@ export function AccountPage() {
   const display = {
     name: displayName,
     role: user?.role ?? "Customer",
-    location: [profileData.city, profileData.country].filter(Boolean).join(", ") || "—",
+    location: profileData.address || "—",
     email: user?.email ?? "—",
     phone: profileData.phone || "—",
     dob: profileData.dob || "—",
-    postal: profileData.postal || "—",
-    city: profileData.city || "—",
-    country: profileData.country || "—",
+    address: profileData.address || "—",
   };
 
   // EditableField is now defined at module level (see top of file)
@@ -549,6 +554,41 @@ export function AccountPage() {
     { id: "orders", label: "Order History", icon: Package },
     { id: "password", label: "Change Password", icon: Shield },
   ];
+
+  // ========== Cancel Order Handler ==========
+  const handleCancelOrder = async () => {
+    if (!orderToCancel || !user) return;
+    
+    setCancelLoading(true);
+    try {
+      const res = await fetch(`/api/orders/${orderToCancel.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      
+      if (res.ok) {
+        // Update the order in local state
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === orderToCancel.id ? { ...o, status: "CANCELLED" } : o
+          )
+        );
+        setCancelSuccess(true);
+        setTimeout(() => {
+          setCancelModalOpen(false);
+          setOrderToCancel(null);
+          setCancelSuccess(false);
+        }, 1500);
+      } else {
+        console.error("Failed to cancel order");
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    } finally {
+      setCancelLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8E8BD] relative">
@@ -614,16 +654,8 @@ export function AccountPage() {
                         <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white pointer-events-none"></div>
                       </div>
                       {profilePictureError && (
-                        <p className="text-xs text-red-600 mt-2">{profilePictureError}</p>
+                        <p className="text-xs text-red-600 mt-1">{profilePictureError}</p>
                       )}
-                      <button
-                        type="button"
-                        onClick={handleAvatarClick}
-                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[#C87536] hover:text-[#A85E2E] transition-colors"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                        {isMobile ? "Pilih dari Galeri" : "Upload Foto"}
-                      </button>
                       <h3 className="mt-4 font-bold text-[#4A1D0B] text-lg">{display.name}</h3>
                       <p className="text-sm text-[#8B6F47]">{display.email}</p>
                       <span className="inline-block mt-2 px-3 py-1 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white text-xs font-semibold rounded-full">
@@ -672,41 +704,45 @@ export function AccountPage() {
                     <>
                       {/* Profile Header Card */}
                       <div className="bg-gradient-to-r from-[#4A1D0B] to-[#6B3A1D] rounded-2xl p-6 text-white shadow-xl">
-                        <div className="flex items-center gap-6">
-                          <button
-                            type="button"
-                            onClick={handleAvatarClick}
-                            className="relative w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E8C547] focus:ring-offset-2 focus:ring-offset-[#4A1D0B] group"
-                            aria-label="Ubah foto profil"
-                          >
-                            {profilePicture ? (
-                              <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="text-white text-2xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
-                            )}
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <Camera className="w-6 h-6 text-white" />
-                            </div>
-                            {profilePictureLoading && (
-                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                        <div className="flex items-start gap-6">
+                          <div className="flex flex-col items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleAvatarClick}
+                              className="relative w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E8C547] focus:ring-offset-2 focus:ring-offset-[#4A1D0B] group"
+                              aria-label="Ubah foto profil"
+                            >
+                              {profilePicture ? (
+                                <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-white text-2xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
+                              )}
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <Camera className="w-6 h-6 text-white" />
                               </div>
-                            )}
-                          </button>
-                          <div className="flex-1">
+                              {profilePictureLoading && (
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                </div>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleAvatarClick}
+                              className="inline-flex items-center gap-1.5 text-xs text-[#F8E8BD]/80 hover:text-white transition-colors cursor-pointer"
+                              aria-label="Ubah foto profil"
+                            >
+                              <Camera className="w-3 h-3" />
+                              Upload Foto
+                            </button>
+                          </div>
+                          <div className="flex-1 pt-2">
                             <h2 className="text-2xl font-bold">{display.name}</h2>
                             <p className="text-[#D29A2A]">{display.role}</p>
                             <div className="flex items-center gap-2 mt-2 text-sm text-[#F8E8BD]">
                               <MapPin className="w-4 h-4" />
                               {display.location}
                             </div>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F8E8BD]/10 text-[#F8E8BD] text-xs font-medium rounded-xl border border-[#F8E8BD]/20">
-                              <span className="w-2 h-2 bg-[#E8C547] rounded-full"></span>
-                              Manual save
-                            </div>
-                            <p className="text-[10px] text-[#F8E8BD]/60 pr-1">Klik Save Changes untuk menyimpan</p>
                           </div>
                         </div>
                       </div>
@@ -745,17 +781,6 @@ export function AccountPage() {
                                 value={profileData.lastName}
                                 onChange={handleFieldChange}
                                 placeholder="Nama belakang"
-                              />
-                            </div>
-                            {/* Date of Birth */}
-                            <div className="space-y-2">
-                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Date of Birth</label>
-                              <EditableField
-                                field="dob"
-                                value={profileData.dob}
-                                onChange={handleFieldChange}
-                                type="date"
-                                icon={Calendar}
                               />
                             </div>
                             {/* Email (read-only) */}
@@ -818,37 +843,19 @@ export function AccountPage() {
                         </div>
 
                         <div className="p-6">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Country */}
-                            <div className="space-y-2">
-                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Country</label>
-                              <EditableField
-                                field="country"
-                                value={profileData.country}
-                                onChange={handleFieldChange}
-                                placeholder="Negara"
+                          <div className="space-y-2">
+                            <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Full Address</label>
+                            <div className="relative">
+                              <MapPin className="absolute left-3 top-4 w-4 h-4 text-[#C87536] pointer-events-none" />
+                              <textarea
+                                value={profileData.address}
+                                onChange={(e) => handleFieldChange("address", e.target.value)}
+                                placeholder="Masukkan alamat lengkap Anda"
+                                rows={4}
+                                className="w-full pl-10 pr-4 py-3 bg-white border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] transition-colors resize-none"
                               />
                             </div>
-                            {/* City */}
-                            <div className="space-y-2">
-                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">City</label>
-                              <EditableField
-                                field="city"
-                                value={profileData.city}
-                                onChange={handleFieldChange}
-                                placeholder="Kota"
-                              />
-                            </div>
-                            {/* Postal Code */}
-                            <div className="space-y-2">
-                              <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Postal Code</label>
-                              <EditableField
-                                field="postal"
-                                value={profileData.postal}
-                                onChange={handleFieldChange}
-                                placeholder="Kode pos"
-                              />
-                            </div>
+                            <p className="text-[10px] text-[#8B6F47] px-1">Contoh: Jl. Sudirman No. 123, RT 001 RW 002, Kelurahan, Kecamatan, Kota, Provinsi</p>
                           </div>
                           <SaveChangesBar
                             section="address"
@@ -862,7 +869,7 @@ export function AccountPage() {
                       </div>
 
                       {/* Quick Stats */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-lg border border-[#E8D4C4]">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1565C0] to-[#1976D2] flex items-center justify-center shadow-md">
@@ -877,22 +884,15 @@ export function AccountPage() {
                         <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-lg border border-[#E8D4C4]">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2E7D32] to-[#388E3C] flex items-center justify-center shadow-md">
-                              <MapPin className="w-6 h-6 text-white" />
+                              <DollarSign className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                              <p className="text-sm text-[#8B6F47]">Saved Addresses</p>
-                              <p className="text-2xl font-bold text-[#4A1D0B]">3</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-lg border border-[#E8D4C4]">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7B1FA2] to-[#9C27B0] flex items-center justify-center shadow-md">
-                              <Bell className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-[#8B6F47]">Notifications</p>
-                              <p className="text-2xl font-bold text-[#4A1D0B]">12</p>
+                              <p className="text-sm text-[#8B6F47]">Total Spending</p>
+                              <p className="text-xl font-bold text-[#4A1D0B]">
+                                {orders.reduce((sum, o) => sum + Number(o.totalAmount), 0) >= 1000000
+                                  ? `Rp ${(orders.reduce((sum, o) => sum + Number(o.totalAmount), 0) / 1000000).toFixed(1)}M`
+                                  : formatPrice(orders.reduce((sum, o) => sum + Number(o.totalAmount), 0))}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -1113,7 +1113,13 @@ export function AccountPage() {
                                             </button>
                                           )}
                                           {order.status.toLowerCase() === "pending" && (
-                                            <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium">
+                                            <button 
+                                              onClick={() => {
+                                                setOrderToCancel(order);
+                                                setCancelModalOpen(true);
+                                              }}
+                                              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
+                                            >
                                               <X className="w-4 h-4" />
                                               Batalkan
                                             </button>
@@ -1248,6 +1254,105 @@ export function AccountPage() {
           </main>
         </div>
       </div>
+
+      {/* Cancel Order Confirmation Modal */}
+      {cancelModalOpen && orderToCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="bg-red-600 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <X className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xl font-bold">Batalkan Pesanan</h3>
+                </div>
+                <button
+                  onClick={() => {
+                    if (!cancelLoading) {
+                      setCancelModalOpen(false);
+                      setOrderToCancel(null);
+                    }
+                  }}
+                  disabled={cancelLoading}
+                  className="p-2 hover:bg-white/20 rounded-full transition-colors disabled:opacity-50"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {cancelSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h4 className="text-xl font-bold text-[#4A1D0B] mb-2">Pesanan Dibatalkan!</h4>
+                  <p className="text-[#8B6F47]">Pesanan berhasil dibatalkan.</p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[#4A1D0B] mb-4">
+                    Apakah Anda yakin ingin membatalkan pesanan ini?
+                  </p>
+                  
+                  {/* Order Summary */}
+                  <div className="bg-[#F8E8BD] rounded-xl p-4 mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-[#8B6F47]">Nomor Pesanan</span>
+                      <span className="font-semibold text-[#4A1D0B]">{orderToCancel.orderNumber}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#8B6F47]">Total</span>
+                      <span className="font-bold text-[#4A1D0B]">{formatPrice(Number(orderToCancel.totalAmount))}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                    <p className="text-sm text-amber-800">
+                      ⚠️ Pembatalan pesanan tidak dapat dibatalkan. Jika Anda sudah melakukan pembayaran, hubungi admin untuk refund.
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setCancelModalOpen(false);
+                        setOrderToCancel(null);
+                      }}
+                      disabled={cancelLoading}
+                      className="flex-1 px-4 py-3 bg-white border border-[#E8D4C4] text-[#4A1D0B] font-semibold rounded-xl hover:bg-[#F8E8BD] transition-colors disabled:opacity-50"
+                    >
+                      Tidak, Kembali
+                    </button>
+                    <button
+                      onClick={handleCancelOrder}
+                      disabled={cancelLoading}
+                      className="flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {cancelLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Membatalkan...
+                        </>
+                      ) : (
+                        <>
+                          <X className="w-4 h-4" />
+                          Ya, Batalkan
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

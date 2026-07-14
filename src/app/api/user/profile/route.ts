@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     const [dbUser, setting] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
-        select: { id: true, name: true, email: true, phone: true, role: true },
+        select: { id: true, name: true, email: true, phone: true, address: true, role: true },
       }),
       prisma.userSetting.upsert({
         where: { userId },
@@ -33,12 +33,9 @@ export async function GET(req: Request) {
       name: dbUser.name,
       email: dbUser.email,
       phone: dbUser.phone ?? "",
+      address: dbUser.address ?? "",
       role: dbUser.role,
       dob: settings.dob ?? "",
-      country: settings.country ?? "",
-      city: settings.city ?? "",
-      postal: settings.postal ?? "",
-      location: settings.location ?? "",
     });
   } catch (err) {
     console.error("GET profile error:", err);
@@ -46,11 +43,11 @@ export async function GET(req: Request) {
   }
 }
 
-// PUT — update profile fields (name, phone on User; dob/country/city/postal/location on UserSetting)
+// PUT — update profile fields (name, phone, address on User; dob on UserSetting)
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { userId, firstName, lastName, phone, dob, country, city, postal, location } = body;
+    const { userId, firstName, lastName, phone, address, dob } = body;
 
     if (!userId) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
@@ -70,11 +67,12 @@ export async function PUT(req: Request) {
       data: {
         name: combinedName,
         phone: phone ?? null,
+        address: address ?? null,
       },
-      select: { id: true, name: true, email: true, phone: true, role: true },
+      select: { id: true, name: true, email: true, phone: true, address: true, role: true },
     });
 
-    // Update UserSetting.settings (merge so we don't lose profilePicture etc.)
+    // Update UserSetting.settings (only dob)
     const existing = await prisma.userSetting.upsert({
       where: { userId },
       update: {},
@@ -87,10 +85,6 @@ export async function PUT(req: Request) {
         settings: {
           ...current,
           dob: dob ?? "",
-          country: country ?? "",
-          city: city ?? "",
-          postal: postal ?? "",
-          location: location ?? [city, country].filter(Boolean).join(", "),
         },
       },
     });
