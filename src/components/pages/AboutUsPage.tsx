@@ -269,9 +269,9 @@ export function AboutUsPage() {
         </section>
 
         {/* ========== CRAFT PROCESS SECTION ========== */}
-        <section id="craft" className="py-24 lg:py-32 bg-[#3D2314] text-white relative overflow-hidden">
+        <section id="craft" className="py-24 lg:py-32 bg-[#3D2314] text-white relative">
           {/* Background gradient */}
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_right,rgba(232,197,71,0.05)_0%,transparent_60%)]"></div>
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_right,rgba(232,197,71,0.05)_0%,transparent_60%)] pointer-events-none"></div>
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
@@ -285,9 +285,10 @@ export function AboutUsPage() {
               </p>
             </div>
             
-            <div className="grid lg:grid-cols-5 gap-12 items-start">
-              {/* Video Showcase */}
-              <div className="lg:col-span-3">
+            <div className="grid lg:grid-cols-5 gap-12">
+              {/* Video Showcase - sticky so it follows scroll within the section */}
+              <div className="lg:col-span-3 lg:self-stretch">
+                <div className="lg:sticky lg:top-24 z-10">
                 <div className="relative rounded-3xl overflow-hidden aspect-video bg-gradient-to-br from-[#5C3D28] to-[#2A1810] group cursor-pointer" onClick={() => setVideoModalOpen(true)}>
                   {/* Video Preview (muted, autoplay, loop) */}
                   <video
@@ -304,9 +305,6 @@ export function AboutUsPage() {
                   {/* Overlay gradient for better text contrast */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#3D2314]/60 via-transparent to-[#3D2314]/20 pointer-events-none"></div>
 
-                  {/* Decorative pattern */}
-                  <div className="absolute inset-0 opacity-10 pointer-events-none" style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'40\' fill=\'none\' stroke=\'%23E8C547\' stroke-width=\'0.3\'/%3E%3C/svg%3E")', backgroundSize: '180px'}}></div>
-
                   {/* Play Button */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <div className="relative w-22 h-22 bg-[#E86A17] rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#E8C547] shadow-2xl" style={{width: '88px', height: '88px'}}>
@@ -320,6 +318,7 @@ export function AboutUsPage() {
                 <p className="text-center text-sm text-white/50 mt-5 relative z-10">
                   Proses pembuatan Getuk Gondok Hj. Sri Rahayu
                 </p>
+                </div>
               </div>
               
               {/* Craft Steps */}
