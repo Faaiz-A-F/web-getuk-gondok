@@ -181,22 +181,6 @@ export function LandingPage() {
               <p className="text-lg lg:text-xl text-amber-100/80 max-w-2xl mx-auto lg:mx-0">
                 Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial-.
               </p>
-
-              <div className="relative max-w-md mx-auto lg:mx-0">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Cari produk favorit Anda..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-11 pr-4 py-4 rounded-full border-0 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-amber-500 sm:text-lg shadow-xl"
-                />
-              </div>
-
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link
                   href="/catalogue"
