@@ -7,8 +7,6 @@ import { Play, Clock, Award, Layers, CheckCircle, Package, Heart, Shield, Star, 
 
 export function AboutUsPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [parallaxOffset, setParallaxOffset] = useState(0);
-  const imageRef = useRef<HTMLDivElement>(null);
   const modalVideoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -22,32 +20,6 @@ export function AboutUsPage() {
       modalVideoRef.current.currentTime = 0;
     }
   }, [videoModalOpen]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (imageRef.current) {
-        const rect = imageRef.current.getBoundingClientRect();
-        const distance = -rect.top * 0.15;
-        setParallaxOffset(distance);
-      }
-    };
-
-    let ticking = false;
-    const handleScrollRAF = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScrollRAF, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScrollRAF);
-  }, []);
 
   // About us images
   const aboutImages = [
@@ -171,29 +143,18 @@ export function AboutUsPage() {
               </p>
             </div>
             
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Origin Visual */}
-              <div className="relative">
-                <div 
-                  ref={imageRef}
-                  className="relative rounded-3xl overflow-hidden aspect-square bg-gradient-to-br from-[#F5EBE0] to-[#FAF3E8] border border-[#5C3D28]/10"
-                  style={{ transform: `translateY(${parallaxOffset}px)` }}
-                >
-                  <img 
-                    src={aboutImages[1]} 
-                    alt="Keluarga Pendiri Getuk Gondok"
-                    className="w-full h-full object-cover"
-                  />
+            <div className="grid lg:grid-cols-2 gap-16">
+              {/* Origin Visual - sticky so it follows scroll within the section */}
+              <div className="relative lg:self-stretch">
+                <div className="lg:sticky lg:top-24 z-10">
+                  <div className="relative rounded-3xl overflow-hidden aspect-square bg-gradient-to-br from-[#F5EBE0] to-[#FAF3E8] border border-[#5C3D28]/10">
+                    <img
+                      src={aboutImages[1]}
+                      alt="Keluarga Pendiri Getuk Gondok"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
-                {/* Decorative circles */}
-                <div 
-                  className="absolute -inset-4 border-2 border-[#E8C547]/30 rounded-full -z-10" 
-                  style={{ transform: `translateY(${parallaxOffset}px)` }}
-                ></div>
-                <div 
-                  className="absolute -bottom-4 -right-4 w-2/3 h-2/3 border-2 border-[#E8C547]/20 rounded-full -z-10 bg-[#E8C547]/5" 
-                  style={{ transform: `translateY(${parallaxOffset}px)` }}
-                ></div>
               </div>
               
               {/* Origin Content */}
