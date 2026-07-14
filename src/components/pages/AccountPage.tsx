@@ -1,10 +1,127 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import MagelangImage from "../../assets/images/magelang fiks.png";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
-import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2 } from "lucide-react";
+
+// ========== Module-level EditableField ==========
+// Defined outside AccountPage so its type reference is stable across renders.
+// If defined inside the parent, React unmounts/remounts the input on every
+// state update, causing focus loss and the "can only type one char" bug.
+
+type ProfileField = "firstName" | "lastName" | "phone" | "dob" | "country" | "city" | "postal";
+
+interface EditableFieldProps {
+  field: ProfileField;
+  value: string;
+  onChange: (field: ProfileField, value: string) => void;
+  placeholder?: string;
+  type?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+const EditableField = React.memo(function EditableField({
+  field,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  icon: Icon,
+}: EditableFieldProps) {
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => onChange(field, e.target.value),
+    [field, onChange]
+  );
+
+  return (
+    <div className="relative">
+      {Icon && (
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C87536] pointer-events-none" />
+      )}
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={handleChange}
+        className={`w-full ${Icon ? "pl-10" : "pl-4"} pr-4 py-3 bg-white border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:border-[#C87536] transition-colors`}
+      />
+    </div>
+  );
+});
+
+// ========== Module-level SaveChangesBar ==========
+// Also moved to module level to keep type reference stable.
+
+interface SaveChangesBarProps {
+  section: "profile" | "address";
+  dirty: boolean;
+  saving: boolean;
+  saved: boolean;
+  onSave: () => void;
+  onCancel: () => void;
+}
+
+const SaveChangesBar = React.memo(function SaveChangesBar({
+  section,
+  dirty,
+  saving,
+  saved,
+  onSave,
+  onCancel,
+}: SaveChangesBarProps) {
+  if (!dirty && !saving && !saved) return null;
+
+  return (
+    <div className="mt-6 flex items-center justify-between gap-3 pt-4 border-t border-[#E8D4C4]">
+      <div className="flex items-center gap-2 text-xs">
+        {saving && (
+          <span className="inline-flex items-center gap-1.5 text-[#C87536] font-medium">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menyimpan perubahan...
+          </span>
+        )}
+        {!saving && saved && (
+          <span className="inline-flex items-center gap-1.5 text-green-600 font-medium">
+            <Check className="w-3.5 h-3.5" /> Perubahan berhasil disimpan
+          </span>
+        )}
+        {!saving && !saved && dirty && (
+          <span className="inline-flex items-center gap-1.5 text-amber-600 font-medium">
+            <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+            Anda memiliki perubahan yang belum disimpan
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={saving}
+          className="px-4 py-2 text-sm font-semibold text-[#8B6F47] bg-white border border-[#E8D4C4] rounded-xl hover:bg-[#F8E8BD] transition-colors disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={saving}
+          className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-[#D29A2A] to-[#C87536] rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-50"
+        >
+          {saving ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+            </>
+          ) : (
+            <>
+              <Check className="w-4 h-4" /> Save Changes
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+});
 
 interface OrderItem {
   id: string;
@@ -28,7 +145,7 @@ interface Order {
 }
 
 export function AccountPage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "orders" | "password">("profile");
@@ -53,6 +170,218 @@ export function AccountPage() {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Profile picture state
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [profilePictureLoading, setProfilePictureLoading] = useState(false);
+  const [profilePictureError, setProfilePictureError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Detect mobile device
+  const isMobile = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Fetch existing profile picture on mount
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/user/profile-picture?userId=${user.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.profilePicture) {
+          setProfilePicture(data.profilePicture);
+        }
+      })
+      .catch((e) => console.error("Error fetching profile picture:", e));
+  }, [user]);
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setProfilePictureError("File harus berupa gambar");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setProfilePictureError("Ukuran file maksimal 5MB");
+      return;
+    }
+
+    setProfilePictureError("");
+    setProfilePictureLoading(true);
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      setProfilePicture(base64); // Optimistic preview
+
+      // Upload to server
+      try {
+        const res = await fetch("/api/user/profile-picture", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user?.id, image: base64 }),
+        });
+
+        if (!res.ok) {
+          throw new Error("Upload failed");
+        }
+      } catch (err) {
+        console.error("Error uploading profile picture:", err);
+        setProfilePictureError("Gagal mengupload foto");
+      } finally {
+        setProfilePictureLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input value so the same file can be re-selected
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Trigger file picker (gallery on mobile, file dialog on desktop)
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // ========== Real-time editable profile state ==========
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dob: "",
+    country: "",
+    city: "",
+    postal: "",
+  });
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Fetch full profile data on mount / user change
+  useEffect(() => {
+    if (!user) return;
+    setProfileLoading(true);
+    fetch(`/api/user/profile?userId=${user.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.id) {
+          const nameParts = (data.name || "").trim().split(" ");
+          setProfileData({
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+            phone: data.phone || "",
+            dob: data.dob || "",
+            country: data.country || "",
+            city: data.city || "",
+            postal: data.postal || "",
+          });
+        }
+      })
+      .catch((e) => console.error("Error fetching profile:", e))
+      .finally(() => setProfileLoading(false));
+  }, [user]);
+
+  // Local-only field update — actual save happens via "Save Changes" button
+  const handleFieldChange = useCallback((field: ProfileField, value: string) => {
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  // ========== Manual "Save Changes" support ==========
+  // Track which section has unsaved changes (dirty state)
+  const [profileDirty, setProfileDirty] = useState(false);
+  const [addressDirty, setAddressDirty] = useState(false);
+  const [manualSaving, setManualSaving] = useState<"profile" | "address" | null>(null);
+  const [manualSaved, setManualSaved] = useState<"profile" | "address" | null>(null);
+
+  // Personal info fields (excluding address fields)
+  const profileFields = useMemo<ProfileField[]>(() => ["firstName", "lastName", "dob", "phone"], []);
+  // Address fields
+  const addressFields = useMemo<ProfileField[]>(() => ["country", "city", "postal"], []);
+
+  // Watch profileData for changes (compared to last saved snapshot)
+  const [lastSavedSnapshot, setLastSavedSnapshot] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dob: "",
+    country: "",
+    city: "",
+    postal: "",
+  });
+
+  useEffect(() => {
+    // After profile loads, treat current values as the saved baseline
+    if (!profileLoading && !lastSavedSnapshot.firstName && !lastSavedSnapshot.lastName && profileData.firstName) {
+      setLastSavedSnapshot(profileData);
+    }
+  }, [profileLoading, profileData, lastSavedSnapshot]);
+
+  useEffect(() => {
+    const profileChanged = profileFields.some(
+      (f) => profileData[f] !== lastSavedSnapshot[f]
+    );
+    const addressChanged = addressFields.some(
+      (f) => profileData[f] !== lastSavedSnapshot[f]
+    );
+    setProfileDirty(profileChanged);
+    setAddressDirty(addressChanged);
+  }, [profileData, lastSavedSnapshot, profileFields, addressFields]);
+
+  // Manual save handler — saves the whole section in one request
+  const handleManualSave = useCallback(async (section: "profile" | "address") => {
+    if (!user) return;
+    setManualSaving(section);
+    setManualSaved(null);
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, ...profileData }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser({ ...user, name: data.user.name, phone: data.user.phone ?? "" });
+        }
+        // Update baseline so dirty flag resets
+        setLastSavedSnapshot(profileData);
+        setProfileDirty(false);
+        setAddressDirty(false);
+        setManualSaved(section);
+        // Flash "Saved" badge for 2s
+        setTimeout(() => setManualSaved((cur) => (cur === section ? null : cur)), 2000);
+      } else {
+        console.error("Manual save failed");
+      }
+    } catch (e) {
+      console.error("Error manual save:", e);
+    } finally {
+      setManualSaving(null);
+    }
+  }, [user, profileData, setUser]);
+
+  // Cancel / revert section to last saved snapshot
+  const handleCancel = useCallback((section: "profile" | "address") => {
+    const fields = section === "profile" ? profileFields : addressFields;
+    const reverted: typeof profileData = { ...profileData };
+    fields.forEach((f) => {
+      reverted[f] = lastSavedSnapshot[f];
+    });
+    setProfileData(reverted);
+  }, [profileFields, addressFields, lastSavedSnapshot, profileData]);
+
+  // Stable callback factories for SaveChangesBar
+  const saveProfile = useCallback(() => handleManualSave("profile"), [handleManualSave]);
+  const cancelProfile = useCallback(() => handleCancel("profile"), [handleCancel]);
+  const saveAddress = useCallback(() => handleManualSave("address"), [handleManualSave]);
+  const cancelAddress = useCallback(() => handleCancel("address"), [handleCancel]);
+
+  // SaveChangesBar is now defined at module level (see top of file)
 
   useEffect(() => {
     if (!user) return;
@@ -149,18 +478,24 @@ export function AccountPage() {
     }
   };
 
-  // Fallback defaults if auth context or api isn't ready
+  // Display values pulled from auth + real-time profile state
+  const displayName = profileData.firstName
+    ? [profileData.firstName, profileData.lastName].filter(Boolean).join(" ")
+    : user?.name ?? "User";
   const display = {
-    name: user?.name ?? "Natashia Khaleira",
-    role: user?.role ?? "Admin",
-    location: settings?.settings?.location ?? "Leeds, United Kingdom",
-    email: user?.email ?? "info@binary-fusion.com",
-    phone: settings?.settings?.phone ?? "(+62) 821 2554-5846",
-    dob: settings?.settings?.dob ?? "12-10-1990",
-    postal: settings?.settings?.postal ?? "ERT 1254",
-    city: settings?.settings?.city ?? "Leeds, East London",
-    country: settings?.settings?.country ?? "United Kingdom",
+    name: displayName,
+    role: user?.role ?? "Customer",
+    location: [profileData.city, profileData.country].filter(Boolean).join(", ") || "—",
+    email: user?.email ?? "—",
+    phone: profileData.phone || "—",
+    dob: profileData.dob || "—",
+    postal: profileData.postal || "—",
+    city: profileData.city || "—",
+    country: profileData.country || "—",
   };
+
+  // EditableField is now defined at module level (see top of file)
+  // to keep a stable component type reference across renders.
 
   const navItems = [
     { id: "profile", label: "My Profile", icon: User },
@@ -170,6 +505,16 @@ export function AccountPage() {
 
   return (
     <div className="min-h-screen bg-[#F8E8BD] relative">
+      {/* Hidden file input — opens gallery on mobile, file picker on desktop */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+        aria-hidden="true"
+      />
+
       {/* Background Image */}
       <div className="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <Image
@@ -196,12 +541,42 @@ export function AccountPage() {
                   <div className="bg-[#F7F7F5] rounded-2xl shadow-xl p-6 sticky top-24 border border-[#E8D4C4]">
                     {/* User Card */}
                     <div className="text-center pb-6 border-b border-[#E8D4C4]">
-                      <div className="relative inline-block">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] mx-auto flex items-center justify-center">
-                          <span className="text-white text-3xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
-                        </div>
-                        <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
+                      <div className="relative inline-block group">
+                        <button
+                          type="button"
+                          onClick={handleAvatarClick}
+                          className="relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] mx-auto flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#C87536] focus:ring-offset-2"
+                          aria-label="Ubah foto profil"
+                        >
+                          {profilePicture ? (
+                            <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-white text-3xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
+                          )}
+                          {/* Camera overlay on hover */}
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <Camera className="w-7 h-7 text-white" />
+                          </div>
+                          {/* Loading spinner overlay */}
+                          {profilePictureLoading && (
+                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                            </div>
+                          )}
+                        </button>
+                        <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white pointer-events-none"></div>
                       </div>
+                      {profilePictureError && (
+                        <p className="text-xs text-red-600 mt-2">{profilePictureError}</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleAvatarClick}
+                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[#C87536] hover:text-[#A85E2E] transition-colors"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        {isMobile ? "Pilih dari Galeri" : "Upload Foto"}
+                      </button>
                       <h3 className="mt-4 font-bold text-[#4A1D0B] text-lg">{display.name}</h3>
                       <p className="text-sm text-[#8B6F47]">{display.email}</p>
                       <span className="inline-block mt-2 px-3 py-1 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white text-xs font-semibold rounded-full">
@@ -251,9 +626,26 @@ export function AccountPage() {
                       {/* Profile Header Card */}
                       <div className="bg-gradient-to-r from-[#4A1D0B] to-[#6B3A1D] rounded-2xl p-6 text-white shadow-xl">
                         <div className="flex items-center gap-6">
-                          <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center">
-                            <span className="text-white text-2xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAvatarClick}
+                            className="relative w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E8C547] focus:ring-offset-2 focus:ring-offset-[#4A1D0B] group"
+                            aria-label="Ubah foto profil"
+                          >
+                            {profilePicture ? (
+                              <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-white text-2xl font-bold">{display.name?.charAt(0).toUpperCase()}</span>
+                            )}
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <Camera className="w-6 h-6 text-white" />
+                            </div>
+                            {profilePictureLoading && (
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                              </div>
+                            )}
+                          </button>
                           <div className="flex-1">
                             <h2 className="text-2xl font-bold">{display.name}</h2>
                             <p className="text-[#D29A2A]">{display.role}</p>
@@ -262,29 +654,12 @@ export function AccountPage() {
                               {display.location}
                             </div>
                           </div>
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => {}}
-                              className="px-5 py-2.5 bg-[#F8E8BD] text-[#4A1D0B] font-semibold rounded-xl hover:bg-[#E8D4C4] transition-colors shadow-lg"
-                            >
-                              Edit Profile
-                            </button>
-                            <button
-                              disabled={loading}
-                              onClick={() =>
-                                save({
-                                  location: display.location,
-                                  phone: display.phone,
-                                  dob: display.dob,
-                                  postal: display.postal,
-                                  city: display.city,
-                                  country: display.country,
-                                })
-                              }
-                              className="px-5 py-2.5 bg-[#C87536] text-white font-semibold rounded-xl hover:bg-[#A85E2E] transition-colors disabled:opacity-50 shadow-lg"
-                            >
-                              {loading ? "Saving..." : "Save Changes"}
-                            </button>
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F8E8BD]/10 text-[#F8E8BD] text-xs font-medium rounded-xl border border-[#F8E8BD]/20">
+                              <span className="w-2 h-2 bg-[#E8C547] rounded-full"></span>
+                              Manual save
+                            </div>
+                            <p className="text-[10px] text-[#F8E8BD]/60 pr-1">Klik Save Changes untuk menyimpan</p>
                           </div>
                         </div>
                       </div>
@@ -308,50 +683,76 @@ export function AccountPage() {
                             {/* First Name */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">First Name</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
-                                {(display.name || "").split(" ")[0]}
-                              </div>
+                              <EditableField
+                                field="firstName"
+                                value={profileData.firstName}
+                                onChange={handleFieldChange}
+                                placeholder="Nama depan"
+                              />
                             </div>
                             {/* Last Name */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Last Name</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
-                                {(display.name || "").split(" ").slice(1).join(" ")}
-                              </div>
+                              <EditableField
+                                field="lastName"
+                                value={profileData.lastName}
+                                onChange={handleFieldChange}
+                                placeholder="Nama belakang"
+                              />
                             </div>
                             {/* Date of Birth */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Date of Birth</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
-                                <Calendar className="w-4 h-4 text-[#C87536]" />
-                                {display.dob}
-                              </div>
+                              <EditableField
+                                field="dob"
+                                value={profileData.dob}
+                                onChange={handleFieldChange}
+                                type="date"
+                                icon={Calendar}
+                              />
                             </div>
-                            {/* Email */}
+                            {/* Email (read-only) */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Email Address</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
-                                <Mail className="w-4 h-4 text-[#C87536]" />
-                                {display.email}
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C87536]/50" />
+                                <div className="w-full pl-10 pr-4 py-3 bg-[#F8E8BD]/50 border border-[#E8D4C4] rounded-xl text-[#4A1D0B]/70 cursor-not-allowed">
+                                  {display.email}
+                                </div>
                               </div>
+                              <p className="text-[10px] text-[#8B6F47] px-1">Email tidak dapat diubah</p>
                             </div>
                             {/* Phone */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Phone Number</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
-                                <Phone className="w-4 h-4 text-[#C87536]" />
-                                {display.phone}
-                              </div>
+                              <EditableField
+                                field="phone"
+                                value={profileData.phone}
+                                onChange={handleFieldChange}
+                                type="tel"
+                                placeholder="+62 xxx-xxxx-xxxx"
+                                icon={Phone}
+                              />
                             </div>
-                            {/* User Role */}
+                            {/* User Role (read-only) */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">User Role</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium flex items-center gap-2 border border-[#E8D4C4]">
-                                <Shield className="w-4 h-4 text-[#C87536]" />
-                                {display.role}
+                              <div className="relative">
+                                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C87536]/50" />
+                                <div className="w-full pl-10 pr-4 py-3 bg-[#F8E8BD]/50 border border-[#E8D4C4] rounded-xl text-[#4A1D0B]/70 cursor-not-allowed">
+                                  {display.role}
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <SaveChangesBar
+                            section="profile"
+                            dirty={profileDirty}
+                            saving={manualSaving === "profile"}
+                            saved={manualSaved === "profile"}
+                            onSave={saveProfile}
+                            onCancel={cancelProfile}
+                          />
                         </div>
                       </div>
 
@@ -374,25 +775,42 @@ export function AccountPage() {
                             {/* Country */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Country</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
-                                {display.country}
-                              </div>
+                              <EditableField
+                                field="country"
+                                value={profileData.country}
+                                onChange={handleFieldChange}
+                                placeholder="Negara"
+                              />
                             </div>
                             {/* City */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">City</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
-                                {display.city}
-                              </div>
+                              <EditableField
+                                field="city"
+                                value={profileData.city}
+                                onChange={handleFieldChange}
+                                placeholder="Kota"
+                              />
                             </div>
                             {/* Postal Code */}
                             <div className="space-y-2">
                               <label className="text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Postal Code</label>
-                              <div className="px-4 py-3 bg-[#F8E8BD] rounded-xl text-[#4A1D0B] font-medium border border-[#E8D4C4]">
-                                {display.postal}
-                              </div>
+                              <EditableField
+                                field="postal"
+                                value={profileData.postal}
+                                onChange={handleFieldChange}
+                                placeholder="Kode pos"
+                              />
                             </div>
                           </div>
+                          <SaveChangesBar
+                            section="address"
+                            dirty={addressDirty}
+                            saving={manualSaving === "address"}
+                            saved={manualSaved === "address"}
+                            onSave={saveAddress}
+                            onCancel={cancelAddress}
+                          />
                         </div>
                       </div>
 
