@@ -65,7 +65,7 @@ export function Header() {
                            <User className="w-4 h-4" />
                            My Account
                          </Link>
-                          <Link href="/orders" className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50 text-gray-700 font-medium">
+                          <Link href="/account?tab=orders" className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50 text-gray-700 font-medium">
                             <History className="w-4 h-4" />
                             Riwayat Pesanan
                           </Link>
@@ -132,7 +132,7 @@ export function Header() {
                      <User className="w-4 h-4" />
                      Akun Saya
                    </Link>
-                   <Link href="/orders" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium flex items-center gap-2">
+                   <Link href="/account?tab=orders" className="w-full text-left px-4 py-3 rounded-lg hover:bg-amber-50 text-gray-700 font-medium flex items-center gap-2">
                      <History className="w-4 h-4" />
                      Riwayat Pesanan
                    </Link>

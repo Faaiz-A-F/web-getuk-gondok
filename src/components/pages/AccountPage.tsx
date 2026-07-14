@@ -1,10 +1,11 @@
 "use client"
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import MagelangImage from "../../assets/images/magelang fiks.png";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
-import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2 } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2, Truck, DollarSign, Search, Filter, FileText, RefreshCw, X } from "lucide-react";
 
 // ========== Module-level EditableField ==========
 // Defined outside AccountPage so its type reference is stable across renders.
@@ -149,6 +150,28 @@ export function AccountPage() {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "orders" | "password">("profile");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Sync activeTab with ?tab= query param so deep-links like /account?tab=orders work
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "orders" || tab === "password" || tab === "profile") {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  // Helper to switch tab and update the URL (no scroll, replace to avoid history spam)
+  const switchTab = useCallback(
+    (tab: "profile" | "orders" | "password") => {
+      setActiveTab(tab);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", tab);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router, pathname]
+  );
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -248,6 +271,30 @@ export function AccountPage() {
   // Trigger file picker (gallery on mobile, file dialog on desktop)
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
+  };
+
+  // ========== Order History enhanced UI state ==========
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const orderStatusConfig = (status: string) => {
+    const s = status.toLowerCase();
+    switch (s) {
+      case "done":
+      case "delivered":
+        return { label: "Selesai", className: "bg-green-100 text-green-700", dotColor: "bg-green-500" };
+      case "shipped":
+      case "sent":
+        return { label: "Dikirim", className: "bg-amber-100 text-amber-700", dotColor: "bg-amber-500" };
+      case "pending":
+      case "processing":
+      case "paid":
+        return { label: "Diproses", className: "bg-yellow-100 text-yellow-700", dotColor: "bg-yellow-500" };
+      case "cancelled":
+        return { label: "Dibatalkan", className: "bg-red-100 text-red-700", dotColor: "bg-red-500" };
+      default:
+        return { label: status, className: "bg-gray-100 text-gray-700", dotColor: "bg-gray-500" };
+    }
   };
 
   // ========== Real-time editable profile state ==========
@@ -592,7 +639,7 @@ export function AccountPage() {
                         return (
                           <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id as any)}
+                            onClick={() => switchTab(item.id as "profile" | "orders" | "password")}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                               isActive
                                 ? "bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white shadow-lg"
@@ -855,97 +902,232 @@ export function AccountPage() {
 
                   {activeTab === "orders" && (
                     <>
-                      {/* Order History Header */}
-                      <div className="bg-[#F7F7F5] rounded-2xl shadow-lg overflow-hidden border border-[#E8D4C4]">
-                        <div className="px-6 py-5 border-b border-[#E8D4C4] bg-gradient-to-r from-[#F8E8BD] to-transparent">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D29A2A] to-[#C87536] flex items-center justify-center shadow-md">
-                              <Package className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="font-bold text-[#4A1D0B]">Order History</h3>
-                              <p className="text-sm text-[#8B6F47]">Riwayat pesanan Anda</p>
-                            </div>
+                      {/* Order History Page Header */}
+                      <div className="bg-gradient-to-r from-[#7A4A1E] via-[#6B3A1D] to-[#7A4A1E] text-white rounded-2xl shadow-lg p-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-[#D29A2A] flex items-center justify-center shadow-md">
+                            <Package className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h1 className="text-2xl md:text-3xl font-bold">Riwayat Pesanan</h1>
+                            <p className="text-[#F8E8BD]/80 text-sm">Lacak dan kelola semua pesanan Anda</p>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="p-6">
-                          {ordersLoading ? (
-                            <div className="flex items-center justify-center py-12">
-                              <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#F8E8BD] border-t-[#C87536]"></div>
-                            </div>
-                          ) : orders.length === 0 ? (
-                            <div className="text-center py-12">
-                              <div className="w-16 h-16 bg-[#F8E8BD] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#E8D4C4]">
-                                <Package className="w-8 h-8 text-[#C87536]" />
+                      {(() => {
+                        // Filtered orders
+                        const filtered = orders.filter((o) => {
+                          const matchesStatus = statusFilter === "all" || o.status.toLowerCase() === statusFilter.toLowerCase();
+                          const matchesSearch =
+                            searchQuery === "" ||
+                            o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            o.items.some((it) => it.product?.name?.toLowerCase().includes(searchQuery.toLowerCase()));
+                          return matchesStatus && matchesSearch;
+                        });
+
+                        const totalOrders = orders.length;
+                        const pendingOrders = orders.filter((o) => ["pending", "processing", "paid"].includes(o.status.toLowerCase())).length;
+                        const shippedOrders = orders.filter((o) => ["shipped", "sent"].includes(o.status.toLowerCase())).length;
+                        const totalSpent = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+
+                        return (
+                          <div className="space-y-4">
+                            {/* Filter Bar */}
+                            <div className="bg-[#F7F7F5] rounded-2xl shadow-lg p-4 border border-[#E8D4C4]">
+                              <div className="flex flex-col md:flex-row gap-4 items-center">
+                                <div className="flex items-center gap-2">
+                                  <Filter className="w-5 h-5 text-[#C87536]" />
+                                  <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="px-4 py-2.5 bg-[#F8E8BD] border border-[#E8D4C4] rounded-xl text-[#4A1D0B] focus:outline-none focus:ring-2 focus:ring-[#C87536] cursor-pointer"
+                                  >
+                                    <option value="all">Semua Status</option>
+                                    <option value="pending">Diproses</option>
+                                    <option value="shipped">Dikirim</option>
+                                    <option value="done">Selesai</option>
+                                    <option value="cancelled">Dibatalkan</option>
+                                  </select>
+                                </div>
+                                <div className="flex-1 relative">
+                                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8B6F47]" />
+                                  <input
+                                    type="text"
+                                    placeholder="Cari nomor pesanan atau produk..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-2.5 bg-[#F8E8BD] border border-[#E8D4C4] rounded-xl text-[#4A1D0B] placeholder-[#8B6F47] focus:outline-none focus:ring-2 focus:ring-[#C87536]"
+                                  />
+                                  {searchQuery && (
+                                    <button
+                                      onClick={() => setSearchQuery("")}
+                                      className="absolute right-4 top-1/2 -translate-y-1/2"
+                                    >
+                                      <X className="w-4 h-4 text-[#8B6F47] hover:text-[#4A1D0B]" />
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                              <h3 className="text-lg font-semibold text-[#4A1D0B] mb-2">Belum ada pesanan</h3>
-                              <p className="text-sm text-[#8B6F47] mb-4">Anda belum memiliki riwayat pesanan.</p>
-                              <a href="/catalogue" className="inline-block px-6 py-2.5 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-md">
-                                Mulai Belanja
-                              </a>
                             </div>
-                          ) : (
-                            <div className="overflow-x-auto">
-                              <table className="w-full">
-                                <thead>
-                                  <tr className="border-b border-[#E8D4C4]">
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Order ID</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Tanggal</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Items</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Total</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Status</th>
-                                    <th className="text-left py-3 px-4 text-xs font-semibold text-[#8B6F47] uppercase tracking-wider">Pembayaran</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {orders.map((order) => (
-                                    <tr key={order.id} className="border-b border-[#E8D4C4] hover:bg-[#F8E8BD] transition-colors">
-                                      <td className="py-4 px-4">
-                                        <span className="font-mono text-sm font-medium text-[#C87536]">{order.orderNumber}</span>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <div className="flex items-center gap-2 text-sm text-[#4A1D0B]">
-                                          <Clock className="w-4 h-4 text-[#C87536]" />
-                                          {formatDate(order.createdAt)}
+
+                            {/* Stats Cards */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-md border border-[#E8D4C4] hover:shadow-lg transition-shadow">
+                                <div className="w-12 h-12 bg-[#F8E8BD] rounded-xl flex items-center justify-center mb-3">
+                                  <Package className="w-6 h-6 text-[#C87536]" />
+                                </div>
+                                <p className="text-3xl font-bold text-[#4A1D0B]">{totalOrders}</p>
+                                <p className="text-sm text-[#8B6F47]">Total Pesanan</p>
+                              </div>
+                              <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-md border border-[#E8D4C4] hover:shadow-lg transition-shadow">
+                                <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-3">
+                                  <Clock className="w-6 h-6 text-yellow-600" />
+                                </div>
+                                <p className="text-3xl font-bold text-[#4A1D0B]">{pendingOrders}</p>
+                                <p className="text-sm text-[#8B6F47]">Sedang Diproses</p>
+                              </div>
+                              <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-md border border-[#E8D4C4] hover:shadow-lg transition-shadow">
+                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
+                                  <Truck className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <p className="text-3xl font-bold text-[#4A1D0B]">{shippedOrders}</p>
+                                <p className="text-sm text-[#8B6F47]">Dalam Pengiriman</p>
+                              </div>
+                              <div className="bg-[#F7F7F5] rounded-2xl p-5 shadow-md border border-[#E8D4C4] hover:shadow-lg transition-shadow">
+                                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
+                                  <DollarSign className="w-6 h-6 text-green-600" />
+                                </div>
+                                <p className="text-xl md:text-2xl font-bold text-[#4A1D0B]">
+                                  {totalSpent >= 1000000
+                                    ? `Rp ${(totalSpent / 1000000).toFixed(1)}M`
+                                    : formatPrice(totalSpent)}
+                                </p>
+                                <p className="text-sm text-[#8B6F47]">Total Belanja</p>
+                              </div>
+                            </div>
+
+                            {/* Order List */}
+                            {ordersLoading ? (
+                              <div className="flex items-center justify-center py-16 bg-[#F7F7F5] rounded-2xl shadow-md border border-[#E8D4C4]">
+                                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#F8E8BD] border-t-[#C87536]"></div>
+                              </div>
+                            ) : filtered.length === 0 ? (
+                              <div className="text-center py-16 bg-[#F7F7F5] rounded-2xl shadow-md border border-[#E8D4C4]">
+                                <div className="w-24 h-24 bg-[#F8E8BD] rounded-full flex items-center justify-center mx-auto mb-6">
+                                  <Package className="w-12 h-12 text-[#C87536]" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-[#4A1D0B] mb-2">Belum ada pesanan</h3>
+                                <p className="text-[#8B6F47] mb-6">
+                                  {searchQuery || statusFilter !== "all"
+                                    ? "Tidak ada pesanan yang cocok dengan filter Anda"
+                                    : "Mulai belanja untuk melihat pesanan di sini"}
+                                </p>
+                                <a
+                                  href="/catalogue"
+                                  className="inline-block px-8 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] hover:opacity-90 text-white font-semibold rounded-full transition-all shadow-lg"
+                                >
+                                  Mulai Belanja
+                                </a>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {filtered.map((order) => {
+                                  const statusConfig = orderStatusConfig(order.status);
+                                  return (
+                                    <article
+                                      key={order.id}
+                                      className="bg-[#F7F7F5] rounded-2xl shadow-md border border-[#E8D4C4] overflow-hidden hover:shadow-lg transition-all"
+                                    >
+                                      {/* Order Header */}
+                                      <div className="p-5 bg-gradient-to-r from-[#F8E8BD] to-white border-b border-[#E8D4C4]">
+                                        <div className="flex flex-wrap justify-between items-start gap-4">
+                                          <div>
+                                            <h3 className="text-lg font-bold text-[#4A1D0B]">{order.orderNumber}</h3>
+                                            <div className="flex items-center gap-4 mt-2 text-sm text-[#8B6F47]">
+                                              <span className="flex items-center gap-1">
+                                                <Clock className="w-4 h-4" />
+                                                {formatDate(order.createdAt)}
+                                              </span>
+                                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                order.paymentStatus === "PAID"
+                                                  ? "bg-green-100 text-green-700"
+                                                  : order.paymentStatus === "UNPAID"
+                                                  ? "bg-yellow-100 text-yellow-700"
+                                                  : "bg-gray-100 text-gray-700"
+                                              }`}>
+                                                {order.paymentStatus === "PAID" ? "Lunas" : order.paymentStatus}
+                                              </span>
+                                            </div>
+                                          </div>
+                                          <span
+                                            className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${statusConfig.className}`}
+                                          >
+                                            <span className={`w-2 h-2 rounded-full ${statusConfig.dotColor}`}></span>
+                                            {statusConfig.label}
+                                          </span>
                                         </div>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <div className="text-sm text-[#4A1D0B]">
-                                          {order.items && order.items.length > 0 ? (
-                                            <span>{order.items.length} item{order.items.length > 1 ? "s" : ""}</span>
-                                          ) : (
-                                            <span>-</span>
+                                      </div>
+
+                                      {/* Order Items */}
+                                      <div className="p-5">
+                                        <div className="space-y-3">
+                                          {order.items.map((item) => (
+                                            <div key={item.id} className="flex items-center gap-4 p-3 bg-[#F8E8BD] rounded-xl">
+                                              <div className="w-14 h-14 bg-[#E8D4C4] rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                <Package className="w-6 h-6 text-[#8B6F47]" />
+                                              </div>
+                                              <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-[#4A1D0B] truncate">{item.product?.name || "Produk"}</p>
+                                                <p className="text-sm text-[#8B6F47]">
+                                                  Qty: {item.quantity} × {formatPrice(Number(item.price))}
+                                                </p>
+                                              </div>
+                                              <p className="font-bold text-[#4A1D0B]">{formatPrice(Number(item.subtotal))}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+
+                                      {/* Order Footer */}
+                                      <div className="px-5 py-4 bg-[#F8E8BD] border-t border-[#E8D4C4] flex flex-wrap justify-between items-center gap-4">
+                                        <div>
+                                          <p className="text-xs text-[#8B6F47] uppercase tracking-wide">Total Pesanan</p>
+                                          <p className="text-2xl font-bold text-[#4A1D0B]">{formatPrice(Number(order.totalAmount))}</p>
+                                        </div>
+                                        <div className="flex gap-2 flex-wrap">
+                                          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8D4C4] text-[#4A1D0B] rounded-xl hover:bg-[#E8D4C4]/40 transition-colors font-medium">
+                                            <FileText className="w-4 h-4" />
+                                            Detail
+                                          </button>
+                                          {order.status.toLowerCase() === "done" && (
+                                            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white rounded-xl hover:opacity-90 transition-opacity font-medium">
+                                              <RefreshCw className="w-4 h-4" />
+                                              Beli Lagi
+                                            </button>
+                                          )}
+                                          {(order.status.toLowerCase() === "shipped" || order.status.toLowerCase() === "sent") && (
+                                            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white rounded-xl hover:opacity-90 transition-opacity font-medium">
+                                              <Truck className="w-4 h-4" />
+                                              Lacak
+                                            </button>
+                                          )}
+                                          {order.status.toLowerCase() === "pending" && (
+                                            <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium">
+                                              <X className="w-4 h-4" />
+                                              Batalkan
+                                            </button>
                                           )}
                                         </div>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <span className="font-semibold text-[#C87536]">{formatPrice(Number(order.totalAmount))}</span>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                                          {order.status}
-                                        </span>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                                          order.paymentStatus === "PAID" 
-                                            ? "bg-green-100 text-green-700" 
-                                            : order.paymentStatus === "UNPAID"
-                                            ? "bg-yellow-100 text-yellow-700"
-                                            : "bg-gray-100 text-gray-700"
-                                        }`}>
-                                          {order.paymentStatus}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                                      </div>
+                                    </article>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </>
                   )}
 

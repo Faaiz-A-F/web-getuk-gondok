@@ -135,12 +135,12 @@ export function HeaderLandingPage() {
               </Link>
 
               <Link
-                href="/orders"
+                href="/account?tab=orders"
                 onClick={closeMenu}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-amber-50 hover:text-amber-800 font-medium transition-all duration-200"
               >
                 <History className="w-5 h-5" />
-                <span>History Pemesanan</span>
+                <span>Riwayat Pemesanan</span>
               </Link>
 
               <Link
