@@ -449,7 +449,17 @@ export function AboutUsPage() {
                         href={location.googleMapsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#E86A17] text-white text-sm font-semibold transition-all duration-300 hover:bg-[#3D2314] hover:gap-3 shadow-md shadow-[#E86A17]/20"
+                        style={{
+                          backgroundColor: isProduction ? "#E86A17" : "#3D2314",
+                          boxShadow: isProduction ? "0 4px 6px rgba(232, 106, 23, 0.2)" : "0 4px 6px rgba(61, 35, 20, 0.2)",
+                        }}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:gap-3"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = isProduction ? "#3D2314" : "#E86A17";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = isProduction ? "#E86A17" : "#3D2314";
+                        }}
                       >
                         <Navigation className="w-4 h-4" />
                         Buka di Google Maps
