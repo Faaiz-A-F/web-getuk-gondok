@@ -35,11 +35,9 @@ export function AboutUsPage() {
       
       <main>
         {/* ========== HERO SECTION — EDITORIAL/ABOUT STYLE ========== */}
-        <section className="relative min-h-[85vh] flex items-center bg-[#FAF3E8] overflow-hidden">
-          {/* Decorative background elements */}
-          <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-[#F5EBE0] to-transparent pointer-events-none"></div>
-          <div className="absolute top-20 left-10 w-72 h-72 bg-[#E8C547]/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#E86A17]/5 rounded-full blur-3xl"></div>
+        <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+          {/* Gradient background from white top to cream bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white via-[#F8F4F0] to-[#FAF3E8]"></div>
           
           {/* Decorative line */}
           <div className="absolute top-32 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#5C3D28]/20 to-transparent"></div>
@@ -56,13 +54,13 @@ export function AboutUsPage() {
               <div className="lg:col-span-7">
                 {/* Main headline */}
                 <h1 className="font-['Playfair_Display'] text-5xl sm:text-6xl lg:text-7xl font-bold text-[#3D2314] leading-[1.05] mb-6">
-                  Kisah di Balik
-                  <span className="block text-[#E86A17]">Setiap Gigitan</span>
+                  Cerita di Balik
+                  <span className="block text-[#E86A17]">Getuk Gondok</span>
                 </h1>
                 
                 {/* Story intro */}
                 <p className="font-['Playfair_Display'] text-xl text-[#5C3D28] leading-relaxed mb-8 max-w-xl">
-                  Lebih dari sekadar makanan, Getuk Gondok adalah cerita tentang keluarga, tradisi, dan kecintaan yang tak pernah padam terhadap cita rasa autentik khas Magelang.
+                  Getuk Gondok Hj. Sri Rahayu merupakan usaha keluarga yang menjaga resep warisan dengan bahan-bahan pilihan dan proses pembuatan yang telah dipercaya lintas generasi. Sejak tahun 1985, kami terus berkomitmen menghadirkan cita rasa autentik khas Magelang dengan kualitas yang konsisten.
                 </p>
                 
                 {/* Year badge */}
