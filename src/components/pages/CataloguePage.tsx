@@ -8,6 +8,8 @@ import { CartContext } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { RatingDisplay } from "@/components/review/RatingDisplay";
+import { ProductReviewsModal } from "@/components/review/ProductReviewsModal";
 
 // Types for database products
 interface DbProduct {
@@ -73,6 +75,7 @@ const PICKUP_OPTIONS = [
 export function CataloguePage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"default" | "top-rated" | "most-reviewed">("default");
   const [cartLines, setCartLines] = useState<CartLine[]>([]);
   const [pickupLocation, setPickupLocation] = useState<(typeof PICKUP_OPTIONS)[number]["id"]>("rumah-produksi");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -83,6 +86,12 @@ export function CataloguePage() {
   const [dbProducts, setDbProducts] = useState<DbProduct[]>([]);
   const [dbCategories, setDbCategories] = useState<DbCategory[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Rating state: productId -> { avg, total }
+  const [ratings, setRatings] = useState<Record<string, { avg: number; total: number }>>({});
+
+  // Product reviews modal state
+  const [reviewsModalProduct, setReviewsModalProduct] = useState<DbProduct | null>(null);
 
   const router = useRouter();
   const { addItem } = useContext(CartContext) || {};
@@ -117,6 +126,25 @@ export function CataloguePage() {
     fetchData();
   }, []);
 
+  // Fetch aggregate ratings for all products in a single request
+  useEffect(() => {
+    fetch("/api/reviews?all=true")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.summary)) {
+          const map: Record<string, { avg: number; total: number }> = {};
+          data.summary.forEach((row: { productId: string; _avg: { rating: number | null }; _count: { _all: number } }) => {
+            map[row.productId] = {
+              avg: row._avg?.rating ?? 0,
+              total: row._count?._all ?? 0,
+            };
+          });
+          setRatings(map);
+        }
+      })
+      .catch((e) => console.error("Error fetching ratings:", e));
+  }, []);
+
   // Transform database products to component format
   const products: Product[] = dbProducts.map((p) => ({
     id: p.id,
@@ -149,7 +177,19 @@ export function CataloguePage() {
 
   const filteredProducts = products
     .filter((product) => selectedCategory === "All" || product.category === selectedCategory)
-    .filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+    .filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase().trim()))
+    .sort((a, b) => {
+      if (sortBy === "top-rated") {
+        const aRating = ratings[a.id]?.avg ?? 0;
+        const bRating = ratings[b.id]?.avg ?? 0;
+        if (bRating !== aRating) return bRating - aRating;
+        return (ratings[b.id]?.total ?? 0) - (ratings[a.id]?.total ?? 0);
+      }
+      if (sortBy === "most-reviewed") {
+        return (ratings[b.id]?.total ?? 0) - (ratings[a.id]?.total ?? 0);
+      }
+      return 0;
+    });
 
   // Panel dibuka begitu produk pertama ditambahkan, dan tetap terbuka
   // selama masih ada isi keranjang supaya user bisa terus menambah
@@ -278,20 +318,36 @@ export function CataloguePage() {
         </div>
 
         {/* Filter Kategori */}
-        <div className="mt-8 flex overflow-x-auto pb-3 -mx-4 px-4 md:mx-0 md:px-0 hide-scrollbar gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all ${
-                selectedCategory === cat
-                  ? "bg-amber-700 text-white shadow-md"
-                  : "bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:bg-amber-50"
-              }`}
+        <div className="mt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex overflow-x-auto pb-3 -mx-4 px-4 md:mx-0 md:px-0 hide-scrollbar gap-2 flex-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                  selectedCategory === cat
+                    ? "bg-amber-700 text-white shadow-md"
+                    : "bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:bg-amber-50"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs text-gray-500 font-medium hidden sm:inline">Urutkan:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="px-4 py-2 rounded-full text-sm font-semibold bg-white border border-gray-200 text-gray-700 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 cursor-pointer hover:border-amber-300"
             >
-              {cat}
-            </button>
-          ))}
+              <option value="default">Default</option>
+              <option value="top-rated">⭐ Rating Tertinggi</option>
+              <option value="most-reviewed">💬 Paling Banyak Ulasan</option>
+            </select>
+          </div>
         </div>
 
         {/*
@@ -302,6 +358,75 @@ export function CataloguePage() {
         */}
         <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className={isPanelMounted ? "lg:col-span-8" : "lg:col-span-12"}>
+            {/* Top Rated Featured Section */}
+            {!loading && (() => {
+              const topRated = Object.entries(ratings)
+                .filter(([, r]) => r.total > 0)
+                .sort((a, b) => {
+                  if (b[1].avg !== a[1].avg) return b[1].avg - a[1].avg;
+                  return b[1].total - a[1].total;
+                })
+                .slice(0, 5)
+                .map(([pid, r]) => {
+                  const product = dbProducts.find((p) => p.id === pid);
+                  if (!product) return null;
+                  const primaryImage =
+                    product.images?.find((img) => img.isPrimary)?.url ||
+                    product.images?.[0]?.url ||
+                    "/products/placeholder.webp";
+                  return { product, rating: r, image: primaryImage };
+                })
+                .filter((x): x is NonNullable<typeof x> => x !== null);
+
+              if (topRated.length === 0) return null;
+
+              return (
+                <section className="mb-10 p-6 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 rounded-3xl border border-amber-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+                        ⭐ Produk Terbaik
+                      </p>
+                      <h2 className="text-2xl font-black text-amber-950 mt-1">
+                        Favorit Pelanggan
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {topRated.map(({ product, rating, image }) => (
+                      <button
+                        key={product.id}
+                        onClick={() => setReviewsModalProduct(product)}
+                        className="text-left bg-white rounded-2xl shadow-sm hover:shadow-lg transition overflow-hidden group"
+                      >
+                        <div className="relative aspect-square bg-gray-100 overflow-hidden">
+                          <Image
+                            src={image}
+                            alt={product.name}
+                            fill
+                            sizes="(max-width: 640px) 50vw, 20vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-bold text-gray-900 line-clamp-1">
+                            {product.name}
+                          </p>
+                          <div className="mt-1">
+                            <RatingDisplay
+                              rating={rating.avg}
+                              totalReviews={rating.total}
+                              size="sm"
+                            />
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
+
             {/* Loading State */}
             {loading && (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -324,39 +449,60 @@ export function CataloguePage() {
             {/* Products Grid */}
             {!loading && (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent"
-                  >
-                    <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
+                {filteredProducts.map((product) => {
+                  const ratingInfo = ratings[product.id];
+                  const hasReviews = ratingInfo && ratingInfo.total > 0;
+                  const dbProduct = dbProducts.find((p) => p.id === product.id);
+                  return (
+                    <div
+                      key={product.id}
+                      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent"
+                    >
+                      <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        {hasReviews && ratingInfo.avg >= 4.5 && (
+                          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-amber-500 text-white text-xs font-bold shadow-md flex items-center gap-1">
+                            ⭐ Favorit
+                          </span>
+                        )}
+                      </div>
 
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
-                      <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{product.description}</p>
-
-                      <div className="flex items-center justify-between mt-auto">
-                        <span className="text-lg font-black text-amber-700">{formatPrice(product.price)}</span>
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
                         <button
-                          onClick={() => handleAddProduct(product)}
-                          className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-colors"
-                          aria-label={`Tambah ${product.name}`}
+                          onClick={() => dbProduct && setReviewsModalProduct(dbProduct)}
+                          className="mb-2 inline-flex items-center hover:opacity-80 transition"
+                          aria-label={`Lihat ulasan ${product.name}`}
                         >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
+                          <RatingDisplay
+                            rating={ratingInfo?.avg ?? 0}
+                            totalReviews={ratingInfo?.total ?? 0}
+                            size="sm"
+                          />
                         </button>
+                        <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">{product.description}</p>
+
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="text-lg font-black text-amber-700">{formatPrice(product.price)}</span>
+                          <button
+                            onClick={() => handleAddProduct(product)}
+                            className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-colors"
+                            aria-label={`Tambah ${product.name}`}
+                          >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -520,6 +666,16 @@ export function CataloguePage() {
       </div>
 
       <Footer />
+
+      {/* Product Reviews Modal */}
+      {reviewsModalProduct && (
+        <ProductReviewsModal
+          open={true}
+          onClose={() => setReviewsModalProduct(null)}
+          productId={reviewsModalProduct.id}
+          productName={reviewsModalProduct.name}
+        />
+      )}
 
       {/* Login Required Modal */}
       {showLoginModal && (

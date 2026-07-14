@@ -46,6 +46,7 @@ model User {
   adminLogs    AdminLog[]
   siteContents SiteContent[]
   userSettings UserSetting[]
+  reviews      Review[]
 }
 
 model Category {
@@ -72,6 +73,7 @@ model Product {
   category    Category       @relation(fields: [categoryId], references: [id])
   images      ProductImage[]
   orderItems  OrderItem[]
+  reviews     Review[]
 }
 
 model ProductImage {
@@ -102,6 +104,7 @@ model Order {
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderItem[]
   adminLogs  AdminLog[]
+  reviews    Review[]
 }
 
 model OrderItem {
@@ -152,4 +155,27 @@ model UserSetting {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5
+  comment   String?  @db.Text
+  photos    Json     @default("[]") // array of base64 / URL strings
+  videoUrl  String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, orderId]) // one review per user per product per order
+  @@index([productId])
+  @@index([userId])
 }

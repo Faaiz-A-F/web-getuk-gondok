@@ -5,7 +5,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import MagelangImage from "../../assets/images/magelang fiks.png";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
-import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2, Truck, DollarSign, Search, Filter, FileText, RefreshCw, X } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2, Truck, DollarSign, Search, Filter, FileText, RefreshCw, X, Star } from "lucide-react";
+import { ReviewModal } from "@/components/review/ReviewModal";
 
 // ========== Module-level EditableField ==========
 // Defined outside AccountPage so its type reference is stable across renders.
@@ -206,6 +207,20 @@ export function AccountPage() {
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+
+  // ========== Review State ==========
+  // Tracks which products in DONE orders have already been reviewed
+  // Keyed by `${orderId}::${productId}` so the same product in different
+  // orders is tracked separately.
+  const [reviewedItems, setReviewedItems] = useState<Set<string>>(new Set());
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewTarget, setReviewTarget] = useState<{
+    productId: string;
+    productName: string;
+    productImage: string;
+    orderId: string;
+    orderNumber: string;
+  } | null>(null);
 
   // Profile picture state
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -498,6 +513,46 @@ export function AccountPage() {
         .finally(() => setOrdersLoading(false));
     }
   }, [activeTab, user]);
+
+  // Fetch which items have already been reviewed by this user
+  // so we can show the "Sudah Diulas" badge and hide the review button
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/reviews?userId=${user.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.reviews)) {
+          const set = new Set<string>();
+          data.reviews.forEach((r: { productId: string; orderId: string }) => {
+            set.add(`${r.orderId}::${r.productId}`);
+          });
+          setReviewedItems(set);
+        }
+      })
+      .catch((e) => console.error("Error fetching user reviews:", e));
+  }, [user]);
+
+  // Helper: open the review modal for a specific item
+  const handleOpenReview = (order: Order, item: OrderItem) => {
+    setReviewTarget({
+      productId: item.productId,
+      productName: item.product?.name || "Produk",
+      productImage: "", // The product's own image is fetched from db, but we pass empty here as fallback
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+    });
+    setReviewModalOpen(true);
+  };
+
+  // When a review is submitted, mark the item as reviewed locally
+  const handleReviewSubmitted = () => {
+    if (!reviewTarget) return;
+    setReviewedItems((prev) => {
+      const next = new Set(prev);
+      next.add(`${reviewTarget.orderId}::${reviewTarget.productId}`);
+      return next;
+    });
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -1072,20 +1127,40 @@ export function AccountPage() {
                                       {/* Order Items */}
                                       <div className="p-5">
                                         <div className="space-y-3">
-                                          {order.items.map((item) => (
-                                            <div key={item.id} className="flex items-center gap-4 p-3 bg-[#F8E8BD] rounded-xl">
-                                              <div className="w-14 h-14 bg-[#E8D4C4] rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
-                                                <Package className="w-6 h-6 text-[#8B6F47]" />
+                                          {order.items.map((item) => {
+                                            const isDone = order.status.toLowerCase() === "done";
+                                            const isReviewed = reviewedItems.has(`${order.id}::${item.productId}`);
+                                            return (
+                                              <div key={item.id} className="flex items-center gap-4 p-3 bg-[#F8E8BD] rounded-xl">
+                                                <div className="w-14 h-14 bg-[#E8D4C4] rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                  <Package className="w-6 h-6 text-[#8B6F47]" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                  <p className="font-semibold text-[#4A1D0B] truncate">{item.product?.name || "Produk"}</p>
+                                                  <p className="text-sm text-[#8B6F47]">
+                                                    Qty: {item.quantity} × {formatPrice(Number(item.price))}
+                                                  </p>
+                                                  {isDone && isReviewed && (
+                                                    <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                                      <Check className="w-3 h-3" /> Sudah Diulas
+                                                    </span>
+                                                  )}
+                                                </div>
+                                                <div className="flex flex-col items-end gap-1.5">
+                                                  <p className="font-bold text-[#4A1D0B]">{formatPrice(Number(item.subtotal))}</p>
+                                                  {isDone && !isReviewed && (
+                                                    <button
+                                                      onClick={() => handleOpenReview(order, item)}
+                                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition shadow-sm"
+                                                    >
+                                                      <Star className="w-3.5 h-3.5 fill-current" />
+                                                      Beri Ulasan
+                                                    </button>
+                                                  )}
+                                                </div>
                                               </div>
-                                              <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-[#4A1D0B] truncate">{item.product?.name || "Produk"}</p>
-                                                <p className="text-sm text-[#8B6F47]">
-                                                  Qty: {item.quantity} × {formatPrice(Number(item.price))}
-                                                </p>
-                                              </div>
-                                              <p className="font-bold text-[#4A1D0B]">{formatPrice(Number(item.subtotal))}</p>
-                                            </div>
-                                          ))}
+                                            );
+                                          })}
                                         </div>
                                       </div>
 
@@ -1254,6 +1329,24 @@ export function AccountPage() {
           </main>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {reviewModalOpen && reviewTarget && user && (
+        <ReviewModal
+          open={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setReviewTarget(null);
+          }}
+          userId={user.id}
+          productId={reviewTarget.productId}
+          productName={reviewTarget.productName}
+          productImage={reviewTarget.productImage}
+          orderId={reviewTarget.orderId}
+          orderNumber={reviewTarget.orderNumber}
+          onSubmitted={handleReviewSubmitted}
+        />
+      )}
 
       {/* Cancel Order Confirmation Modal */}
       {cancelModalOpen && orderToCancel && (
