@@ -16,23 +16,23 @@ export type MapLocation = {
 
 export const locations: MapLocation[] = [
   {
+    id: "toko",
+    name: "Toko Getuk Gondok Hj. Sri Rahayu",
+    role: "Toko",
+    address: "Jl. Mataram No.9A, Rejowinangun Sel., Kec. Magelang Sel., Kota Magelang, Jawa Tengah 56172 Indonesia",
+    lat: -7.4849762,
+    lng: 110.2215611,
+    googleMapsUrl: "https://maps.app.goo.gl/tiqgnVgum8UKeagD9",
+  },
+  {
     id: "rumah-produksi",
     name: "Rumah Produksi Getuk Gondok",
     role: "Rumah Produksi",
-    address: "G643+24F, Karet, Bulurejo, Mertoyudan, Kabupaten Magelang, Jawa Tengah 56172",
+    address: "G643+24F, Nepak, Bulurejo, Kec. Mertoyudan, Kabupaten Magelang, Jawa Tengah 56571 Indonesia",
     lat: -7.4941075,
     lng: 110.2015508,
     googleMapsUrl:
       "https://www.google.com/maps/search/?api=1&query=G643%2B24F+Karet+Bulurejo+Mertoyudan+Magelang",
-  },
-  {
-    id: "toko",
-    name: "Toko Getuk Gondok Hj. Sri Rahayu",
-    role: "Toko",
-    address: "Jl. Mataram No.9A, Rejowinangun Sel., Kec. Magelang Sel., Kota Magelang, Jawa Tengah 56172",
-    lat: -7.4849762,
-    lng: 110.2215611,
-    googleMapsUrl: "https://maps.app.goo.gl/tiqgnVgum8UKeagD9",
   },
 ];
 
