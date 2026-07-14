@@ -265,7 +265,7 @@ export function AboutUsPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#3D2314]/60 via-transparent to-[#3D2314]/20 pointer-events-none"></div>
 
                   {/* Play Button */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="relative w-22 h-22 bg-[#E86A17] rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#E8C547] shadow-2xl" style={{width: '88px', height: '88px'}}>
                       <svg className="w-9 h-9 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                         <polygon points="5,3 19,12 5,21" />
