@@ -1055,86 +1055,8 @@ const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | n
     );
   }
 
-  const highlightProducts = siteContent['highlight'] || [];
-  const heroSection = siteContent['hero'] || [];
-
   return (
     <div className="space-y-6">
-      {/* Highlight Products */}
-      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl">
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-amber-950">Highlight Products</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Konfigurasi produk yang ditampilkan di halaman utama</p>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shadow-inner">
-            <Package size={20} />
-          </div>
-        </div>
-        {highlightProducts.length > 0 ? (
-          <div className="space-y-4">
-            {highlightProducts.map((item, index) => (
-              <div key={item.id} className="group/item relative overflow-hidden rounded-xl border border-amber-100/60 bg-gradient-to-r from-amber-50/50 to-white/50 p-4 transition-all duration-300 hover:border-amber-200 hover:bg-amber-50/70">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold shadow-md">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-sm font-semibold text-slate-700">{item.label}</label>
-                    <input
-                      type="text"
-                      defaultValue={item.value}
-                      onBlur={(e) => onUpdate(item.key, e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border-2 border-amber-200 bg-white px-4 py-2.5 text-slate-700 outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-200 placeholder:text-slate-400"
-                      placeholder="Product ID atau slug"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-12">
-            <Package size={40} className="text-amber-300" />
-            <p className="text-sm text-slate-500">Belum ada produk highlight dikonfigurasi</p>
-          </div>
-        )}
-      </div>
-
-      {/* Hero Section */}
-      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl">
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-amber-950">Hero Section</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Kelola konten bagian utama website</p>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600 shadow-inner">
-            <LayoutDashboard size={20} />
-          </div>
-        </div>
-        {heroSection.length > 0 ? (
-          <div className="space-y-4">
-            {heroSection.map((item) => (
-              <div key={item.id} className="group/item relative overflow-hidden rounded-xl border border-amber-100/60 bg-gradient-to-r from-amber-50/50 to-white/50 p-4 transition-all duration-300 hover:border-amber-200 hover:bg-amber-50/70">
-                <label className="mb-2 block text-sm font-semibold text-slate-700">{item.label}</label>
-                <textarea
-                  defaultValue={item.value}
-                  onBlur={(e) => onUpdate(item.key, e.target.value)}
-                  className="w-full rounded-lg border-2 border-amber-200 bg-white px-4 py-2.5 text-slate-700 outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-200 resize-none placeholder:text-slate-400"
-                  rows={3}
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-12">
-            <LayoutDashboard size={40} className="text-amber-300" />
-            <p className="text-sm text-slate-500">Belum ada konten hero section</p>
-          </div>
-        )}
-      </div>
 
       {/* Review Selection Section */}
       <ReviewSelectionContent onSave={() => {}} />
