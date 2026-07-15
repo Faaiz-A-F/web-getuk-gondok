@@ -43,6 +43,11 @@ const publicPaths = [
   '/public',
 ]
 
+// Static asset extensions served from /public — must bypass auth so the
+// Next.js image optimizer can fetch them without being redirected to /login.
+const staticAssetPattern =
+  /\.(png|jpe?g|webp|gif|svg|ico|bmp|avif|woff2?|ttf|otf|eot|css|js|json|mp3|wav|ogg|m4a|mp4|webm|pdf|zip|txt|xml)$/i
+
 // Paths that require admin access
 const adminPaths = [
   '/admin',
@@ -50,7 +55,8 @@ const adminPaths = [
 ]
 
 function isPublicPath(pathname: string): boolean {
-  return publicPaths.some(path => 
+  if (staticAssetPattern.test(pathname)) return true
+  return publicPaths.some(path =>
     pathname === path || pathname.startsWith(path + '/')
   )
 }
