@@ -11,6 +11,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
     }
 
+    // Check if user exists first
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const setting = await prisma.userSetting.upsert({
       where: { userId },
       update: {},
@@ -42,6 +48,12 @@ export async function POST(req: Request) {
     // Limit raw payload size (~5MB base64)
     if (image.length > 7 * 1024 * 1024) {
       return NextResponse.json({ error: "Image too large" }, { status: 413 });
+    }
+
+    // Check if user exists first
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const existing = await prisma.userSetting.upsert({

@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { setUser, setSessionId } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +35,10 @@ export default function LoginPage() {
         return;
       }
 
-      // Store user data using AuthContext (this will also update localStorage)
+      // Store session ID and user data from response
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
       setUser(data.user);
       
       // Redirect based on role

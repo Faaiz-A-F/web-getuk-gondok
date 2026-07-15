@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { createSession, destroySession, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session'
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, email, password, name, phone, address } = await request.json()
+    const { action, email, password, name, phone, address, sessionId } = await request.json()
 
     if (action === 'register') {
       // Validate required fields
@@ -98,20 +99,105 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Return user data (in production, you would generate a JWT token here)
-      return NextResponse.json({
+      // Create session
+      const newSessionId = await createSession({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        phone: user.phone,
+      })
+
+      // Create response with user data and set session cookie
+      const response = NextResponse.json({
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          phone: user.phone,
         },
+        sessionId: newSessionId, // Return session ID for client-side use
         message: 'Login successful'
       })
+
+      // Set the session cookie
+      response.cookies.set(SESSION_COOKIE_NAME, newSessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: SESSION_MAX_AGE,
+        path: '/',
+      })
+
+      return response
+    }
+
+    if (action === 'logout') {
+      // Validate session ID
+      if (!sessionId) {
+        return NextResponse.json(
+          { error: 'Session ID is required' },
+          { status: 400 }
+        )
+      }
+
+      // Destroy the session
+      await destroySession(sessionId)
+
+      // Create response and clear the session cookie
+      const response = NextResponse.json({
+        message: 'Logout successful'
+      })
+
+      // Clear the session cookie
+      response.cookies.delete(SESSION_COOKIE_NAME)
+
+      return response
+    }
+
+    if (action === 'validate') {
+      // This endpoint is used to validate and refresh session from client
+      if (!sessionId) {
+        return NextResponse.json(
+          { valid: false },
+          { status: 200 }
+        )
+      }
+
+      // Import validateSession dynamically to avoid circular imports
+      const { validateSession } = await import('@/lib/session')
+      const user = await validateSession(sessionId)
+
+      if (!user) {
+        const response = NextResponse.json({ valid: false })
+        response.cookies.delete(SESSION_COOKIE_NAME)
+        return response
+      }
+
+      // Refresh session
+      const { refreshSession } = await import('@/lib/session')
+      await refreshSession(sessionId)
+
+      const response = NextResponse.json({
+        valid: true,
+        user
+      })
+
+      // Set updated cookie
+      response.cookies.set(SESSION_COOKIE_NAME, sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: SESSION_MAX_AGE,
+        path: '/',
+      })
+
+      return response
     }
 
     return NextResponse.json(
-      { error: 'Invalid action. Use "login" or "register"' },
+      { error: 'Invalid action. Use "login", "register", "logout", or "validate"' },
       { status: 400 }
     )
   } catch (error) {

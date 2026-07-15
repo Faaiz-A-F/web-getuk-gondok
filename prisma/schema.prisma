@@ -47,6 +47,20 @@ model User {
   siteContents SiteContent[]
   userSettings UserSetting[]
   reviews      Review[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  data      String   @db.LongText // JSON string with user data
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Category {

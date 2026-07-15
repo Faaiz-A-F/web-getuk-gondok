@@ -162,7 +162,7 @@ export function LandingPage() {
     <div className="min-h-screen bg-neutral-50 font-['Playfair_Display'] transition-colors duration-300 selection:bg-amber-200 selection:text-amber-900">
       <HeaderLandingPage />
 
-      <section className="relative overflow-hidden bg-amber-950 text-white shadow-[0_20px_60px_rgba(79,17,67,41.28)]">
+      <section className="relative overflow-hidden bg-amber-950 text-white">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
           <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-800 blur-3xl opacity-50"></div>
           <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-700 blur-3xl opacity-40"></div>
