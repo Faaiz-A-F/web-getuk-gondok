@@ -2212,7 +2212,7 @@ export function AdminDashboardPage() {
             storeOrders,
             houseOrders,
             totalRevenue,
-            totalProductsSold: todayOrders.length * 3, // Mock: 3 products per order
+            totalProductsSold: todayOrders.length,
           });
         }
       } catch (error) {
