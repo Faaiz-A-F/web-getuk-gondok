@@ -11,7 +11,7 @@ export function Footer() {
                       <Image src="/logo/13.png" alt="Logo" 
                       width={100} height={100} className="object-contain" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white">Getuk Gondok</h3>
+                    <h3 className="text-2xl font-bold text-white">Getuk Gondok Hj. Sri Rahayu </h3>
                   </div>
                   <p className="text-sm leading-relaxed">
                     Pusat oleh-oleh khas Magelang yang mengutamakan resep warisan, bahan pilihan, dan cita rasa autentik sejak 1985.
