@@ -7,6 +7,7 @@ import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage"; // us
 import { Footer } from "@/components/layout/Footer";
 import { formatPrice } from "@/lib/utils/formatPrice";
 import { Heading4 } from "lucide-react";
+import { ReviewCarousel } from "@/components/ui/ReviewCarousel";
 
 const products = [
   { id: "1", name: "Tumpeng Hias", category: "Special", image: "/nobg/1.webp", price: 75000, description: "Tumpeng hias premium untuk acara spesial" },
@@ -400,17 +401,7 @@ export function LandingPage() {
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-8 lg:grid-cols-3">
-            {testimonials.map((item) => (
-              <div key={item.name} className="rounded-3xl border border-white/10 bg-white/10 p-7 text-left backdrop-blur-sm shadow-[0_16px_40px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out hover:-translate-y-1 hover:bg-white/15">
-                <p className="text-sm leading-7 text-amber-50">“{item.quote}”</p>
-                <div className="mt-6">
-                  <div className="font-semibold text-white">{item.name}</div>
-                  <div className="text-sm text-amber-200">{item.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ReviewCarousel />
         </div>
       </section>
 

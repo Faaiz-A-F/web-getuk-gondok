@@ -31,6 +31,7 @@ import {
   Filter,
   XCircle,
   FileDown,
+  Star,
 } from "lucide-react";
 import {
   Area,
@@ -863,6 +864,188 @@ const FinancialContent = ({ orders }: { orders: Order[] }) => {
   );
 };
 
+interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  user: { id: string; name: string };
+  product: { id: string; name: string };
+  isSelected?: boolean;
+}
+
+const ReviewSelectionContent = ({ onSave }: { onSave: (reviewIds: string[]) => void }) => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch('/api/reviews/all');
+        const data = await response.json();
+        if (response.ok) {
+          setReviews(data.reviews || []);
+          const selected = (data.reviews || []).filter((r: Review) => r.isSelected).map((r: Review) => r.id);
+          setSelectedIds(new Set(selected));
+        }
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  const toggleReview = (reviewId: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(reviewId)) {
+      newSelected.delete(reviewId);
+    } else {
+      newSelected.add(reviewId);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleSave = async () => {
+    const userData = localStorage.getItem('user');
+    if (!userData) return;
+
+    const user = JSON.parse(userData);
+    setSaving(true);
+
+    try {
+      const response = await fetch('/api/reviews/all', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.id}`,
+        },
+        body: JSON.stringify({ reviewIds: Array.from(selectedIds) }),
+      });
+
+      if (response.ok) {
+        onSave(Array.from(selectedIds));
+        alert('Review selection saved successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to save review selection');
+      }
+    } catch (error) {
+      console.error('Failed to save review selection:', error);
+      alert('Failed to save review selection');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            size={14}
+            className={star <= rating ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
+        <p className="text-gray-500">Loading reviews...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 p-6 shadow-lg transition-all duration-500 hover:shadow-xl">
+        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-100/40 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-amber-950">Pilih Review untuk Landing Page</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Pilih review yang akan ditampilkan di halaman utama</p>
+          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shadow-inner">
+            <Star size={20} />
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold text-amber-600">{selectedIds.size}</span> review dipilih
+          </p>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-700 disabled:opacity-50"
+          >
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
+        </div>
+      </div>
+
+      {/* Reviews List */}
+      {reviews.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {reviews.map((review) => (
+            <div
+              key={review.id}
+              onClick={() => toggleReview(review.id)}
+              className={`cursor-pointer overflow-hidden rounded-2xl border-2 p-4 transition-all duration-300 ${
+                selectedIds.has(review.id)
+                  ? "border-amber-500 bg-amber-50 shadow-md"
+                  : "border-amber-200 bg-white hover:border-amber-300 hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                    selectedIds.has(review.id)
+                      ? "border-amber-500 bg-amber-500"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
+                  {selectedIds.has(review.id) && <Check size={14} className="text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-semibold text-slate-800 truncate">{review.user.name}</div>
+                    {renderStars(review.rating)}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">{review.product.name}</div>
+                  <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+                    {review.comment || "Tanpa komentar"}
+                  </p>
+                  <div className="mt-2 text-xs text-slate-400">
+                    {new Date(review.createdAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-12">
+          <Star size={40} className="text-amber-300" />
+          <p className="text-sm text-slate-500">Belum ada review untuk dipilih</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | null; onUpdate: (key: string, value: string) => void }) => {
   if (!siteContent) {
     return (
@@ -952,6 +1135,9 @@ const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | n
           </div>
         )}
       </div>
+
+      {/* Review Selection Section */}
+      <ReviewSelectionContent onSave={() => {}} />
     </div>
   );
 };
