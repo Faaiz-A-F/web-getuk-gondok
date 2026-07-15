@@ -14,7 +14,7 @@ export function Footer() {
                     <h3 className="text-2xl font-bold text-white">Getuk Gondok</h3>
                   </div>
                   <p className="text-sm leading-relaxed">
-                    Pusat oleh-oleh khas Magelang yang memadukan resep tradisional dengan kualitas modern sejak 1985.
+                    Pusat oleh-oleh khas Magelang yang mengutamakan resep warisan, bahan pilihan, dan cita rasa autentik sejak 1985.
                   </p>
                 </div>
     
