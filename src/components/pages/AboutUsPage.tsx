@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Play, Clock, Award, Layers, CheckCircle, Package, Heart, Shield, Star, Sparkles, Leaf, MapPin, Navigation, Factory, Store } from "lucide-react";
@@ -9,19 +9,11 @@ import { locations } from "@/components/map/LocationMap";
 
 export function AboutUsPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const modalVideoRef = useRef<HTMLVideoElement>(null);
-  const previewVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Path to the video file (public/Video)
-  const videoSrc = "/Video/getuk-gondok-video.mp4";
-
-  // Pause video when modal closes
-  useEffect(() => {
-    if (!videoModalOpen && modalVideoRef.current) {
-      modalVideoRef.current.pause();
-      modalVideoRef.current.currentTime = 0;
-    }
-  }, [videoModalOpen]);
+  // YouTube video configuration
+  const youtubeVideoId = "nXypsMvwwAE";
+  const youtubePreviewSrc = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&modestbranding=1&rel=0&playsinline=1`;
+  const youtubeModalSrc = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&rel=0&modestbranding=1`;
 
   // About us images
   const aboutImages = [
@@ -252,15 +244,12 @@ export function AboutUsPage() {
                 <div className="lg:sticky lg:top-24 z-10">
                 <div className="relative rounded-3xl overflow-hidden aspect-video bg-gradient-to-br from-[#5C3D28] to-[#2A1810] group cursor-pointer" onClick={() => setVideoModalOpen(true)}>
                   {/* Video Preview (muted, autoplay, loop) */}
-                  <video
-                    ref={previewVideoRef}
-                    src={videoSrc}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    muted
-                    autoPlay
-                    loop
-                    playsInline
-                    preload="metadata"
+                  <iframe
+                    src={youtubePreviewSrc}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    title="Video Pembuatan Getuk Gondok"
                   />
 
                   {/* Overlay gradient for better text contrast */}
@@ -495,16 +484,13 @@ export function AboutUsPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <video
-              ref={modalVideoRef}
-              src={videoSrc}
-              className="w-full h-full object-contain bg-black"
-              controls
-              autoPlay
-              playsInline
-            >
-              Browser Anda tidak mendukung tag video.
-            </video>
+            <iframe
+              src={youtubeModalSrc}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              title="Video Pembuatan Getuk Gondok"
+            />
           </div>
         </div>
       )}
