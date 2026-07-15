@@ -1,7 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { createSession, destroySession, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session'
+import { SignJWT, jwtVerify } from 'jose'
+
+// Session configuration
+export const SESSION_COOKIE_NAME = 'session'
+export const SESSION_MAX_AGE = 60 * 60 * 24 // 24 hours in seconds
+
+// JWT Secret
+const getSecret = () => {
+  const secret = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production'
+  return new TextEncoder().encode(secret)
+}
+
+// User type
+interface SessionUser {
+  id: string
+  email: string
+  name: string
+  role: string
+  phone?: string | null
+}
+
+// Create JWT token
+async function createJWT(user: SessionUser): Promise<string> {
+  const secret = getSecret()
+  const expiresAt = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE
+  
+  return await new SignJWT({ user })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(expiresAt)
+    .setJti(crypto.randomUUID())
+    .sign(secret)
+}
+
+// Validate JWT token
+async function validateJWT(token: string): Promise<SessionUser | null> {
+  try {
+    const secret = getSecret()
+    const { payload } = await jwtVerify(token, secret)
+    const sessionData = payload as unknown as { user: SessionUser; exp: number }
+    if (!sessionData.exp || sessionData.exp < Math.floor(Date.now() / 1000)) {
+      return null
+    }
+    return sessionData.user
+  } catch {
+    return null
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,8 +146,8 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Create session
-      const newSessionId = await createSession({
+      // Create JWT token
+      const token = await createJWT({
         id: user.id,
         email: user.email,
         name: user.name,
@@ -117,12 +164,12 @@ export async function POST(request: NextRequest) {
           role: user.role,
           phone: user.phone,
         },
-        sessionId: newSessionId, // Return session ID for client-side use
+        sessionId: token,
         message: 'Login successful'
       })
 
       // Set the session cookie
-      response.cookies.set(SESSION_COOKIE_NAME, newSessionId, {
+      response.cookies.set(SESSION_COOKIE_NAME, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -134,50 +181,31 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'logout') {
-      // Validate session ID
-      if (!sessionId) {
-        return NextResponse.json(
-          { error: 'Session ID is required' },
-          { status: 400 }
-        )
-      }
-
-      // Destroy the session
-      await destroySession(sessionId)
-
-      // Create response and clear the session cookie
+      // Just clear the cookie - JWT doesn't need server-side invalidation
+      // (it will expire naturally)
       const response = NextResponse.json({
         message: 'Logout successful'
       })
 
-      // Clear the session cookie
       response.cookies.delete(SESSION_COOKIE_NAME)
 
       return response
     }
 
     if (action === 'validate') {
-      // This endpoint is used to validate and refresh session from client
+      // Validate existing session
       if (!sessionId) {
-        return NextResponse.json(
-          { valid: false },
-          { status: 200 }
-        )
+        return NextResponse.json({ valid: false })
       }
 
-      // Import validateSession dynamically to avoid circular imports
-      const { validateSession } = await import('@/lib/session')
-      const user = await validateSession(sessionId)
+      const user = await validateJWT(sessionId)
 
       if (!user) {
-        const response = NextResponse.json({ valid: false })
-        response.cookies.delete(SESSION_COOKIE_NAME)
-        return response
+        return NextResponse.json({ valid: false })
       }
 
-      // Refresh session
-      const { refreshSession } = await import('@/lib/session')
-      await refreshSession(sessionId)
+      // Create new token with fresh expiration
+      const newToken = await createJWT(user)
 
       const response = NextResponse.json({
         valid: true,
@@ -185,7 +213,7 @@ export async function POST(request: NextRequest) {
       })
 
       // Set updated cookie
-      response.cookies.set(SESSION_COOKIE_NAME, sessionId, {
+      response.cookies.set(SESSION_COOKIE_NAME, newToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

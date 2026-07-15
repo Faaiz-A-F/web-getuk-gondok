@@ -24,20 +24,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Session cookie name (must match the one in session.ts)
+// Session cookie name
 const SESSION_COOKIE_NAME = "session";
 const SESSION_STORAGE_KEY = "session_id";
 const USER_STORAGE_KEY = "user";
-// Session refresh interval in milliseconds (30 minutes)
-const SESSION_REFRESH_INTERVAL = 30 * 60 * 1000;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(null);
   const [sessionId, setSessionIdState] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSessionExpired, setIsSessionExpired] = useState(false);
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastActivityRef = useRef<number>(Date.now());
 
   // Function to get session cookie
   const getSessionCookie = useCallback((): string | null => {
@@ -50,127 +46,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   }, []);
 
-  // Function to set session cookie
-  const setSessionCookie = useCallback((id: string) => {
-    if (typeof document === "undefined") return;
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toUTCString();
-    document.cookie = `${SESSION_COOKIE_NAME}=${id}; expires=${expires}; path=/; SameSite=Lax`;
-  }, []);
-
   // Function to delete session cookie
   const deleteSessionCookie = useCallback(() => {
     if (typeof document === "undefined") return;
     document.cookie = `${SESSION_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
   }, []);
 
-  // Refresh session from server
-  const refreshSessionFromServer = useCallback(async () => {
-    const currentSessionId = sessionId || getSessionCookie();
-    if (!currentSessionId) return;
-
-    try {
-      const response = await fetch("/api/auth", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          action: "validate",
-          sessionId: currentSessionId,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.valid && data.user) {
-        setUserState(data.user);
-        setSessionIdState(currentSessionId);
-        setIsSessionExpired(false);
-        // Update cookie with fresh expiration
-        setSessionCookie(currentSessionId);
-      } else {
-        // Session invalid or expired
-        setUserState(null);
-        setSessionIdState(null);
-        setIsSessionExpired(true);
-        deleteSessionCookie();
-      }
-    } catch (error) {
-      console.error("Failed to refresh session:", error);
-    }
-  }, [sessionId, getSessionCookie, setSessionCookie, deleteSessionCookie]);
-
-  // Validate session on mount
+  // Initialize user from localStorage on mount
+  // (middleware validates JWT on each request)
   useEffect(() => {
-    const validateSessionOnLoad = async () => {
-      const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-      const storedSessionId = localStorage.getItem(SESSION_STORAGE_KEY);
-      const cookieSessionId = getSessionCookie();
+    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+    const storedSessionId = localStorage.getItem(SESSION_STORAGE_KEY);
+    const cookieSessionId = getSessionCookie();
 
-      // Use cookie session ID if available, otherwise use stored one
-      const currentSessionId = cookieSessionId || storedSessionId;
+    // Use cookie session ID if available, otherwise use stored one
+    const currentSessionId = cookieSessionId || storedSessionId;
 
-      if (currentSessionId) {
+    if (storedUser && currentSessionId) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserState(parsedUser);
         setSessionIdState(currentSessionId);
-        await refreshSessionFromServer();
-      } else if (storedUser) {
-        // No valid session but has stored user - clear it
+      } catch {
+        // Invalid stored data
         localStorage.removeItem(USER_STORAGE_KEY);
         localStorage.removeItem(SESSION_STORAGE_KEY);
       }
+    }
 
-      setIsLoaded(true);
-    };
-
-    validateSessionOnLoad();
-  }, [getSessionCookie, refreshSessionFromServer]);
+    setIsLoaded(true);
+  }, [getSessionCookie]);
 
   // Derive isLoggedIn from user state
   const isLoggedIn = !!user;
-
-  // Set up periodic session refresh
-  useEffect(() => {
-    if (isLoggedIn && sessionId) {
-      // Refresh session every 30 minutes
-      refreshIntervalRef.current = setInterval(() => {
-        refreshSessionFromServer();
-      }, SESSION_REFRESH_INTERVAL);
-
-      return () => {
-        if (refreshIntervalRef.current) {
-          clearInterval(refreshIntervalRef.current);
-        }
-      };
-    }
-  }, [isLoggedIn, sessionId, refreshSessionFromServer]);
-
-  // Track user activity to refresh session
-  useEffect(() => {
-    if (!isLoggedIn) return;
-
-    const activityEvents = ["mousedown", "keydown", "scroll", "touchstart"];
-
-    const handleActivity = () => {
-      const now = Date.now();
-      // Only refresh if more than 5 minutes since last activity
-      if (now - lastActivityRef.current > 5 * 60 * 1000) {
-        lastActivityRef.current = now;
-        refreshSessionFromServer();
-      }
-    };
-
-    // Add activity listeners
-    activityEvents.forEach((event) => {
-      window.addEventListener(event, handleActivity, { passive: true });
-    });
-
-    return () => {
-      activityEvents.forEach((event) => {
-        window.removeEventListener(event, handleActivity);
-      });
-    };
-  }, [isLoggedIn, refreshSessionFromServer]);
 
   const setUser = (newUser: User | null) => {
     setUserState(newUser);
@@ -185,10 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionIdState(newSessionId);
     if (newSessionId) {
       localStorage.setItem(SESSION_STORAGE_KEY, newSessionId);
-      setSessionCookie(newSessionId);
     } else {
       localStorage.removeItem(SESSION_STORAGE_KEY);
-      deleteSessionCookie();
     }
   };
 
@@ -217,15 +123,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(USER_STORAGE_KEY);
     localStorage.removeItem(SESSION_STORAGE_KEY);
     deleteSessionCookie();
-
-    // Clear refresh interval
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-    }
   };
 
   const refreshSession = async () => {
-    await refreshSessionFromServer();
+    // JWT validation is handled by middleware on each request
+    // This function is kept for compatibility but does nothing
+    // The middleware automatically validates and refreshes the JWT
   };
 
   // Show loading state until we've checked session
