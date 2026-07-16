@@ -286,8 +286,15 @@ export function LandingPage() {
                 className="group relative w-full max-w-none overflow-hidden rounded-4xl border border-[#d89a34]/35 bg-[#5a2500] px-6 py-8 text-left shadow-[0_24px_60px_rgba(90,37,0,0.28)] text-[#d89a34] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_30px_70px_rgba(90,37,0,0.34)] sm:px-8 sm:py-10 lg:min-h-[22rem]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#6b2c00]/95 via-transparent to-[#7a3a07]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,220,160,0.12),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_38%)]" />
-
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,  rgba(169, 110, 7, 0.12),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_38%)]" />
+                <Image
+                              src="design bg/gunungan.svg"
+                              alt="Latar belakang produk Getuk Gondok"
+                              fill
+                              priority
+                              sizes="45"
+                              className="object-cover object-center"
+                            />
                 <div className="relative z-10 flex h-full min-h-[18rem] flex-col justify-between gap-6 sm:min-h-[20rem] lg:min-h-[22rem]">
                   <div className="space-y-3">
                     <div className="text-3xl font-semibold tracking-[0.15em] uppercase">Since</div>
@@ -413,7 +420,7 @@ export function LandingPage() {
               alt="Latar belakang produk Getuk Gondok"
               fill
               priority
-              sizes="100vw"
+              sizes="50vw"
               className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-amber-950/80 via-amber-900/70 to-orange-800/70" />

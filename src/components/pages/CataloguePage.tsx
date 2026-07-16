@@ -292,9 +292,10 @@ export function CataloguePage() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Section Atas: Judul & Form Pencarian */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-neutral-200 pb-8">
-          <div className="space-y-4">
+          <div className="space-y-3">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">Katalog Produk</p>
             <h1 className="text-4xl font-black tracking-tight text-amber-950">Getuk Gondok</h1>
+            <h2 className="text-3xl font-brown tracking-tight text-amber-900">Hj. Sri Rahayu</h2>
             <p className="max-w-xl text-base leading-relaxed text-neutral-600">
               Cari dan temukan hidangan tumpeng hias, jajanan pasar tradisional, serta opsi packaging terbaik untuk momen spesial Anda.
             </p>
