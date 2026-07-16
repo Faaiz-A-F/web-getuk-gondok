@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage"; // use this version for the landing page header instead of the default Header component
 import { Footer } from "@/components/layout/Footer";
 import { formatPrice } from "@/lib/utils/formatPrice";
-import { Factory, MapPin, Navigation, Store } from "lucide-react";
+import { ChevronDown, Factory, MapPin, Navigation, Store } from "lucide-react";
 import { ReviewCarousel } from "@/components/ui/ReviewCarousel";
 import { LocationMapClient } from "@/components/map/LocationMapClient";
 import { locations } from "@/components/map/LocationMap";
@@ -92,11 +92,47 @@ const testimonials = [
   },
 ];
 
+const faqs = [
+  {
+    question: "Bagaimana cara memesan produk Getuk Gondok?",
+    answer: "Anda dapat memesan dengan mudah melalui website ini. Pilih produk favorit di katalog, tambahkan ke keranjang, lalu lanjutkan ke proses checkout. Untuk pesanan khusus seperti hampers, parcel, atau jumlah besar, silakan hubungi kami melalui WhatsApp untuk konsultasi lebih lanjut.",
+  },
+  {
+    question: "Apakah ada minimal pemesanan?",
+    answer: "Tidak ada minimal pemesanan untuk sebagian besar produk di katalog. Namun, untuk pesanan khusus seperti hampers, parcel, atau pesanan untuk acara besar, ketentuan jumlah minimum dapat disesuaikan dengan kebutuhan dan budget Anda. Hubungi kami untuk informasi lebih detail.",
+  },
+  {
+    question: "Berapa lama masa simpan produk?",
+    answer: "Getuk segar dapat bertahan 2-3 hari pada suhu ruang dan hingga 1 minggu jika disimpan di dalam kulkas. Untuk kue kering dan produk kemasan lainnya, masa simpan dapat mencapai 2-4 minggu. Kami sarankan untuk mengonsumsi produk sesegera mungkin untuk menikmati kualitas rasa terbaik.",
+  },
+  {
+    question: "Apakah produk menggunakan bahan pengawet?",
+    answer: "Tidak. Semua produk Getuk Gondok Hj. Sri Rahayu diolah secara alami tanpa bahan pengawet buatan. Kami hanya menggunakan bahan-bahan pilihan berkualitas, sehingga produk aman dan sehat untuk dinikmati oleh seluruh keluarga.",
+  },
+  {
+    question: "Apakah melayani pengiriman ke luar kota?",
+    answer: "Ya, kami melayani pengiriman ke berbagai kota di seluruh Indonesia. Pengiriman dilakukan melalui ekspedisi terpercaya dengan estimasi waktu yang bervariasi tergantung lokasi tujuan. Untuk informasi ongkos kirim dan jadwal pengiriman, silakan hubungi kami melalui WhatsApp.",
+  },
+  {
+    question: "Metode pembayaran apa saja yang tersedia?",
+    answer: "Kami menerima pembayaran melalui transfer bank, e-wallet (OVO, GoPay, DANA, ShopeePay), serta QRIS. Detail pembayaran dan instruksi lengkap akan diberikan setelah pesanan Anda dikonfirmasi oleh tim kami.",
+  },
+  {
+    question: "Apakah bisa request packaging atau hampers custom?",
+    answer: "Tentu saja! Kami menerima pesanan custom untuk hampers, parcel, dan packaging khusus untuk berbagai momen seperti pernikahan, ulang tahun, hari raya, anniversary, maupun acara korporat. Tim kami siap membantu mendesain kemasan yang sesuai dengan kebutuhan dan budget Anda.",
+  },
+  {
+    question: "Bagaimana jika produk yang diterima tidak sesuai atau rusak?",
+    answer: "Kepuasan pelanggan adalah prioritas kami. Apabila produk yang Anda terima tidak sesuai pesanan atau mengalami kerusakan selama pengiriman, mohon segera menghubungi kami melalui WhatsApp dengan menyertakan foto produk. Tim kami akan segera menindaklanjuti dengan solusi terbaik, termasuk penggantian produk atau pengembalian dana.",
+  },
+];
+
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [heroProductIndex, setHeroProductIndex] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const historyCardRef = useRef<HTMLDivElement | null>(null);
 
@@ -138,6 +174,10 @@ export function LandingPage() {
 
   const goToNextHeroProduct = () => {
     setHeroProductIndex((currentIndex) => (currentIndex + 1) % heroProducts.length);
+  };
+
+  const toggleFaq = (index: number) => {
+    setOpenFaqIndex((current) => (current === index ? null : index));
   };
 
   const toggleBackgroundAudio = async () => {
@@ -484,6 +524,63 @@ export function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" className="bg-amber-50/50 py-20 sm:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">
+              Pertanyaan yang Sering Diajukan
+            </p>
+            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight text-neutral-900">
+              Pertanyaan Umum Seputar Produk dan Pemesanan
+            </h2>
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-neutral-600 max-w-2xl mx-auto">
+              Temukan jawaban atas pertanyaan yang sering diajukan pelanggan tentang produk, pemesanan, dan layanan kami.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <div
+                  key={faq.question}
+                  className="overflow-hidden rounded-2xl border border-amber-200/70 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleFaq(index)}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-panel-${index}`}
+                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-amber-50/50"
+                  >
+                    <span className="text-base sm:text-lg font-semibold text-neutral-900">
+                      {faq.question}
+                    </span>
+                    <ChevronDown
+                      className={`h-5 w-5 flex-shrink-0 text-amber-700 transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <div
+                    id={`faq-panel-${index}`}
+                    className={`grid transition-all duration-300 ease-out ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-6 pb-5 text-sm sm:text-base leading-relaxed text-neutral-600">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
