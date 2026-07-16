@@ -70,6 +70,7 @@ interface Order {
   totalAmount: number;
   paymentStatus: string;
   createdAt: string;
+  preparationDate?: string | null;
   user: { 
     name: string; 
     email: string;
@@ -78,6 +79,7 @@ interface Order {
   };
   items: Array<{ quantity: number; price: number; subtotal?: number; note?: string | null; product: { name: string } }>;
   notes?: string | null;
+  pickupLocation?: string | null;
 }
 
 interface SiteContent {
@@ -485,6 +487,17 @@ const OrderDetailModal = ({
   );
 };
 
+const PICKUP_LOCATION_MAP: Record<string, { label: string; address: string }> = {
+  "rumah-produksi": {
+    label: "Rumah Produksi",
+    address: "G643+24F, Karet, Bulurejo, Mertoyudan, Magelang Regency, Central Java 56172",
+  },
+  "toko": {
+    label: "Toko",
+    address: "Jl. Mataram No.9A, Rejowinangun Sel., Kec. Magelang Sel., Kota Magelang, Jawa Tengah 56172",
+  },
+};
+
 const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt, onViewDetail }: { 
   orders: Order[]; 
   loading: boolean;
@@ -493,7 +506,6 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt, onView
   onViewDetail: (order: Order) => void;
 }) => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [dateFilter, setDateFilter] = useState<string>(new Date().toISOString().split('T')[0]);
   
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -519,21 +531,29 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt, onView
     }
   };
 
-  // Filter orders based on selected status and date
+  const getPickupInfo = (pickupLocation: string | null | undefined) => {
+    if (!pickupLocation) return { label: "Tidak Diketahui", address: "-" };
+    return PICKUP_LOCATION_MAP[pickupLocation] || { label: pickupLocation, address: "-" };
+  };
+
+  // Filter orders based on selected status only (no date filter)
   const filteredOrders = orders.filter(order => {
-    const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
     const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
-    const matchesDate = orderDate === dateFilter;
-    return matchesStatus && matchesDate;
+    return matchesStatus;
   });
 
-  // Count orders by status for the selected date
+  // Separate orders by pickup location
+  const tokoOrders = filteredOrders.filter(o => o.pickupLocation === 'toko');
+  const rumahProduksiOrders = filteredOrders.filter(o => o.pickupLocation === 'rumah-produksi');
+  const otherOrders = filteredOrders.filter(o => !o.pickupLocation || (o.pickupLocation !== 'toko' && o.pickupLocation !== 'rumah-produksi'));
+
+  // Count orders by status (all orders, not filtered by date)
   const orderCounts = {
-    ALL: orders.filter(o => new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
-    PENDING: orders.filter(o => o.status === 'PENDING' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
-    PAID: orders.filter(o => o.status === 'PAID' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
-    DONE: orders.filter(o => o.status === 'DONE' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
-    CANCELLED: orders.filter(o => o.status === 'CANCELLED' && new Date(o.createdAt).toISOString().split('T')[0] === dateFilter).length,
+    ALL: filteredOrders.length,
+    PENDING: filteredOrders.filter(o => o.status === 'PENDING').length,
+    PAID: filteredOrders.filter(o => o.status === 'PAID').length,
+    DONE: filteredOrders.filter(o => o.status === 'DONE').length,
+    CANCELLED: filteredOrders.filter(o => o.status === 'CANCELLED').length,
   };
 
   if (loading) {
@@ -544,173 +564,198 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt, onView
     );
   }
 
-  return (
-    <div className="overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 shadow-lg transition-all duration-500">
-      {/* Header */}
-      <div className="border-b border-amber-100/60 bg-gradient-to-r from-amber-50/80 to-white/80 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-amber-950">Daftar Pesanan</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Kelola semua pesanan pelanggan</p>
+  // Helper to render orders table for a specific location
+  const renderOrdersTable = (ordersToRender: Order[], locationLabel: string, icon: React.ReactNode) => {
+    if (ordersToRender.length === 0) return null;
+    
+    return (
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg">
+            {icon}
           </div>
-          <div className="flex items-center gap-3">
-            {/* Date Filter */}
-            <div className="flex items-center gap-2 bg-white rounded-xl border-2 border-amber-200 px-4 py-2 shadow-sm">
-              <Calendar size={18} className="text-amber-600" />
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="text-sm font-medium text-slate-700 bg-transparent outline-none cursor-pointer"
-              />
-            </div>
-            <span className="flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-700">
-              <Receipt size={18} />
-              {filteredOrders.length} Pesanan
-            </span>
+          <div>
+            <h3 className="text-lg font-bold text-amber-950">{locationLabel}</h3>
+            <p className="text-xs text-slate-500">{ordersToRender.length} pesanan</p>
           </div>
         </div>
-        
-        {/* Status Filter */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Filter size={14} />
-            <span>Filter Status:</span>
+        <div className="overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 shadow-lg transition-all duration-500">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-amber-50 to-amber-100/30">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Order Number</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Customer</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Total</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Date</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-amber-100/50">
+                {ordersToRender.map((order, index) => (
+                  <tr key={order.id} className="group transition-all duration-300 hover:bg-amber-50/50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-700 font-bold text-sm shadow-inner">
+                          {index + 1}
+                        </div>
+                        <span className="font-semibold text-slate-800 text-sm">{order.orderNumber}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-slate-500 to-slate-600 font-semibold text-white text-sm">
+                          {order.user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-800 text-sm">{order.user.name}</div>
+                          <div className="text-xs text-slate-400">{order.user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold leading-tight shadow-sm ${getStatusColor(order.status)}`}>
+                        {order.status === 'PENDING' && <Clock size={12} />}
+                        {order.status === 'PAID' && <DollarSign size={12} />}
+                        {order.status === 'DONE' && <Check size={12} />}
+                        {order.status === 'CANCELLED' && <XCircle size={12} />}
+                        {getStatusLabel(order.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">{formatCurrency(order.totalAmount)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-col gap-1 text-sm text-slate-500">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={14} />
+                          {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                        </div>
+                        {order.preparationDate && (
+                          <div className="flex items-center gap-1.5 text-amber-600">
+                            <Clock size={14} />
+                            Ambil: {new Date(order.preparationDate).toLocaleDateString('id-ID')}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <select
+                            value={order.status}
+                            onChange={(e) => {
+                              const newStatus = e.target.value;
+                              if (newStatus !== order.status) {
+                                if (newStatus === 'CANCELLED') {
+                                  if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
+                                    onUpdateStatus(order.id, newStatus);
+                                  }
+                                } else {
+                                  onUpdateStatus(order.id, newStatus);
+                                }
+                              }
+                            }}
+                            className={`appearance-none rounded-xl px-3 py-2 pr-8 text-xs font-semibold border-2 cursor-pointer transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1 ${getStatusColor(order.status)} border-transparent hover:border-opacity-50`}
+                            style={{ minWidth: '120px' }}
+                          >
+                            <option value="PENDING" className="bg-amber-50 text-amber-800">⏳ Menunggu</option>
+                            <option value="PAID" className="bg-blue-50 text-blue-800">💰 Dibayar</option>
+                            <option value="DONE" className="bg-emerald-50 text-emerald-800">✅ Selesai</option>
+                            <option value="CANCELLED" className="bg-red-50 text-red-800">❌ Batal</option>
+                          </select>
+                          <ChevronRight size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none rotate-90 opacity-70" />
+                        </div>
+                        <button
+                          onClick={() => onViewDetail(order)}
+                          className="group/btn rounded-xl px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 font-semibold text-sm"
+                          title="Lihat Detail"
+                        >
+                          <FileBarChart size={18} />
+                          <span>Detail</span>
+                        </button>
+                        <button
+                          onClick={() => onPrintReceipt(order)}
+                          className="group/btn rounded-xl px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 font-semibold text-sm"
+                          title="Download PDF Struk"
+                        >
+                          <FileDown size={18} />
+                          <span>PDF</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          {[
-            { value: 'ALL', label: `Semua (${orderCounts.ALL})` },
-            { value: 'PENDING', label: `Menunggu (${orderCounts.PENDING})` },
-            { value: 'PAID', label: `Dibayar (${orderCounts.PAID})` },
-            { value: 'DONE', label: `Selesai (${orderCounts.DONE})` },
-            { value: 'CANCELLED', label: `Batal (${orderCounts.CANCELLED})` },
-          ].map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => setStatusFilter(filter.value)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
-                statusFilter === filter.value
-                  ? 'bg-amber-600 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="overflow-hidden rounded-2xl border border-amber-200/60 bg-white/95 shadow-lg transition-all duration-500 mb-6">
+        <div className="border-b border-amber-100/60 bg-gradient-to-r from-amber-50/80 to-white/80 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-amber-950">Daftar Pesanan</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Kelola semua pesanan pelanggan</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-700">
+                <Receipt size={18} />
+                {filteredOrders.length} Pesanan
+              </span>
+            </div>
+          </div>
+          
+          {/* Status Filter */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Filter size={14} />
+              <span>Filter Status:</span>
+            </div>
+            {[
+              { value: 'ALL', label: `Semua (${orderCounts.ALL})` },
+              { value: 'PENDING', label: `Menunggu (${orderCounts.PENDING})` },
+              { value: 'PAID', label: `Dibayar (${orderCounts.PAID})` },
+              { value: 'DONE', label: `Selesai (${orderCounts.DONE})` },
+              { value: 'CANCELLED', label: `Batal (${orderCounts.CANCELLED})` },
+            ].map((filter) => (
+              <button
+                key={filter.value}
+                onClick={() => setStatusFilter(filter.value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                  statusFilter === filter.value
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gradient-to-r from-amber-50 to-amber-100/30">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Order Number</th>
-              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Customer</th>
-              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Status</th>
-              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Total</th>
-              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Date</th>
-              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-amber-800">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-amber-100/50">
-            {filteredOrders.map((order, index) => (
-              <tr key={order.id} className="group transition-all duration-300 hover:bg-amber-50/50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-600/10 text-amber-700 font-bold text-sm shadow-inner">
-                      {index + 1}
-                    </div>
-                    <span className="font-semibold text-slate-800 text-sm">{order.orderNumber}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-slate-500 to-slate-600 font-semibold text-white text-sm">
-                      {order.user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="font-medium text-slate-800 text-sm">{order.user.name}</div>
-                      <div className="text-xs text-slate-400">{order.user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold leading-tight shadow-sm ${getStatusColor(order.status)}`}>
-                    {order.status === 'PENDING' && <Clock size={12} />}
-                    {order.status === 'PAID' && <DollarSign size={12} />}
-                    {order.status === 'DONE' && <Check size={12} />}
-                    {order.status === 'CANCELLED' && <XCircle size={12} />}
-                    {getStatusLabel(order.status)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-600">{formatCurrency(order.totalAmount)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-1.5 text-sm text-slate-500">
-                    <Calendar size={14} />
-                    {new Date(order.createdAt).toLocaleDateString('id-ID')}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <select
-                        value={order.status}
-                        onChange={(e) => {
-                          const newStatus = e.target.value;
-                          if (newStatus !== order.status) {
-                            if (newStatus === 'CANCELLED') {
-                              if (confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) {
-                                onUpdateStatus(order.id, newStatus);
-                              }
-                            } else {
-                              onUpdateStatus(order.id, newStatus);
-                            }
-                          }
-                        }}
-                        className={`appearance-none rounded-xl px-3 py-2 pr-8 text-xs font-semibold border-2 cursor-pointer transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1 ${getStatusColor(order.status)} border-transparent hover:border-opacity-50`}
-                        style={{ minWidth: '120px' }}
-                      >
-                        <option value="PENDING" className="bg-amber-50 text-amber-800">⏳ Menunggu</option>
-                        <option value="PAID" className="bg-blue-50 text-blue-800">💰 Dibayar</option>
-                        <option value="DONE" className="bg-emerald-50 text-emerald-800">✅ Selesai</option>
-                        <option value="CANCELLED" className="bg-red-50 text-red-800">❌ Batal</option>
-                      </select>
-                      <ChevronRight size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none rotate-90 opacity-70" />
-                    </div>
-                    <button
-                      onClick={() => onViewDetail(order)}
-                      className="group/btn rounded-xl px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 font-semibold text-sm"
-                      title="Lihat Detail"
-                    >
-                      <FileBarChart size={18} />
-                      <span>Detail</span>
-                    </button>
-                    <button
-                      onClick={() => onPrintReceipt(order)}
-                      className="group/btn rounded-xl px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 font-semibold text-sm"
-                      title="Download PDF Struk"
-                    >
-                      <FileDown size={18} />
-                      <span>PDF</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredOrders.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-6 py-16 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-                      <Receipt size={32} className="text-amber-400" />
-                    </div>
-                    <p className="text-gray-500 font-medium">Belum ada pesanan</p>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* Toko Orders Section */}
+      {renderOrdersTable(tokoOrders, "Pesanan Toko", <Package size={20} />)}
+      
+      {/* Rumah Produksi Orders Section */}
+      {renderOrdersTable(rumahProduksiOrders, "Pesanan Rumah Produksi", <Package size={20} />)}
+      
+      {/* Other Orders Section (if any) */}
+      {renderOrdersTable(otherOrders, "Lokasi Lainnya", <Package size={20} />)}
+      
+      {/* Empty State */}
+      {filteredOrders.length === 0 && (
+        <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50/30 py-16">
+          <Receipt size={48} className="text-amber-300" />
+          <p className="text-gray-500 font-medium">Belum ada pesanan</p>
+        </div>
+      )}
     </div>
   );
 };

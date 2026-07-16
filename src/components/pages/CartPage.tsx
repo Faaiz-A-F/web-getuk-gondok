@@ -23,6 +23,19 @@ export function CartPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [preparationDate, setPreparationDate] = useState<string>('');
+
+  // Calculate minimum date (24 hours from now)
+  const getMinDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setHours(tomorrow.getHours() + 24);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
+  // Handle preparation date change
+  const handlePreparationDateChange = (date: string) => {
+    setPreparationDate(date);
+  };
 
   // Check authentication on mount
   useEffect(() => {
@@ -40,6 +53,24 @@ export function CartPage() {
   // Handle checkout - create order and redirect
   const handleCheckout = async () => {
     if (items.length === 0) return;
+    
+    // Validate preparation date
+    if (!preparationDate) {
+      setErrorMessage('Silakan pilih tanggal pengambilan terlebih dahulu.');
+      setShowErrorModal(true);
+      return;
+    }
+    
+    // Check if preparation date is at least 24 hours from now
+    const selectedDate = new Date(preparationDate);
+    const minDate = new Date();
+    minDate.setHours(minDate.getHours() + 24);
+    
+    if (selectedDate < minDate) {
+      setErrorMessage('Tanggal pengambilan harus minimal 24 jam dari sekarang.');
+      setShowErrorModal(true);
+      return;
+    }
     
     setIsCheckingOut(true);
     
@@ -68,6 +99,7 @@ export function CartPage() {
         pickupLocation: items[0]?.pickupLocation || 'rumah-produksi',
         userId: user?.id,
         notes: combinedNotes || null,
+        preparationDate: preparationDate,
       };
       
       // Call API to create order
@@ -322,6 +354,24 @@ export function CartPage() {
               {/* Floating White Card */}
               <div className="bg-white rounded-2xl p-5 shadow-lg">
                 
+                {/* Pickup Date Selection */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Tanggal Pengambilan *
+                  </label>
+                  <input
+                    type="date"
+                    value={preparationDate}
+                    onChange={(e) => handlePreparationDateChange(e.target.value)}
+                    min={getMinDate()}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-500 focus:outline-none transition text-gray-700 font-medium bg-white"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Minimal 24 jam dari sekarang
+                  </p>
+                </div>
+
                 {/* Subtotal Row */}
                 <div className="flex justify-between items-center mb-3">
                   <span className="text-amber-800 font-medium">Subtotal</span>
@@ -404,8 +454,8 @@ export function CartPage() {
 
       {/* QRIS Payment Modal */}
       {showQrisModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 lg:p-8 animate-fade-in relative">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 lg:p-8 animate-fade-in relative my-auto">
             {/* Close button */}
             <button
               onClick={handleQrisClose}
@@ -459,6 +509,23 @@ export function CartPage() {
                 <div className="absolute -top-1 -right-1 w-5 h-5 border-r-2 border-t-2 border-orange-500 rounded-tr-lg"></div>
                 <div className="absolute -bottom-1 -left-1 w-5 h-5 border-l-2 border-b-2 border-orange-500 rounded-bl-lg"></div>
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 border-r-2 border-b-2 border-orange-500 rounded-br-lg"></div>
+              </div>
+            </div>
+
+            {/* Preparation Date Display */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Tanggal Pengambilan
+              </label>
+              <div className="px-4 py-3 rounded-xl border-2 border-orange-100 bg-orange-50 text-gray-700 font-medium">
+                {preparationDate ? (
+                  new Date(preparationDate).toLocaleDateString('id-ID', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })
+                ) : '-'}
               </div>
             </div>
 

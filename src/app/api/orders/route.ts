@@ -72,29 +72,38 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { orderNumber, items, subtotal, adminFee, totalAmount, pickupLocation, userId, notes } = body;
+    const { orderNumber, items, subtotal, adminFee, totalAmount, pickupLocation, userId, notes, preparationDate } = body;
+
+    // Build order data object conditionally to avoid null foreign key
+    const orderData: any = {
+      orderNumber,
+      totalAmount: totalAmount,
+      shippingCost: 0,
+      shippingAddress: "Pickup Order",
+      notes: notes || null,
+      paymentStatus: "UNPAID",
+      status: "PENDING",
+      pickupLocation: pickupLocation || "rumah-produksi",
+      preparationDate: preparationDate ? new Date(preparationDate) : null,
+      items: {
+        create: items.map((item: any) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.price * item.quantity,
+          note: item.note || null,
+        })),
+      },
+    };
+
+    // Only include userId if it's a valid non-empty string
+    if (userId && typeof userId === 'string' && userId.trim() !== '') {
+      orderData.userId = userId;
+    }
 
     // Create order with items
     const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        totalAmount: totalAmount,
-        shippingCost: 0,
-        shippingAddress: pickupLocation,
-        notes: notes || null,
-        paymentStatus: "UNPAID",
-        status: "PENDING",
-        userId: userId || null,
-        items: {
-          create: items.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-            subtotal: item.price * item.quantity,
-            note: item.note || null,
-          })),
-        },
-      },
+      data: orderData,
       include: {
         items: true,
       },

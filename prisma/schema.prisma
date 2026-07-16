@@ -111,11 +111,13 @@ model Order {
   notes           String?       @db.Text
   paymentMethod   String?
   paymentStatus   PaymentStatus @default(UNPAID)
+  pickupLocation  String        @default("rumah-produksi") // "toko" or "rumah-produksi"
+  preparationDate DateTime?     // When the customer will pick up the order
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  userId     String
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String      
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   items      OrderItem[]
   adminLogs  AdminLog[]
   reviews    Review[]
