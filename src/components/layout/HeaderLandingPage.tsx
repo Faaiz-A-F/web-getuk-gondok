@@ -23,6 +23,8 @@ export function HeaderLandingPage() {
                 alt="Getuk Gondok Logo"
                 width={64}
                 height={64}
+                priority
+                loading="eager"
                 className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
               />
             </div>

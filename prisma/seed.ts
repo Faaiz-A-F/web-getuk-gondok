@@ -434,6 +434,7 @@ async function main() {
     { key: "landing_highlight_image_1", type: ContentType.IMAGE, value: "/products/1.webp", label: "Highlight Image 1", section: "landing_highlight" },
     { key: "landing_highlight_image_2", type: ContentType.IMAGE, value: "/products/7.webp", label: "Highlight Image 2", section: "landing_highlight" },
     { key: "landing_highlight_image_3", type: ContentType.IMAGE, value: "/products/11.webp", label: "Highlight Image 3", section: "landing_highlight" },
+    { key: "landing_reviews", type: ContentType.JSON, value: "[]", label: "Selected Landing Reviews", section: "landing_reviews" },
   ]
 
   for (const content of siteContents) {

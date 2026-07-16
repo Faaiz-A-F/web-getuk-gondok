@@ -24,6 +24,8 @@ export function Header() {
                      alt="Getuk Gondok Logo"
                      width={64}
                      height={64}
+                     priority
+                     loading="eager"
                      className="w-16 h-16 sm:w-16 sm:h-16 object-contain"
                    />
                  </div>

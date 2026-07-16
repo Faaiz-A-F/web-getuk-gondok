@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Play, Clock, Award, Layers, CheckCircle, Package, Heart, Shield, Star, Sparkles, Leaf, MapPin, Navigation, Factory, Store } from "lucide-react";
-import { LocationMapClient } from "@/components/map/LocationMapClient";
-import { locations } from "@/components/map/LocationMap";
 
 export function AboutUsPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -373,94 +371,7 @@ export function AboutUsPage() {
             </div>
           </div>
         </section>
-
-        {/* ========== LOCATION MAP SECTION ========== */}
-        <section id="location" className="py-24 lg:py-32 bg-gradient-to-b from-[#FAF3E8] to-[#F5EBE0]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Header */}
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Lokasi Kami</p>
-              <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
-                Temukan Kami di
-                <span className="block text-[#E86A17]">Magelang</span>
-              </h2>
-              <p className="text-lg text-[#5C3D28] leading-relaxed">
-                Kunjungi Rumah Produksi kami untuk melihat langsung proses pembuatan, atau mampir ke toko kami untuk membawa pulang oleh-oleh favorit Anda.
-              </p>
-            </div>
-
-            {/* Map */}
-            <div className="relative mb-12">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#E8C547]/40 via-[#E86A17]/30 to-[#3D2314]/20 rounded-3xl blur-xl opacity-60" />
-              <div className="relative bg-white rounded-3xl overflow-hidden border border-[#5C3D28]/15 shadow-2xl shadow-[#3D2314]/10">
-                <LocationMapClient />
-              </div>
-            </div>
-
-            {/* Location Cards */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {locations.map((location) => {
-                const isProduction = location.id === "rumah-produksi";
-                const Icon = isProduction ? Factory : Store;
-                const accent = isProduction ? "from-[#E8C547] to-[#E86A17]" : "from-[#3D2314] to-[#5C3D28]";
-
-                return (
-                  <div
-                    key={location.id}
-                    className="group relative bg-white rounded-3xl p-7 lg:p-8 border border-[#5C3D28]/10 shadow-lg shadow-[#3D2314]/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#3D2314]/10 overflow-hidden"
-                  >
-                    {/* Decorative gradient corner */}
-                    <div className={`absolute -top-12 -right-12 w-40 h-40 rounded-full bg-gradient-to-br ${accent} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`} />
-
-                    <div className="relative">
-                      <div className="flex items-start gap-4 mb-5">
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${accent} flex items-center justify-center flex-shrink-0 shadow-md`}>
-                          <Icon className="w-7 h-7 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-1">
-                            {location.role}
-                          </p>
-                          <h3 className="font-['Playfair_Display'] text-xl lg:text-2xl font-bold text-[#3D2314] leading-tight">
-                            {location.name}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3 mb-6">
-                        <MapPin className="w-5 h-5 text-[#E86A17] flex-shrink-0 mt-0.5" />
-                        <p className="text-[#5C3D28] leading-relaxed text-sm">
-                          {location.address}
-                        </p>
-                      </div>
-
-                      <a
-                        href={location.googleMapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          backgroundColor: isProduction ? "#E86A17" : "#3D2314",
-                          boxShadow: isProduction ? "0 4px 6px rgba(232, 106, 23, 0.2)" : "0 4px 6px rgba(61, 35, 20, 0.2)",
-                        }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:gap-3"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = isProduction ? "#3D2314" : "#E86A17";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = isProduction ? "#E86A17" : "#3D2314";
-                        }}
-                      >
-                        <Navigation className="w-4 h-4" />
-                        Buka di Google Maps
-                      </a>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
+        
         {/* ========== FOOTER ========== */}
         <Footer />
       </main>
