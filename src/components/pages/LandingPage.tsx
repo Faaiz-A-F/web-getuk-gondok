@@ -103,7 +103,7 @@ const faqs = [
   },
   {
     question: "Berapa lama masa simpan produk?",
-    answer: "Getuk segar dapat bertahan 2-3 hari pada suhu ruang dan hingga 1 minggu jika disimpan di dalam kulkas. Untuk kue kering dan produk kemasan lainnya, masa simpan dapat mencapai 2-4 minggu. Kami sarankan untuk mengonsumsi produk sesegera mungkin untuk menikmati kualitas rasa terbaik.",
+    answer: "Getuk segar dapat bertahan 2 hari pada suhu ruang dan hingga 3-4 hari jika disimpan di dalam kulkas. Kami sarankan untuk mengonsumsi produk sesegera mungkin untuk menikmati kualitas rasa terbaik.",
   },
   {
     question: "Apakah produk menggunakan bahan pengawet?",
@@ -111,7 +111,7 @@ const faqs = [
   },
   {
     question: "Apakah melayani pengiriman ke luar kota?",
-    answer: "Ya, kami melayani pengiriman ke berbagai kota di seluruh Indonesia. Pengiriman dilakukan melalui ekspedisi terpercaya dengan estimasi waktu yang bervariasi tergantung lokasi tujuan. Untuk informasi ongkos kirim dan jadwal pengiriman, silakan hubungi kami melalui WhatsApp.",
+    answer: "tidak, untuk sementara kami melayani hanya di toko dan rumah produksi di Magelang. Namun, kami sedang dalam proses pengembangan layanan pengiriman ke luar kota. Nantikan informasi terbaru melalui website dan media sosial kami.",
   },
   {
     question: "Metode pembayaran apa saja yang tersedia?",
