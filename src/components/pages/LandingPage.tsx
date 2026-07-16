@@ -528,7 +528,54 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="faq" className="bg-amber-50/50 py-20 sm:py-24">
+      <section className="bg-[#5a2500] py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-8 text-center">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Testimoni Pelanggan</p>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-white">
+              Apa kata mereka tentang produk kami
+            </h2>
+          </div>
+
+          <ReviewCarousel />
+        </div>
+      </section>
+
+      <section className="bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
+          <div className="relative overflow-hidden rounded-[2rem] border border-amber-100 shadow-[0_20px_60px_rgba(201,122,45,0.16)] transition-all duration-300 ease-out hover:shadow-[0_24px_70px_rgba(201,122,45,0.2)]">
+            <Image
+              src="/design bg/1.png"
+              alt="Latar belakang produk Getuk Gondok"
+              fill
+              priority
+              sizes="50vw"
+              className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-950/80 via-amber-900/70 to-orange-800/70" />
+
+            <div className="relative z-10 px-6 py-12 text-center sm:px-10 lg:px-16">
+              <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Siap memesan?</p>
+              <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold leading-tight text-white">
+                Jadikan momen Anda lebih istimewa dengan oleh-oleh autentik dari Getuk Gondok.
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-amber-50">
+                Hubungi kami untuk pemesanan khusus, hampers, maupun kebutuhan acara besar dengan desain kemasan yang elegan.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link href="/catalogue" className="inline-flex items-center justify-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-amber-400">
+                  Pilih Produk Sekarang
+                </Link>
+                <Link href="https://wa.me/6285643730540" className="inline-flex items-center justify-center rounded-full border border-amber-200/70 px-6 py-3 text-sm font-semibold text-amber-50 transition hover:bg-white/10">
+                  Hubungi Kami
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+        <section id="faq" className="bg-amber-50/50 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">
@@ -581,53 +628,6 @@ export function LandingPage() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[#5a2500] py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-8 text-center">
-            <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Testimoni Pelanggan</p>
-            <h2 className="text-4xl sm:text-5xl font-extrabold leading-tight text-white">
-              Apa kata mereka tentang produk kami
-            </h2>
-          </div>
-
-          <ReviewCarousel />
-        </div>
-      </section>
-
-      <section className="bg-white py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-          <div className="relative overflow-hidden rounded-[2rem] border border-amber-100 shadow-[0_20px_60px_rgba(201,122,45,0.16)] transition-all duration-300 ease-out hover:shadow-[0_24px_70px_rgba(201,122,45,0.2)]">
-            <Image
-              src="/design bg/1.png"
-              alt="Latar belakang produk Getuk Gondok"
-              fill
-              priority
-              sizes="50vw"
-              className="object-cover object-center"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-950/80 via-amber-900/70 to-orange-800/70" />
-
-            <div className="relative z-10 px-6 py-12 text-center sm:px-10 lg:px-16">
-              <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Siap memesan?</p>
-              <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold leading-tight text-white">
-                Jadikan momen Anda lebih istimewa dengan oleh-oleh autentik dari Getuk Gondok.
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-amber-50">
-                Hubungi kami untuk pemesanan khusus, hampers, maupun kebutuhan acara besar dengan desain kemasan yang elegan.
-              </p>
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Link href="/catalogue" className="inline-flex items-center justify-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-amber-400">
-                  Pilih Produk Sekarang
-                </Link>
-                <Link href="https://wa.me/6285643730540" className="inline-flex items-center justify-center rounded-full border border-amber-200/70 px-6 py-3 text-sm font-semibold text-amber-50 transition hover:bg-white/10">
-                  Hubungi Kami
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>
