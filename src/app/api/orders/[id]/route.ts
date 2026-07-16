@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 export async function GET(
   request: NextRequest,
@@ -50,7 +51,7 @@ export async function PATCH(
       status?: "PENDING" | "PAID" | "DONE" | "CANCELLED";
     };
 
-    const data: { paymentStatus?: string; status?: string } = {};
+    const data: { paymentStatus?: PaymentStatus; status?: OrderStatus } = {};
     if (paymentStatus) data.paymentStatus = paymentStatus;
     if (status) data.status = status;
 
