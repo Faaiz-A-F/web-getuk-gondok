@@ -6,7 +6,23 @@ import { useEffect, useRef, useState } from "react";
 import { HeaderLandingPage } from "@/components/layout/HeaderLandingPage"; // use this version for the landing page header instead of the default Header component
 import { Footer } from "@/components/layout/Footer";
 import { formatPrice } from "@/lib/utils/formatPrice";
-import { ChevronDown, Factory, MapPin, Navigation, Store } from "lucide-react";
+import {
+  ChevronDown,
+  Factory,
+  MapPin,
+  Navigation,
+  Store,
+  ShoppingBag,
+  Star,
+  Cake,
+  Gift,
+  Award,
+  Sparkles,
+  Package,
+  Cookie,
+  Utensils,
+  Heart,
+} from "lucide-react";
 import { ReviewCarousel } from "@/components/ui/ReviewCarousel";
 import { LocationMapClient } from "@/components/map/LocationMapClient";
 import { locations } from "@/components/map/LocationMap";
@@ -492,7 +508,74 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+      {/* ========== FEATURED PRODUCTS SECTION ========== */}
+      <section className="bg-gradient-to-b from-white via-amber-50/20 to-white py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">PRODUK UNGGULAN</p>
+            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight text-neutral-900">
+              Pilihan Favorit Pelanggan Kami
+            </h2>
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-neutral-600 max-w-2xl mx-auto">
+              Temukan produk-produk pilihan yang paling disukai pelanggan, dibuat dengan resep warisan dan bahan-bahan pilihan berkualitas.
+            </p>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredProducts.map((product, index) => (
+              <div
+                key={product.id}
+                className="group relative flex flex-col rounded-3xl border border-amber-100 bg-white overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(201,122,45,0.18)]"
+              >
+                <div className="relative h-64 bg-gradient-to-br from-amber-50 to-orange-50 overflow-hidden">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-contain p-6 transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold text-amber-800 shadow-sm">
+                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                      {product.category}
+                    </span>
+                    {index === 0 && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-700 text-xs font-semibold text-white shadow-sm">
+                        <Sparkles className="w-3 h-3" />
+                        Best Seller
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col flex-1 p-6">
+                  <h3 className="text-xl font-bold text-neutral-900">{product.name}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600 flex-1">{product.description}</p>
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    <span className="text-2xl font-bold text-[#c97a2d]">{formatPrice(product.price)}</span>
+                    <Link
+                      href="/catalogue"
+                      className="inline-flex items-center justify-center rounded-full bg-amber-100 px-5 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-200"
+                    >
+                      Lihat Detail
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/catalogue"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-amber-800 shadow-md hover:shadow-lg"
+            >
+              Lihat Semua Produk
+              <ShoppingBag className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
       <section className="bg-white py-20 sm:py-24">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title & Description */}
@@ -524,6 +607,56 @@ export function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== PRODUCT CATEGORIES SECTION ========== */}
+      <section className="bg-gradient-to-br from-amber-900 via-amber-800 to-orange-900 py-20 sm:py-24 text-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-600 blur-3xl opacity-30"></div>
+          <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-600 blur-3xl opacity-30"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">KATEGORI PRODUK</p>
+            <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
+              Aneka Pilihan untuk Setiap Momen
+            </h2>
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-amber-100/80 max-w-2xl mx-auto">
+              Dari jajanan tradisional hingga hampers premium, kami menyediakan berbagai pilihan untuk melengkapi setiap momen istimewa Anda.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              { name: "Tumpeng & Nampan", count: "5+ Varian", icon: Cake, color: "from-amber-400 to-orange-500" },
+              { name: "Jajanan Tradisional", count: "10+ Varian", icon: Cookie, color: "from-orange-400 to-red-500" },
+              { name: "Hampers & Gift", count: "8+ Pilihan", icon: Gift, color: "from-rose-400 to-pink-500" },
+              { name: "Snack & Kue", count: "15+ Varian", icon: Utensils, color: "from-yellow-400 to-amber-500" },
+              { name: "Packaging Box", count: "5+ Ukuran", icon: Package, color: "from-emerald-400 to-teal-500" },
+              { name: "Custom Order", count: "By Request", icon: Sparkles, color: "from-purple-400 to-pink-500" },
+              { name: "Paket Spesial", count: "6+ Paket", icon: Award, color: "from-blue-400 to-indigo-500" },
+              { name: "Paket Hemat", count: "4+ Paket", icon: Heart, color: "from-rose-500 to-red-500" },
+            ].map((category) => {
+              const Icon = category.icon;
+              return (
+                <Link
+                  key={category.name}
+                  href="/catalogue"
+                  className="group relative flex flex-col items-center justify-center p-6 sm:p-7 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:-translate-y-1 hover:bg-white/15 hover:border-white/30 hover:shadow-[0_16px_40px_rgba(0,0,0,0.25)]"
+                >
+                  <div
+                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                  >
+                    <Icon className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-semibold text-center text-white">{category.name}</h3>
+                  <p className="text-xs text-amber-200/80 mt-1">{category.count}</p>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
