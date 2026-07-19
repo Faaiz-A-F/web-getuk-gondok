@@ -90,24 +90,6 @@ const steps = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Dewi P.",
-    role: "Customer",
-    quote: "Rasa getuknya masih sama enak dan autentik seperti yang saya kenal sejak kecil. Packaging-nya juga sangat elegan.",
-  },
-  {
-    name: "Rizky A.",
-    role: "Pembeli Hampers",
-    quote: "Saya memesannya untuk acara keluarga dan hasilnya sangat memuaskan. Semua tamu memberi pujian.",
-  },
-  {
-    name: "Siti M.",
-    role: "Pemesan Khusus",
-    quote: "Pelayanannya cepat, komunikasinya jelas, dan kualitas produk sangat konsisten. Sangat recommended.",
-  },
-];
-
 const faqs = [
   {
     question: "Bagaimana cara memesan produk Getuk Gondok?",
@@ -144,7 +126,6 @@ const faqs = [
 ];
 
 export function LandingPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [heroProductIndex, setHeroProductIndex] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isHistoryVisible, setIsHistoryVisible] = useState(false);
@@ -218,18 +199,14 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-['Playfair_Display'] transition-colors duration-300 selection:bg-amber-200 selection:text-amber-900">
+    <div className="brand-site min-h-screen bg-neutral-50 transition-colors duration-300 selection:bg-amber-200 selection:text-amber-900">
       <HeaderLandingPage />
 
-      <section className="relative overflow-hidden bg-amber-950 text-white">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-800 blur-3xl opacity-50"></div>
-          <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-700 blur-3xl opacity-40"></div>
-        </div>
+      <section className="relative overflow-hidden bg-[#3b1f12] text-white">
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-7 rounded-[2rem] border border-white/15 bg-white/10 p-6 text-center shadow-[0_24px_64px_rgba(0,0,0,0.22)] backdrop-blur-md sm:p-8 lg:text-left">
+            <div className="space-y-7 px-2 py-2 text-center sm:px-6 lg:border-l lg:border-amber-400/40 lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/50 border border-amber-700/50 text-amber-200 text-sm font-medium">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                 Buka & Menerima Pesanan
@@ -238,7 +215,7 @@ export function LandingPage() {
                 Kelezatan Autentik <span className="text-amber-400">Getuk Gondok</span> Sejak 1985.
               </h1>
               <p className="text-lg lg:text-xl text-amber-100/80 max-w-2xl mx-auto lg:mx-0">
-                Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial.
+                Oleh-oleh khas Magelang dari resep keluarga sejak 1985. Dibuat segar untuk sajian harian, hampers, dan berbagai momen istimewa.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link
@@ -285,7 +262,7 @@ export function LandingPage() {
                           fill
                           priority
                           sizes="(max-width: 1024px) 100vw, 50vw"
-                          className="object-contain drop-shadow-2xl"
+                          className="object-contain drop-shadow-[0_18px_18px_rgba(0,0,0,0.22)]"
                         />
                       </div>
                     );
@@ -341,10 +318,9 @@ export function LandingPage() {
             <div className="flex justify-center lg:justify-center">
               <div
                 ref={historyCardRef}
-                className="group relative w-full max-w-none overflow-hidden rounded-4xl border border-[#d89a34]/35 bg-[#5a2500] px-6 py-8 text-left shadow-[0_24px_60px_rgba(90,37,0,0.28)] text-[#d89a34] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_30px_70px_rgba(90,37,0,0.34)] sm:px-8 sm:py-10 lg:min-h-[22rem]"
+                className="group relative w-full max-w-none overflow-hidden rounded-[2rem] border border-[#d89a34]/30 bg-[#5a2500] px-6 py-8 text-left text-[#d89a34] shadow-[0_16px_40px_rgba(90,37,0,0.18)] transition-transform duration-300 hover:-translate-y-1 sm:px-8 sm:py-10 lg:min-h-[22rem]"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#6b2c00]/95 via-transparent to-[#7a3a07]/50" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,  rgba(169, 110, 7, 0.12),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_38%)]" />
+                <div className="absolute inset-0 bg-[#5a2500]/75" />
                 <Image
                               src="/design bg/gunungan.svg"
                               alt="Latar belakang produk Getuk Gondok"
@@ -383,12 +359,12 @@ export function LandingPage() {
         </div>
       </section>
 {/* ========== LOCATION MAP SECTION ========== */}
-        <section id="location" className="py-24 lg:py-32 bg-gradient-to-b from-[#FAF3E8] to-[#F5EBE0]">
+        <section id="location" className="bg-[#f8f1e8] py-20 sm:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center max-w-2xl mx-auto mb-16">
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-3">Lokasi Kami</p>
-              <h2 className="font-['Playfair_Display'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3D2314] mb-4 leading-tight">
+              <h2 className="brand-heading mb-4 text-3xl font-bold leading-tight text-[#3D2314] sm:text-4xl lg:text-5xl">
                 Temukan Kami di
                 <span className="block text-[#E86A17]">Magelang</span>
               </h2>
@@ -399,8 +375,7 @@ export function LandingPage() {
 
             {/* Map */}
             <div className="relative mb-12">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#E8C547]/40 via-[#E86A17]/30 to-[#3D2314]/20 rounded-3xl blur-xl opacity-60" />
-              <div className="relative bg-white rounded-3xl overflow-hidden border border-[#5C3D28]/15 shadow-2xl shadow-[#3D2314]/10">
+              <div className="relative overflow-hidden rounded-[2rem] border border-[#5C3D28]/15 bg-white shadow-[0_12px_32px_rgba(61,35,20,0.08)]">
                 <LocationMapClient />
               </div>
             </div>
@@ -415,10 +390,8 @@ export function LandingPage() {
                 return (
                   <div
                     key={location.id}
-                    className="group relative bg-white rounded-3xl p-7 lg:p-8 border border-[#5C3D28]/10 shadow-lg shadow-[#3D2314]/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#3D2314]/10 overflow-hidden"
+                    className="group relative overflow-hidden rounded-2xl border border-[#5C3D28]/15 bg-white p-7 transition-colors duration-300 hover:border-[#E86A17]/40 lg:p-8"
                   >
-                    {/* Decorative gradient corner */}
-                    <div className={`absolute -top-12 -right-12 w-40 h-40 rounded-full bg-gradient-to-br ${accent} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`} />
 
                     <div className="relative">
                       <div className="flex items-start gap-4 mb-5">
@@ -429,7 +402,7 @@ export function LandingPage() {
                           <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#E86A17] mb-1">
                             {location.role}
                           </p>
-                          <h3 className="font-['Playfair_Display'] text-xl lg:text-2xl font-bold text-[#3D2314] leading-tight">
+                          <h3 className="brand-heading text-xl font-bold leading-tight text-[#3D2314] lg:text-2xl">
                             {location.name}
                           </h3>
                         </div>
@@ -492,7 +465,7 @@ export function LandingPage() {
               {benefits.map((benefit) => (
                 <div 
                   key={benefit.title} 
-                  className="flex flex-col rounded-3xl border border-amber-200 bg-white p-7 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(201,122,45,0.12)] min-h-[260px]"
+                  className="flex min-h-[240px] flex-col rounded-2xl border border-amber-200/80 bg-white p-7 transition-colors duration-300 hover:border-amber-400"
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-lg font-semibold text-amber-800">
                     ✦
@@ -506,7 +479,7 @@ export function LandingPage() {
         </div>
       </section>
       {/* ========== FEATURED PRODUCTS SECTION ========== */}
-      <section className="bg-gradient-to-b from-white via-amber-50/20 to-white py-20 sm:py-24">
+      <section className="bg-white py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-sm font-medium tracking-[0.2em] text-amber-700 uppercase">PRODUK UNGGULAN</p>
@@ -522,9 +495,9 @@ export function LandingPage() {
             {featuredProducts.map((product, index) => (
               <div
                 key={product.id}
-                className="group relative flex flex-col rounded-3xl border border-amber-100 bg-white overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(201,122,45,0.18)]"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-amber-200/70 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-amber-400 hover:shadow-[0_12px_28px_rgba(61,35,20,0.09)]"
               >
-                <div className="relative h-64 bg-gradient-to-br from-amber-50 to-orange-50 overflow-hidden">
+                <div className="relative h-64 overflow-hidden bg-[#faf5ed]">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -591,7 +564,7 @@ export function LandingPage() {
             {steps.map((step) => (
               <div 
                 key={step.number} 
-                className="flex flex-col rounded-3xl border border-neutral-200 bg-neutral-50 p-8 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(0,0,0,0.08)] min-h-[220px]"
+                className="flex min-h-[220px] flex-col rounded-2xl border border-neutral-200 bg-white p-8 transition-colors duration-300 hover:border-amber-400"
               >
                 <div className="flex-shrink-0 mb-5">
                   <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center">
@@ -609,11 +582,7 @@ export function LandingPage() {
       </section>
 
       {/* ========== PRODUCT CATEGORIES SECTION ========== */}
-      <section className="bg-gradient-to-br from-amber-900 via-amber-800 to-orange-900 py-20 sm:py-24 text-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-amber-600 blur-3xl opacity-30"></div>
-          <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-600 blur-3xl opacity-30"></div>
-        </div>
+      <section className="relative overflow-hidden bg-[#4a2414] py-20 text-white sm:py-24">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
@@ -642,12 +611,10 @@ export function LandingPage() {
                 <Link
                   key={category.name}
                   href="/catalogue"
-                  className="group relative flex flex-col items-center justify-center p-6 sm:p-7 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:-translate-y-1 hover:bg-white/15 hover:border-white/30 hover:shadow-[0_16px_40px_rgba(0,0,0,0.25)]"
+                  className="group relative flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-white/[0.06] p-6 transition-colors duration-300 hover:border-amber-300/50 hover:bg-white/10 sm:p-7"
                 >
-                  <div
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
-                  >
-                    <Icon className="w-7 h-7 text-white" />
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/35 bg-amber-200/10 text-amber-200 transition-colors group-hover:bg-amber-200/20">
+                    <Icon className="h-7 w-7" />
                   </div>
                   <h3 className="text-sm sm:text-base font-semibold text-center text-white">{category.name}</h3>
                   <p className="text-xs text-amber-200/80 mt-1">{category.count}</p>
@@ -673,7 +640,7 @@ export function LandingPage() {
 
       <section className="bg-white py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-16">
-          <div className="relative overflow-hidden rounded-[2rem] border border-amber-100 shadow-[0_20px_60px_rgba(201,122,45,0.16)] transition-all duration-300 ease-out hover:shadow-[0_24px_70px_rgba(201,122,45,0.2)]">
+          <div className="relative overflow-hidden rounded-[2rem] border border-amber-200/60 shadow-[0_12px_32px_rgba(61,35,20,0.10)]">
             <Image
               src="/design bg/1.png"
               alt="Latar belakang produk Getuk Gondok"
@@ -682,7 +649,7 @@ export function LandingPage() {
               sizes="50vw"
               className="object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-950/80 via-amber-900/70 to-orange-800/70" />
+            <div className="absolute inset-0 bg-amber-950/78" />
 
             <div className="relative z-10 px-6 py-12 text-center sm:px-10 lg:px-16">
               <p className="text-sm font-medium tracking-[0.2em] text-amber-200 uppercase">Siap memesan?</p>
@@ -725,7 +692,7 @@ export function LandingPage() {
               return (
                 <div
                   key={faq.question}
-                  className="overflow-hidden rounded-2xl border border-amber-200/70 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+                  className="overflow-hidden rounded-2xl border border-amber-200/70 bg-white transition-colors duration-300 hover:border-amber-400"
                 >
                   <button
                     type="button"

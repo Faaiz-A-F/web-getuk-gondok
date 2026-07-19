@@ -50,6 +50,18 @@ a {
   color: #3d2314;
 }
 
+.brand-site h1,
+.brand-site h2,
+.brand-site h3,
+.brand-site .brand-heading {
+  font-family: var(--font-playfair-display), Georgia, serif;
+  text-wrap: balance;
+}
+
+.brand-site p {
+  text-wrap: pretty;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
