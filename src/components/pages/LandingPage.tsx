@@ -227,29 +227,29 @@ export function LandingPage() {
           <div className="absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-orange-700 blur-3xl opacity-40"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-10">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 rounded-[2rem] border border-white/10 bg-white/10 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:p-8 lg:text-left">
+            <div className="space-y-7 rounded-[2rem] border border-white/15 bg-white/10 p-6 text-center shadow-[0_24px_64px_rgba(0,0,0,0.22)] backdrop-blur-md sm:p-8 lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/50 border border-amber-700/50 text-amber-200 text-sm font-medium">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                 Buka & Menerima Pesanan
               </div>
-              <h1 className="text-5xl lg:text-7xl font-black tracking-tight leading-tight">
+              <h1 className="text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
                 Kelezatan Autentik <span className="text-amber-400">Getuk Gondok</span> Sejak 1985.
               </h1>
               <p className="text-lg lg:text-xl text-amber-100/80 max-w-2xl mx-auto lg:mx-0">
-                Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial-.
+                Nikmati cita rasa asli Getuk Gondok Hj. Sri Rahayu, oleh-oleh khas Magelang yang dibuat dari resep warisan keluarga. Tersedia aneka jajanan tradisional, tampah hias, nampan, dan hampers untuk berbagai momen spesial.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link
                   href="/catalogue"
-                  className="inline-flex items-center justify-center rounded-full bg-amber-400 px-6 py-3 text-sm font-semibold text-amber-950 transition hover:bg-amber-300"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-amber-400 px-7 py-3 text-sm font-bold text-amber-950 shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-xl"
                 >
                   Lihat Katalog
                 </Link>
                 <Link
                   href="/about-us"
-                  className="inline-flex items-center justify-center rounded-full border border-amber-300/60 px-6 py-3 text-sm font-semibold text-amber-100 transition hover:bg-white/10"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-amber-300/60 px-7 py-3 text-sm font-bold text-amber-100 transition hover:-translate-y-0.5 hover:bg-white/10"
                 >
                   Tentang Kami
                 </Link>
@@ -260,7 +260,7 @@ export function LandingPage() {
               <button
                 type="button"
                 onClick={goToPreviousHeroProduct}
-                aria-label="Previous featured product"
+                aria-label="Produk unggulan sebelumnya"
                 className="absolute left-2 top-1/2 z-20 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,7 +296,7 @@ export function LandingPage() {
               <button
                 type="button"
                 onClick={goToNextHeroProduct}
-                aria-label="Next featured product"
+                aria-label="Produk unggulan berikutnya"
                 className="absolute right-2 top-1/2 z-20 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-amber-900 shadow-xl transition hover:bg-white"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -346,7 +346,7 @@ export function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#6b2c00]/95 via-transparent to-[#7a3a07]/50" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,  rgba(169, 110, 7, 0.12),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_38%)]" />
                 <Image
-                              src="design bg/gunungan.svg"
+                              src="/design bg/gunungan.svg"
                               alt="Latar belakang produk Getuk Gondok"
                               fill
                               priority
@@ -488,10 +488,7 @@ export function LandingPage() {
             </div>
 
             {/* Right Side - 2x2 Grid Cards */}
-            <div 
-              className="grid gap-6"
-              style={{ gridTemplateColumns: "repeat(2, minmax(280px, 1fr))" }}
-            >
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               {benefits.map((benefit) => (
                 <div 
                   key={benefit.title} 

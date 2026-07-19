@@ -34,11 +34,35 @@ export function HeaderLandingPage() {
             </div>
           </Link>
 
+          <div className="hidden items-center gap-1 md:flex" aria-label="Navigasi utama">
+            <Link href="/catalogue" className="rounded-full px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:bg-amber-50 hover:text-amber-800">
+              Katalog
+            </Link>
+            <Link href="/about-us" className="rounded-full px-4 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:bg-amber-50 hover:text-amber-800">
+              Tentang Kami
+            </Link>
+            <Link href="/cart" aria-label="Buka keranjang" className="mx-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 transition-colors hover:bg-amber-50 hover:text-amber-800">
+              <ShoppingCart className="h-5 w-5" />
+            </Link>
+            {isLoggedIn ? (
+              <Link href="/account" className="ml-2 inline-flex items-center gap-2 rounded-full bg-amber-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 hover:shadow-md">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs">{user?.name?.charAt(0).toUpperCase() || "U"}</span>
+                Akun
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="ml-2 rounded-full px-4 py-2 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-50">Masuk</Link>
+                <Link href="/register" className="rounded-full bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 hover:shadow-md">Daftar</Link>
+              </>
+            )}
+          </div>
+
           {/* Hamburger Menu Button */}
           <button
+            type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-amber-900 transition hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-            aria-label="Toggle menu"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-amber-900 transition hover:bg-amber-50 hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 md:hidden"
+            aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
             aria-expanded={menuOpen}
           >
             <div className="w-6 h-5 flex flex-col justify-between">
@@ -64,7 +88,7 @@ export function HeaderLandingPage() {
 
       {/* Dropdown Menu */}
       <div
-        className={`absolute top-20 right-0 w-72 sm:w-80 bg-white shadow-2xl border border-amber-100 rounded-bl-2xl rounded-br-2xl overflow-hidden transition-all duration-300 ease-out origin-top-right ${
+        className={`absolute top-20 right-4 w-[calc(100%-2rem)] max-w-80 overflow-hidden rounded-2xl border border-amber-100 bg-white shadow-2xl transition-all duration-300 ease-out origin-top-right md:hidden ${
           menuOpen
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
@@ -196,7 +220,7 @@ export function HeaderLandingPage() {
       {/* Overlay for mobile */}
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/20 -z-10"
+          className="fixed inset-0 -z-10 bg-black/20 backdrop-blur-[1px] md:hidden"
           onClick={closeMenu}
           onKeyDown={(e) => e.key === "Escape" && closeMenu()}
         />
