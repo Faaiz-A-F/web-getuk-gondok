@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/layout/Header";
 import {
   ArrowDown,
   ArrowUp,
@@ -32,6 +33,8 @@ import {
   XCircle,
   FileDown,
   Star,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import {
   Area,
@@ -44,7 +47,7 @@ import {
 } from "recharts";
 import { generateInvoicePDF } from "@/lib/generateInvoicePDF";
 
-type TabType = "dashboard" | "orders" | "financial" | "layout" | "users" | "products";
+export type TabType = "dashboard" | "orders" | "financial" | "layout" | "users" | "products";
 
 interface DashboardData {
   totalOrders: number;
@@ -2065,33 +2068,53 @@ const DeleteConfirmModal = ({
   );
 };
 
-const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) => {
-  const menuItems: { id: TabType; icon: React.ElementType; label: string }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { id: "products", icon: Package, label: "Produk" },
-    { id: "orders", icon: Receipt, label: "Pesanan" },
-    { id: "financial", icon: FileBarChart, label: "Laporan Keuangan" },
-    { id: "layout", icon: LayoutDashboard, label: "Layout" },
-    { id: "users", icon: Users, label: "User Management" },
-  ];
+const menuItems: { id: TabType; icon: React.ElementType; label: string; shortLabel: string }[] = [
+  { id: "dashboard", icon: LayoutDashboard, label: "Ringkasan", shortLabel: "Dashboard" },
+  { id: "products", icon: Package, label: "Kelola Produk", shortLabel: "Produk" },
+  { id: "orders", icon: Receipt, label: "Pesanan Masuk", shortLabel: "Pesanan" },
+  { id: "financial", icon: FileBarChart, label: "Laporan Keuangan", shortLabel: "Keuangan" },
+  { id: "layout", icon: Sparkles, label: "Konten Website", shortLabel: "Konten" },
+  { id: "users", icon: Users, label: "Kelola Pengguna", shortLabel: "Pengguna" },
+];
 
-  return (
-    <nav className="flex h-14 items-center gap-0 border-b border-amber-800 bg-amber-700 px-8 lg:px-32.5">
-      {menuItems.map((item) => (
+const tabMeta: Record<TabType, { eyebrow: string; title: string; description: string }> = {
+  dashboard: { eyebrow: "Overview", title: "Dashboard", description: "Pantau performa bisnis dan aktivitas terbaru." },
+  products: { eyebrow: "Inventory", title: "Kelola Produk", description: "Atur katalog, stok, harga, dan status produk." },
+  orders: { eyebrow: "Operations", title: "Pesanan", description: "Proses dan pantau seluruh pesanan pelanggan." },
+  financial: { eyebrow: "Reporting", title: "Laporan Keuangan", description: "Analisis pendapatan dan performa penjualan." },
+  layout: { eyebrow: "Website", title: "Konten Website", description: "Perbarui informasi yang tampil di halaman utama." },
+  users: { eyebrow: "Access", title: "Kelola Pengguna", description: "Kelola akun serta hak akses pengguna." },
+};
+
+const NavBar = ({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (tab: TabType) => void }) => (
+  <nav className="admin-nav flex gap-2 overflow-x-auto px-4 py-3 lg:flex-col lg:overflow-visible lg:px-3 lg:py-5" aria-label="Navigasi admin">
+    {menuItems.map((item) => {
+      const isActive = activeTab === item.id;
+      return (
         <button
           key={item.id}
+          type="button"
           onClick={() => onTabChange(item.id)}
-          className={`flex items-center gap-2 border-b-2 px-6 py-3 text-sm transition-all ${
-            activeTab === item.id ? "border-amber-300 text-white font-semibold" : "border-transparent text-white/80 hover:text-white hover:bg-amber-600/50"
+          aria-current={isActive ? "page" : undefined}
+          className={`group flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-300 lg:w-full ${
+            isActive
+              ? "bg-amber-50 text-amber-950 shadow-sm ring-1 ring-amber-200/80"
+              : "text-stone-500 hover:bg-stone-50 hover:text-stone-900"
           }`}
         >
-          <item.icon size={16} />
-          <span>{item.label}</span>
+          <span className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-300 ${
+            isActive ? "bg-amber-800 text-white shadow-md shadow-amber-900/15" : "bg-stone-100 text-stone-500 group-hover:bg-amber-100 group-hover:text-amber-800"
+          }`}>
+            <item.icon size={17} strokeWidth={2.2} />
+          </span>
+          <span className="hidden text-left lg:block">{item.label}</span>
+          <span className="text-left lg:hidden">{item.shortLabel}</span>
+          {isActive && <span className="ml-auto hidden h-1.5 w-1.5 rounded-full bg-amber-600 lg:block" />}
         </button>
-      ))}
-    </nav>
-  );
-};
+      );
+    })}
+  </nav>
+);
 
 const getContentByTab = (tab: TabType, props: any) => {
   switch (tab) {
@@ -2144,31 +2167,31 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, trend, percentage, color, icon }: StatCardProps) => (
-  <div className="relative flex h-40 flex-col justify-between overflow-hidden rounded-md bg-gradient-to-br from-amber-600 to-amber-700 p-6 shadow-lg">
-    <div
-      className="absolute right-0 top-0 px-3 py-1 text-xs font-medium text-white"
-      style={{ backgroundColor: color, clipPath: "polygon(0 0, 100% 0, 85% 100%, 0 100%)", paddingRight: "16px" }}
-    >
-      {trend === "up" ? "+" : ""}{percentage}
+  <article className="admin-stat-card group relative min-h-40 overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-5 shadow-[0_8px_30px_rgba(60,40,20,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-200 hover:shadow-[0_16px_40px_rgba(92,55,23,0.11)]">
+    <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100" style={{ backgroundColor: color }} />
+    <div className="flex items-start justify-between gap-3">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-800 ring-1 ring-amber-100 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+        {icon}
+      </span>
+      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${trend === "up" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+        {trend === "up" ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+        {percentage}
+      </span>
     </div>
-    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white">{icon}</div>
-    <div>
-      <p className="mb-2 text-xs tracking-wide text-amber-100">{title}</p>
-      <div className="flex items-end justify-between">
-        <h3 className="text-2xl font-semibold text-white">{value}</h3>
-        {trend === "up" ? <ArrowUp size={16} className="text-amber-200" /> : <ArrowDown size={16} className="text-red-200" />}
-      </div>
+    <div className="mt-5">
+      <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-stone-400">{title}</p>
+      <h3 className="mt-1.5 truncate text-2xl font-extrabold tracking-tight text-stone-900" title={value}>{value}</h3>
     </div>
-    <div className="flex items-center justify-between">
-      <p className="text-xs text-amber-200">Since last month</p>
-      <ChevronRight size={16} className="text-amber-200" />
+    <div className="mt-3 flex items-center justify-between text-xs text-stone-400">
+      <span>Diperbarui hari ini</span>
+      <Activity size={14} className="text-amber-700" />
     </div>
-  </div>
+  </article>
 );
 
-export function AdminDashboardPage() {
+export function AdminDashboardPage({ initialTab = "dashboard" }: { initialTab?: TabType }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -2741,39 +2764,87 @@ export function AdminDashboardPage() {
     }
   };
 
-  return (
-    <div className="font-['Playfair_Display'] min-h-screen bg-amber-50">
-      <Header />
-      <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
+  const currentTab = tabMeta[activeTab];
 
-      <main className="space-y-7 px-8 py-6 lg:px-32.5">
-        {getContentByTab(activeTab, {
-          dashboardData,
-          orders,
-          siteContent,
-          loading,
-          users,
-          usersLoading,
-          products,
-          categories,
-          productsLoading,
-          requestingAdminIsMainAdmin,
-          onUpdateStatus: handleUpdateStatus,
-          onPrintReceipt: handlePrintReceipt,
-          onViewOrderDetail: handleViewOrderDetail,
-          onUpdateSiteContent: handleUpdateSiteContent,
-          onRefreshUsers: handleRefreshUsers,
-          onEditUser: handleEditUser,
-          onDeleteUser: handleDeleteUser,
-          onResetPasswordUser: handleResetPasswordUser,
-          onCreateUser: handleCreateUser,
-          onRefreshProducts: handleRefreshProducts,
-          onEditProduct: handleEditProduct,
-          onDeleteProduct: handleDeleteProduct,
-          onToggleProductActive: handleToggleProductActive,
-          onCreateProduct: handleCreateProduct,
-        })}
-      </main>
+  return (
+    <div className="admin-shell min-h-screen bg-[#f7f5f1] text-stone-800 lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+      <aside className="relative border-b border-stone-200 bg-white/95 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
+        <div className="flex h-[76px] items-center justify-between border-b border-stone-100 px-5 lg:h-24">
+          <Link href="/admin" className="flex min-w-0 items-center gap-3">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 ring-1 ring-amber-100">
+              <Image src="/logo/13.png" alt="" width={44} height={44} className="h-11 w-11 object-contain" priority />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-extrabold tracking-tight text-stone-900">Getuk Gondok</span>
+              <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700">Admin Console</span>
+            </span>
+          </Link>
+          <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-100 lg:hidden">ONLINE</span>
+        </div>
+
+        <div className="hidden px-5 pt-5 lg:block">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400">Workspace</p>
+        </div>
+        <NavBar activeTab={activeTab} onTabChange={setActiveTab} />
+
+        <div className="absolute inset-x-3 bottom-4 hidden lg:block">
+          <Link href="/" className="group flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-900">
+            <span>Lihat website</span>
+            <ExternalLink size={15} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      </aside>
+
+      <section className="min-w-0">
+        <header className="sticky top-0 z-40 flex min-h-[76px] items-center justify-between border-b border-stone-200/80 bg-white/85 px-5 backdrop-blur-xl sm:px-8 lg:min-h-24">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-700">{currentTab.eyebrow}</p>
+            <h1 className="mt-1 truncate font-serif text-xl font-semibold text-stone-900 sm:text-2xl">{currentTab.title}</h1>
+            <p className="mt-0.5 hidden text-xs text-stone-500 sm:block">{currentTab.description}</p>
+          </div>
+          <div className="ml-4 flex items-center gap-3">
+            <div className="hidden text-right sm:block">
+              <p className="max-w-40 truncate text-sm font-bold text-stone-800">{user?.name || "Administrator"}</p>
+              <p className="text-[11px] text-stone-400">Administrator</p>
+            </div>
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-700 to-amber-900 text-sm font-extrabold text-white shadow-md shadow-amber-900/15">
+              {(user?.name || "A").charAt(0).toUpperCase()}
+              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+          <div key={activeTab} className="admin-tab-enter space-y-7">
+            {getContentByTab(activeTab, {
+              dashboardData,
+              orders,
+              siteContent,
+              loading,
+              users,
+              usersLoading,
+              products,
+              categories,
+              productsLoading,
+              requestingAdminIsMainAdmin,
+              onUpdateStatus: handleUpdateStatus,
+              onPrintReceipt: handlePrintReceipt,
+              onViewOrderDetail: handleViewOrderDetail,
+              onUpdateSiteContent: handleUpdateSiteContent,
+              onRefreshUsers: handleRefreshUsers,
+              onEditUser: handleEditUser,
+              onDeleteUser: handleDeleteUser,
+              onResetPasswordUser: handleResetPasswordUser,
+              onCreateUser: handleCreateUser,
+              onRefreshProducts: handleRefreshProducts,
+              onEditProduct: handleEditProduct,
+              onDeleteProduct: handleDeleteProduct,
+              onToggleProductActive: handleToggleProductActive,
+              onCreateProduct: handleCreateProduct,
+            })}
+          </div>
+        </main>
+      </section>
 
       {/* Modals */}
       <UserModal

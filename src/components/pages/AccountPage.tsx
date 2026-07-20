@@ -663,6 +663,7 @@ export function AccountPage() {
           src={MagelangImage}
           alt="Magelang"
           fill
+          sizes="100vw"
           priority
           className="object-cover object-center opacity-50"
         />

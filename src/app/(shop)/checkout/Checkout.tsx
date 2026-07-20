@@ -280,7 +280,7 @@ const removeItem = context?.removeItem;
                     return (
                       <div key={item.id} className="py-4 flex gap-4 items-center">
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 border border-gray-100 flex-shrink-0">
-                          <Image src={matchedProduct.image || "/nobg/1.png"} alt={matchedProduct.name} fill className="object-cover" />
+                          <Image src={matchedProduct.image || "/nobg/1.png"} alt={matchedProduct.name} fill sizes="64px" className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-sm text-gray-900 truncate">{matchedProduct.name}</h4>

@@ -125,6 +125,7 @@ export default function RegisterPage() {
               src={MagelangImage}
               alt="Magelang"
               fill
+              sizes="100vw"
               priority
               className="object-cover object-center"
             />

@@ -464,6 +464,7 @@ export function CataloguePage() {
                           src={product.image}
                           alt={product.name}
                           fill
+                          sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1279px) 50vw, 33vw"
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         {hasReviews && ratingInfo.avg >= 4.5 && (
