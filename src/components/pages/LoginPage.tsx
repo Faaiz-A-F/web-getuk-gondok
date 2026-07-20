@@ -1,8 +1,18 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+} from 'lucide-react';
 import MagelangImage from '../../assets/images/magelang fiks.png';
 import { useAuth } from '@/context/AuthContext';
 
@@ -30,187 +40,210 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Login failed');
+        setError(data.error || 'Email atau kata sandi tidak sesuai.');
         setLoading(false);
         return;
       }
 
-      // Store session ID and user data from response
-      if (data.sessionId) {
-        setSessionId(data.sessionId);
-      }
+      if (data.sessionId) setSessionId(data.sessionId);
       setUser(data.user);
-      
-      // Redirect based on role
-      if (data.user.role === 'ADMIN') {
-        router.push('/admin');
-      } else {
-        router.push('/');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
+      router.push(data.user.role === 'ADMIN' ? '/admin' : '/');
+    } catch {
+      setError('Tidak dapat terhubung. Periksa koneksi Anda lalu coba lagi.');
       setLoading(false);
     }
   };
 
+  const inputClass =
+    'h-12 w-full rounded-xl border border-stone-200 bg-white pl-11 pr-4 text-sm text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 hover:border-stone-300 focus:border-amber-700 focus:ring-4 focus:ring-amber-700/10';
+
   return (
-    <div className="min-h-screen bg-[#F8E8BD]">
-      <div className="w-full px-4 sm:px-6 md:px-10 lg:px-16">
-        <div className="relative min-h-screen">
-          <div className="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden">
-            <Image
-              src={MagelangImage}
-              alt="Magelang"
-              fill
-              priority
-              className="object-cover object-center"
-            />
+    <main className="min-h-screen bg-[#f6f1e8] lg:grid lg:grid-cols-[46%_54%]">
+      <section className="relative hidden min-h-screen overflow-hidden lg:block" aria-label="Tentang Getuk Gondok">
+        <Image
+          src={MagelangImage}
+          alt="Pemandangan Magelang, rumah Getuk Gondok Hj. Sri Rahayu"
+          fill
+          priority
+          sizes="46vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#241208]/35 via-[#2f190d]/30 to-[#241208]/90" />
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-10 xl:p-12">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-white/90 transition hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali ke beranda
+          </Link>
+          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md">
+            Khas Magelang
+          </span>
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 p-10 text-white xl:p-12">
+          <div className="mb-6 h-px w-14 bg-amber-400" />
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-amber-300">
+            Warisan rasa sejak 1985
+          </p>
+          <h2 className="brand-heading max-w-xl font-serif text-4xl font-semibold leading-tight xl:text-5xl">
+            Rasa tradisional yang selalu membawa pulang kenangan.
+          </h2>
+          <p className="mt-5 max-w-md text-sm leading-6 text-white/75">
+            Dibuat dengan resep keluarga dan bahan pilihan untuk menghadirkan getuk autentik dari jantung Magelang.
+          </p>
+        </div>
+      </section>
+
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-8 sm:px-8 lg:px-12">
+        <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-amber-200/35 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />
+
+        <Link
+          href="/"
+          aria-label="Kembali ke beranda"
+          className="absolute left-5 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white/80 text-stone-700 shadow-sm backdrop-blur transition hover:bg-white hover:text-amber-800 sm:left-8 sm:top-8 lg:hidden"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+
+        <div className="relative z-10 w-full max-w-[440px]">
+          <div className="mb-8 flex flex-col items-center text-center sm:mb-9">
+            <Link href="/" className="mb-5 inline-flex items-center gap-3" aria-label="Getuk Gondok - beranda">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-[0_10px_35px_rgba(88,51,25,0.12)] ring-1 ring-stone-200/70">
+                <Image src="/logo/13.png" alt="" width={56} height={56} className="h-14 w-14 object-contain" />
+              </span>
+              <span className="text-left">
+                <span className="block text-lg font-extrabold tracking-tight text-[#422414]">Getuk Gondok</span>
+                <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700">Hj. Sri Rahayu</span>
+              </span>
+            </Link>
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
+              Sugeng rawuh
+            </h1>
+            <p className="mt-2.5 text-sm leading-6 text-stone-500">
+              Masuk untuk melanjutkan belanja dan melihat pesanan Anda.
+            </p>
           </div>
 
-          <div className="relative z-10 grid min-h-screen grid-cols-1 items-center">
-            <div className="flex items-center justify-center w-full py-6 sm:py-8 lg:py-0">
-              <div className="w-full max-w-md bg-[#F7F7F5] rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
-                {/* Logo Icon - User Avatar Style */}
-                <div className="flex justify-center mb-8">
-                  <div className="relative w-20 h-20 flex items-center justify-center">
-                    {/* Background Circle */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#D29A2A] to-[#C87536] opacity-90"></div>
+          <div className="rounded-[28px] border border-white/80 bg-white/85 p-6 shadow-[0_24px_70px_rgba(75,45,23,0.12)] backdrop-blur-xl sm:p-8">
+            {error && (
+              <div
+                role="alert"
+                aria-live="polite"
+                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-5 text-red-700"
+              >
+                {error}
+              </div>
+            )}
 
-                    {/* User Icon */}
-                    <svg className="w-10 h-10 text-white relative z-10" fill="currentColor" viewBox="0 0 24 24">
-                      {/* Head */}
-                      <circle cx="12" cy="8" r="4" />
-                      {/* Body + Additional user shape */}
-                      <path d="M12 14c-4 0-6 2-6 4v4h12v-4c0-2-2-4-6-4z" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Heading */}
-                <h1 className="text-2xl sm:text-3xl font-bold text-[#4A1D0B] text-center mb-2 leading-tight">
-                  Sugeng Rawuh
-                </h1>
-
-                {/* Subheading */}
-                <p className="text-center text-sm text-[#8B6F47] mb-8 max-w-xs mx-auto">
-                  Mlebet kagem nglajengaken dhateng dashboard
-                </p>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
-
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Email Input */}
-                  <div>
-                    <label htmlFor="email" className="block text-xs font-semibold text-[#4A1D0B] mb-2 uppercase tracking-wide">
-                      Email
-                    </label>
-                    <div className="relative flex items-center">
-                      <svg className="absolute left-4 w-5 h-5 text-[#C87536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                        required
-                        className="w-full h-12 pl-12 pr-4 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Password Input */}
-                  <div>
-                    <label htmlFor="password" className="block text-xs font-semibold text-[#4A1D0B] mb-2 uppercase tracking-wide">
-                      Password
-                    </label>
-                    <div className="relative flex items-center">
-                      <svg className="absolute left-4 w-5 h-5 text-[#C87536]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        required
-                        className="w-full h-12 pl-12 pr-12 border-2 border-[#E8D4C4] rounded-lg focus:outline-none focus:border-[#C87536] focus:ring-2 focus:ring-[#C87536] focus:ring-opacity-30 transition-all duration-200 bg-white text-[#4A1D0B] placeholder-[#A0826D] text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 text-[#C87536] hover:text-[#A85E2E] transition-colors"
-                      >
-                        {showPassword ? (
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.81-2.89 3.69-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.804 11.804 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm5.31-7.78l3.15 3.15.02-.02c-.8-.46-1.63-.85-2.5-1.09l-.67-.04z" />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Remember me & Forgot Password */}
-                  <div className="flex flex-col items-start gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 accent-[#C87536] cursor-pointer rounded border-2 border-[#E8D4C4]"
-                      />
-                      <span className="text-sm text-[#4A1D0B] leading-none">Eling aku</span>
-                    </label>
-                    <a
-                      href="#"
-                      className="text-sm text-[#C87536] hover:text-[#A85E2E] font-semibold transition-colors duration-200"
-                    >
-                      Kesupen Password?
-                    </a>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-12 bg-[#C87536] text-white font-bold rounded-xl hover:bg-[#A85E2E] active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg text-base mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Loading...' : 'Masuk'}
-                  </button>
-                </form>
-
-                {/* Divider */}
-                <div className="flex items-center gap-3 my-6">
-                  <div className="flex-1 h-px bg-[#E8D4C4]"></div>
-                  <span className="text-xs text-[#A0826D]">atau</span>
-                  <div className="flex-1 h-px bg-[#E8D4C4]"></div>
-                </div>
-
-                {/* Sign up Link */}
-                <div className="text-center text-xs text-[#4A1D0B]">
-                  Dhereng gadah akun?{' '}
-                  <a
-                    href="/register"
-                    className="text-[#C87536] font-bold hover:text-[#A85E2E] transition-colors duration-200"
-                  >
-                    Ndamel Akun
-                  </a>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-stone-700">
+                  Alamat email
+                </label>
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-400" />
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@email.com"
+                    autoComplete="email"
+                    required
+                    className={inputClass}
+                  />
                 </div>
               </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <label htmlFor="password" className="text-sm font-semibold text-stone-700">
+                    Kata sandi
+                  </label>
+                  <span className="text-xs font-medium text-stone-400">Min. 6 karakter</span>
+                </div>
+                <div className="relative">
+                  <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-stone-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Masukkan kata sandi"
+                    autoComplete="current-password"
+                    minLength={6}
+                    required
+                    className={`${inputClass} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                    aria-pressed={showPassword}
+                    className="absolute right-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                  >
+                    {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-stone-600">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-stone-300 accent-amber-800"
+                  />
+                  Ingat saya
+                </label>
+                <button type="button" className="text-sm font-semibold text-amber-800 transition hover:text-amber-950">
+                  Lupa kata sandi?
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#8a4b20] px-5 text-sm font-bold text-white shadow-[0_10px_25px_rgba(138,75,32,0.24)] transition hover:-translate-y-0.5 hover:bg-[#713b18] hover:shadow-[0_14px_30px_rgba(113,59,24,0.28)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              >
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    Masuk ke akun
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="my-6 flex items-center gap-3" aria-hidden="true">
+              <span className="h-px flex-1 bg-stone-200" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Belum punya akun?</span>
+              <span className="h-px flex-1 bg-stone-200" />
             </div>
+
+            <Link
+              href="/register"
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-stone-300 bg-white text-sm font-bold text-stone-700 transition hover:border-amber-700 hover:bg-amber-50/60 hover:text-amber-900"
+            >
+              Buat akun baru
+            </Link>
           </div>
+
+          <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-stone-500">
+            <ShieldCheck className="h-4 w-4 text-emerald-700" />
+            Data Anda terlindungi dan tidak dibagikan.
+          </p>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
