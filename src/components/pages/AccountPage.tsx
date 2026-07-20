@@ -806,7 +806,7 @@ export function AccountPage() {
                             {isAdmin && (
                               <Link
                                 href="/admin"
-                                className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[#F8E8BD]/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-[#F8E8BD]/60 hover:bg-[#F8E8BD]/20 sm:px-4"
+                                className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[#F8E8BD]/30 bg-gradient-to-r from-[#F8E8BD]/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-[#F8E8BD]/60 hover:bg-[#F8E8BD]/20 sm:px-4"
                               >
                                 <Shield className="h-4 w-4" />
                                 <span>Ke Halaman Admin</span>
