@@ -605,6 +605,7 @@ export function AccountPage() {
     dob: profileData.dob || "—",
     address: profileData.address || "—",
   };
+  const isAdmin = (user?.role ?? "").toUpperCase() === "ADMIN";
 
   // EditableField is now defined at module level (see top of file)
   // to keep a stable component type reference across renders.
@@ -801,15 +802,17 @@ export function AccountPage() {
                               <span className="truncate">{display.location}</span>
                             </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={handleLogout}
-                            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-red-300/40 hover:bg-red-500/20 sm:px-4"
-                            aria-label="Keluar dari akun"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            <span className="hidden sm:inline">Keluar</span>
-                          </button>
+                          <div className="flex flex-col gap-2 sm:items-end">
+                            {isAdmin && (
+                              <Link
+                                href="/admin"
+                                className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[#F8E8BD]/30 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-[#F8E8BD]/60 hover:bg-[#F8E8BD]/20 sm:px-4"
+                              >
+                                <Shield className="h-4 w-4" />
+                                <span>Ke Halaman Admin</span>
+                              </Link>
+                            )}
+                          </div>
                         </div>
                       </div>
 
