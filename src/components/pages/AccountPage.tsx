@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
-import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2, Truck, DollarSign, Search, Filter, FileText, RefreshCw, X, Star } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2, Truck, DollarSign, Search, Filter, FileText, RefreshCw, X, Star, LogOut } from "lucide-react";
 import { ReviewModal } from "@/components/review/ReviewModal";
 
 // ========== Module-level EditableField ==========
@@ -146,13 +146,19 @@ interface Order {
 }
 
 export function AccountPage() {
-  const { user, setUser, isLoaded } = useAuth();
+  const { user, setUser, isLoaded, logout } = useAuth();
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"profile" | "orders" | "password">("profile");
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
+    router.refresh();
+  };
 
   // ========== Authentication Validation ==========
   useEffect(() => {
@@ -737,6 +743,14 @@ export function AccountPage() {
                         </svg>
                         Kembali ke Beranda
                       </Link>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        Keluar dari Akun
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -779,14 +793,23 @@ export function AccountPage() {
                               Upload Foto
                             </button>
                           </div>
-                          <div className="flex-1 pt-2">
-                            <h2 className="text-2xl font-bold">{display.name}</h2>
+                          <div className="min-w-0 flex-1 pt-2">
+                            <h2 className="truncate text-2xl font-bold">{display.name}</h2>
                             <p className="text-[#D29A2A]">{display.role}</p>
-                            <div className="flex items-center gap-2 mt-2 text-sm text-[#F8E8BD]">
-                              <MapPin className="w-4 h-4" />
-                              {display.location}
+                            <div className="mt-2 flex items-center gap-2 text-sm text-[#F8E8BD]">
+                              <MapPin className="h-4 w-4 shrink-0" />
+                              <span className="truncate">{display.location}</span>
                             </div>
                           </div>
+                          <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-red-300/40 hover:bg-red-500/20 sm:px-4"
+                            aria-label="Keluar dari akun"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            <span className="hidden sm:inline">Keluar</span>
+                          </button>
                         </div>
                       </div>
 
