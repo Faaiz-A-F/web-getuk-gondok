@@ -1,18 +1,6 @@
-interface EditProductPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+import { redirect } from "next/navigation";
 
-export default async function EditProductPage({
-  params,
-}: EditProductPageProps) {
-  const { id } = await params;
-
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Edit Product - {id}</h1>
-      {/* Product edit form will go here */}
-    </div>
-  );
+/** Product editing is handled in the unified admin product workspace. */
+export default function EditProductPage() {
+  redirect("/admin/products");
 }

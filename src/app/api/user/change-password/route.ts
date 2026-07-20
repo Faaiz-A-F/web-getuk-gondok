@@ -1,63 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 
-// POST /api/user/change-password - Change user password
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { userId, currentPassword, newPassword } = body
-
-    // Validation
-    if (!userId || !currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: 'userId, currentPassword, and newPassword are required' },
-        { status: 400 }
-      )
+    const auth = await requireUser(request);
+    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const { currentPassword, newPassword } = await request.json();
+    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
+      return NextResponse.json({ error: 'Kata sandi lama dan baru wajib diisi' }, { status: 400 });
     }
-
-    if (newPassword.length < 6) {
-      return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
-      )
+    if (newPassword.length < 6) return NextResponse.json({ error: 'Kata sandi baru minimal 6 karakter' }, { status: 400 });
+    if (!(await bcrypt.compare(currentPassword, auth.user.password))) {
+      return NextResponse.json({ error: 'Kata sandi saat ini tidak sesuai' }, { status: 401 });
     }
-
-    // Get user
-    const user = await prisma.user.findUnique({ where: { id: userId } })
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.password)
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Current password is incorrect' },
-        { status: 401 }
-      )
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12)
-
-    // Update password
-    await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
-    })
-
-    return NextResponse.json({ 
-      message: 'Password changed successfully' 
-    })
+    await prisma.user.update({ where: { id: auth.user.id }, data: { password: await bcrypt.hash(newPassword, 12) } });
+    return NextResponse.json({ message: 'Kata sandi berhasil diperbarui' });
   } catch (error) {
-    console.error('Error changing password:', error)
-    return NextResponse.json(
-      { error: 'Failed to change password' },
-      { status: 500 }
-    )
+    console.error('Error changing password:', error);
+    return NextResponse.json({ error: 'Gagal memperbarui kata sandi' }, { status: 500 });
   }
 }

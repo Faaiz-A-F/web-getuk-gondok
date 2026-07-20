@@ -130,7 +130,7 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
   if (!data) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
-        <p className="text-gray-500">Loading dashboard data...</p>
+        <p className="text-gray-500">Memuat ringkasan data...</p>
       </div>
     );
   }
@@ -184,13 +184,13 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-amber-950">Monthly Earning</h3>
+              <h3 className="text-lg font-bold text-amber-950">Pendapatan Bulanan</h3>
               <p className="text-xs text-slate-500 mt-0.5">Pendapatan bulanan</p>
             </div>
             <span className="group/btn relative overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105">
               <span className="relative z-10 flex items-center gap-1">
                 <Activity size={12} className="animate-pulse" />
-                Live Update
+                Data Terkini
               </span>
             </span>
           </div>
@@ -218,12 +218,12 @@ const DashboardContent = ({ data }: { data: DashboardData | null }) => {
           
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-amber-950">Recent Orders</h3>
+              <h3 className="text-lg font-bold text-amber-950">Pesanan Terbaru</h3>
               <p className="text-xs text-slate-500 mt-0.5">Pesanan terbaru</p>
             </div>
             <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
               <Clock size={12} />
-              Today
+              Hari ini
             </span>
           </div>
           <div className="space-y-3">
@@ -562,7 +562,7 @@ const OrdersContent = ({ orders, loading, onUpdateStatus, onPrintReceipt, onView
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
-        <p className="text-gray-500">Loading orders...</p>
+        <p className="text-gray-500">Memuat data pesanan...</p>
       </div>
     );
   }
@@ -1007,7 +1007,7 @@ const ReviewSelectionContent = ({ onSave }: { onSave: (reviewIds: string[]) => v
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
-        <p className="text-gray-500">Loading reviews...</p>
+        <p className="text-gray-500">Memuat data ulasan...</p>
       </div>
     );
   }
@@ -1098,7 +1098,7 @@ const LayoutContent = ({ siteContent, onUpdate }: { siteContent: SiteContent | n
   if (!siteContent) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
-        <p className="text-gray-500">Loading site content...</p>
+        <p className="text-gray-500">Memuat konten website...</p>
       </div>
     );
   }
@@ -1151,7 +1151,7 @@ const ProductsContent = ({
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
-        <p className="text-gray-500">Loading products...</p>
+        <p className="text-gray-500">Memuat data produk...</p>
       </div>
     );
   }
@@ -1572,7 +1572,7 @@ const UsersContent = ({
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-amber-200 bg-white/80 shadow-sm">
-        <p className="text-gray-500">Loading users...</p>
+        <p className="text-gray-500">Memuat data pengguna...</p>
       </div>
     );
   }

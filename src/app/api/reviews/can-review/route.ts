@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/auth";
 
 // GET /api/reviews/can-review?userId=...&productId=...
 // Returns: { canReview, orders: [{id, orderNumber}] } — DONE orders containing the product
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireUser(request);
+    if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
+    const userId = auth.user.id;
     const productId = searchParams.get("productId");
 
-    if (!userId || !productId) {
+    if (!productId) {
       return NextResponse.json(
-        { error: "userId and productId are required" },
+        { error: "productId wajib diisi" },
         { status: 400 }
       );
     }

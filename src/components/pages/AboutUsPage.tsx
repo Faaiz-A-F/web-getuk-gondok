@@ -22,7 +22,7 @@ export function AboutUsPage() {
   ];
 
   return (
-    <div className="font-['Playfair_Display'] min-h-screen bg-[#FAF3E8]">
+    <div className="brand-site min-h-screen bg-[#FAF3E8]">
       <Header />
       
       <main>

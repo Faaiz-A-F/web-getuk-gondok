@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/auth";
 
 // GET reviews — by productId (public) or by userId (private list)
 export async function GET(request: NextRequest) {
@@ -43,8 +44,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (userId) {
+      const auth = await requireUser(request);
+      if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
       const reviews = await prisma.review.findMany({
-        where: { userId },
+        where: { userId: auth.user.id },
         include: { product: { select: { id: true, name: true } } },
         orderBy: { createdAt: "desc" },
       });
@@ -64,12 +67,15 @@ export async function GET(request: NextRequest) {
 // POST — create a new review (user must own a DONE order containing the product)
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireUser(request);
+    if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
     const body = await request.json();
-    const { userId, productId, orderId, rating, comment, photos, videoUrl } = body;
+    const { productId, orderId, rating, comment, photos, videoUrl } = body;
+    const userId = auth.user.id;
 
-    if (!userId || !productId || !orderId) {
+    if (!productId || !orderId) {
       return NextResponse.json(
-        { error: "userId, productId, and orderId are required" },
+        { error: "productId dan orderId wajib diisi" },
         { status: 400 }
       );
     }

@@ -28,8 +28,11 @@ export function CartPage() {
   // Calculate minimum date (24 hours from now)
   const getMinDate = () => {
     const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 24);
-    return tomorrow.toISOString().split('T')[0];
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // Handle preparation date change
@@ -62,11 +65,7 @@ export function CartPage() {
     }
     
     // Check if preparation date is at least 24 hours from now
-    const selectedDate = new Date(preparationDate);
-    const minDate = new Date();
-    minDate.setHours(minDate.getHours() + 24);
-    
-    if (selectedDate < minDate) {
+    if (preparationDate < getMinDate()) {
       setErrorMessage('Tanggal pengambilan harus minimal 24 jam dari sekarang.');
       setShowErrorModal(true);
       return;
@@ -113,7 +112,7 @@ export function CartPage() {
         const data = await response.json();
         // Keep cart until payment is confirmed, show QRIS modal
         setCurrentOrderId(data.order?.id ?? data.id ?? null);
-        setCurrentOrderNumber(orderNumber);
+        setCurrentOrderNumber(data.order?.orderNumber ?? orderNumber);
         setIsPaymentDone(false);
         setShowQrisModal(true);
       } else {
@@ -161,7 +160,7 @@ export function CartPage() {
       const res = await fetch(`/api/orders/${currentOrderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentStatus: "PAID", status: "PENDING" }),
+        body: JSON.stringify({ paymentStatus: "PAID", status: "PAID" }),
       });
 
       if (!res.ok) {
@@ -174,9 +173,9 @@ export function CartPage() {
       setShowQrisModal(false);
       setIsPaymentDone(true);
       setShowSuccessModal(true);
-    } catch (e: any) {
-      console.error("Payment confirm error:", e);
-      setErrorMessage(e?.message || "Gagal mengkonfirmasi pembayaran. Silakan coba lagi.");
+    } catch (error: unknown) {
+      console.error("Payment confirm error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Gagal mengkonfirmasi pembayaran. Silakan coba lagi.");
       setShowQrisModal(false);
       setShowErrorModal(true);
     } finally {

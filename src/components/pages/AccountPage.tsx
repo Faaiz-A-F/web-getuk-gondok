@@ -1,8 +1,7 @@
 "use client"
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import MagelangImage from "../../assets/images/magelang fiks.png";
 import { useAuth } from "@/context/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { User, MapPin, Mail, Phone, Calendar, Shield, CreditCard, Bell, Settings, ChevronRight, Clock, Package, Camera, Check, Loader2, Truck, DollarSign, Search, Filter, FileText, RefreshCw, X, Star } from "lucide-react";
@@ -646,7 +645,7 @@ export function AccountPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8E8BD] relative">
+    <div className="account-page brand-site min-h-screen bg-[#f7f5f1] relative">
       {/* Hidden file input — opens gallery on mobile, file picker on desktop */}
       <input
         ref={fileInputRef}
@@ -657,18 +656,6 @@ export function AccountPage() {
         aria-hidden="true"
       />
 
-      {/* Background Image */}
-      <div className="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <Image
-          src={MagelangImage}
-          alt="Magelang"
-          fill
-          sizes="100vw"
-          priority
-          className="object-cover object-center opacity-50"
-        />
-      </div>
-
       <div className="relative z-10">
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
@@ -676,8 +663,8 @@ export function AccountPage() {
           <Header />
 
           {/* Content Area */}
-          <main className="flex-1 p-6">
-            <div className="max-w-6xl mx-auto">
+          <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+            <div className="max-w-7xl mx-auto">
               <div className="flex gap-6">
                 {/* Profile Sidebar */}
                 <div className="w-80 flex-shrink-0 hidden xl:block">
@@ -744,12 +731,12 @@ export function AccountPage() {
                     
                     {/* Back to Dashboard Button */}
                     <div className="pt-4 mt-4 border-t border-[#E8D4C4]">
-                      <a href="/" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
+                      <Link href="/" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D29A2A] to-[#C87536] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Kembali ke Dashboard
-                      </a>
+                        Kembali ke Beranda
+                      </Link>
                     </div>
                   </div>
                 </div>

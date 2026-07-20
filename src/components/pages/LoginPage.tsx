@@ -200,9 +200,9 @@ export default function LoginPage() {
                   />
                   Ingat saya
                 </label>
-                <button type="button" className="text-sm font-semibold text-amber-800 transition hover:text-amber-950">
+                <Link href="/forgot-password" className="text-sm font-semibold text-amber-800 transition hover:text-amber-950">
                   Lupa kata sandi?
-                </button>
+                </Link>
               </div>
 
               <button

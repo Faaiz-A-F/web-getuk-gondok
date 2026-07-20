@@ -1,76 +1,35 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/auth";
 
-// GET — fetch current profile picture for a user
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const userId = url.searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json({ error: "userId is required" }, { status: 400 });
-    }
-
-    // Check if user exists first
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const setting = await prisma.userSetting.upsert({
-      where: { userId },
-      update: {},
-      create: { userId, settings: {} },
-    });
-
-    const settings = (setting.settings as Record<string, any>) || {};
-    return NextResponse.json({ profilePicture: settings.profilePicture ?? null });
-  } catch (err) {
-    console.error("GET profile-picture error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const auth = await requireUser(request);
+    if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const setting = await prisma.userSetting.upsert({ where: { userId: auth.user.id }, update: {}, create: { userId: auth.user.id, settings: {} } });
+    const settings = (setting.settings as Record<string, unknown>) || {};
+    return NextResponse.json({ profilePicture: typeof settings.profilePicture === "string" ? settings.profilePicture : null });
+  } catch (error) {
+    console.error("GET profile-picture error:", error);
+    return NextResponse.json({ error: "Gagal memuat foto profil" }, { status: 500 });
   }
 }
 
-// POST — save base64-encoded image to user settings
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { userId, image } = body;
-
-    if (!userId) {
-      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    const auth = await requireUser(request);
+    if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const { image } = await request.json();
+    if (typeof image !== "string" || !/^data:image\/(jpeg|png|webp);base64,/i.test(image)) {
+      return NextResponse.json({ error: "Format gambar tidak valid" }, { status: 400 });
     }
-
-    if (!image || typeof image !== "string" || !image.startsWith("data:image/")) {
-      return NextResponse.json({ error: "Invalid image data" }, { status: 400 });
-    }
-
-    // Limit raw payload size (~5MB base64)
-    if (image.length > 7 * 1024 * 1024) {
-      return NextResponse.json({ error: "Image too large" }, { status: 413 });
-    }
-
-    // Check if user exists first
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const existing = await prisma.userSetting.upsert({
-      where: { userId },
-      update: {},
-      create: { userId, settings: {} },
-    });
-
-    const current = (existing.settings as Record<string, any>) || {};
-    const updated = await prisma.userSetting.update({
-      where: { userId },
-      data: { settings: { ...current, profilePicture: image } },
-    });
-
+    if (image.length > 7 * 1024 * 1024) return NextResponse.json({ error: "Ukuran gambar terlalu besar" }, { status: 413 });
+    const existing = await prisma.userSetting.upsert({ where: { userId: auth.user.id }, update: {}, create: { userId: auth.user.id, settings: {} } });
+    const current = (existing.settings as Record<string, unknown>) || {};
+    const updated = await prisma.userSetting.update({ where: { userId: auth.user.id }, data: { settings: { ...current, profilePicture: image } } });
     return NextResponse.json({ success: true, settings: updated.settings });
-  } catch (err) {
-    console.error("POST profile-picture error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error) {
+    console.error("POST profile-picture error:", error);
+    return NextResponse.json({ error: "Gagal menyimpan foto profil" }, { status: 500 });
   }
 }

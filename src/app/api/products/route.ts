@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 // GET all products
 export async function GET(request: NextRequest) {
@@ -54,6 +55,11 @@ export async function GET(request: NextRequest) {
 // POST - Create new product
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request);
+    if ("error" in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
     const body = await request.json();
     const {
       name,

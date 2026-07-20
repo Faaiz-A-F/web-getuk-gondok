@@ -1,59 +1,29 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(req.url)
-    const userId = url.searchParams.get('userId')
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-    }
-
-    // Use an upsert so we find or create in a single atomic database operation
-    const setting = await prisma.userSetting.upsert({
-      where: { userId },
-      update: {}, // If found, do nothing
-      create: { 
-        userId, 
-        settings: {} // Empty JSON object as default
-      }
-    })
-
-    return NextResponse.json(setting)
-  } catch (err) {
-    console.error("GET user settings error:", err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const auth = await requireUser(request);
+    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const setting = await prisma.userSetting.upsert({ where: { userId: auth.user.id }, update: {}, create: { userId: auth.user.id, settings: {} } });
+    return NextResponse.json(setting);
+  } catch (error) {
+    console.error('GET user settings error:', error);
+    return NextResponse.json({ error: 'Gagal memuat pengaturan' }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json()
-    const { userId, settings } = body
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-    }
-
-    // Ensure the payload falls back to an empty object, handled cleanly as Prisma JSON input
-    const jsonSettings = settings ?? {}
-
-    // Atomic Upsert: Replaces the manual check-then-create/update logic
-    const updatedSetting = await prisma.userSetting.upsert({
-      where: { userId },
-      update: { 
-        settings: jsonSettings 
-      },
-      create: { 
-        userId, 
-        settings: jsonSettings 
-      }
-    })
-
-    return NextResponse.json(updatedSetting)
-  } catch (err) {
-    console.error("POST user settings error:", err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const auth = await requireUser(request);
+    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const body = await request.json();
+    const settings = body.settings && typeof body.settings === 'object' && !Array.isArray(body.settings) ? body.settings : {};
+    const updated = await prisma.userSetting.upsert({ where: { userId: auth.user.id }, update: { settings }, create: { userId: auth.user.id, settings } });
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error('POST user settings error:', error);
+    return NextResponse.json({ error: 'Gagal menyimpan pengaturan' }, { status: 500 });
   }
 }

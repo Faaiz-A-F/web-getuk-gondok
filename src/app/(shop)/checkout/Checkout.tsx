@@ -37,8 +37,8 @@ export default function Checkout() {
 // const { cart = [], updateQuantity, removeItem } = useContext(CartContext) || {};
 
 // MENJADI SEPERTI INI:
-const context = useContext(CartContext) as any;
-const cart = context?.cart || [];
+const context = useContext(CartContext);
+const cart = context?.items || [];
 const updateQuantity = context?.updateQuantity;
 const removeItem = context?.removeItem;
 
@@ -67,7 +67,7 @@ const removeItem = context?.removeItem;
   };
 
   // Kalkulasi Total Belanjaan
-  const totalSummary = cart.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0);
+  const totalSummary = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   // Integrasi Generator Link WhatsApp otomatis
   const handleCheckoutSubmit = (e: React.FormEvent) => {
@@ -77,11 +77,8 @@ const removeItem = context?.removeItem;
 
     // Bangun string teks pesanan rapi untuk WhatsApp
     let itemText = "";
-    cart.forEach((item: any) => {
-      const matchProduct = products.find((p) => p.id === item.productId);
-      if (matchProduct) {
-        itemText += `- *${matchProduct.name}* (${item.quantity}x) : ${formatPrice(item.price * item.quantity)}\n`;
-      }
+    cart.forEach((item) => {
+      itemText += `- *${item.name || 'Produk'}* (${item.quantity}x) : ${formatPrice(item.price * item.quantity)}\n`;
     });
 
     const textMessage = `*NOTA PESANAN GETUK GONDOK HJ. SRI RAHAYU*\n\n` +
@@ -273,17 +270,14 @@ const removeItem = context?.removeItem;
 
                 {/* List Item */}
                 <div className="divide-y divide-gray-100 max-h-[380px] overflow-y-auto pr-1">
-                  {cart.map((item: any) => {
-                    const matchedProduct = products.find((p) => p.id === item.productId);
-                    if (!matchedProduct) return null;
-
+                  {cart.map((item) => {
                     return (
                       <div key={item.id} className="py-4 flex gap-4 items-center">
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 border border-gray-100 flex-shrink-0">
-                          <Image src={matchedProduct.image || "/nobg/1.png"} alt={matchedProduct.name} fill sizes="64px" className="object-cover" />
+                          <Image src={item.image || "/nobg/1.png"} alt={item.name || "Produk"} fill sizes="64px" className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-sm text-gray-900 truncate">{matchedProduct.name}</h4>
+                          <h4 className="font-bold text-sm text-gray-900 truncate">{item.name || "Produk"}</h4>
                           <p className="text-xs text-amber-700 font-bold mt-0.5">{formatPrice(item.price)}</p>
                           
                           {/* Kontrol Kuantitas Kecil */}

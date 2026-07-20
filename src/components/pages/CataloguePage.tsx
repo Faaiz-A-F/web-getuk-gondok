@@ -286,7 +286,7 @@ export function CataloguePage() {
   ];
 
   return (
-    <div className="font-['Playfair_Display'] min-h-screen bg-neutral-50 selection:bg-amber-200 selection:text-amber-900">
+    <div className="brand-site min-h-screen bg-neutral-50 selection:bg-amber-200 selection:text-amber-900">
       <Header />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -459,7 +459,7 @@ export function CataloguePage() {
                       key={product.id}
                       className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent"
                     >
-                      <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+                      <Link href={`/products/${product.id}`} className="relative block w-full aspect-square bg-gray-100 overflow-hidden" aria-label={`Lihat detail ${product.name}`}>
                         <Image
                           src={product.image}
                           alt={product.name}
@@ -472,10 +472,12 @@ export function CataloguePage() {
                             ⭐ Favorit
                           </span>
                         )}
-                      </div>
+                      </Link>
 
                       <div className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
+                        <Link href={`/products/${product.id}`} className="inline-block">
+                          <h3 className="text-xl font-bold text-gray-900 mb-1 transition-colors hover:text-amber-800">{product.name}</h3>
+                        </Link>
                         <button
                           onClick={() => dbProduct && setReviewsModalProduct(dbProduct)}
                           className="mb-2 inline-flex items-center hover:opacity-80 transition"
