@@ -194,4 +194,5 @@ model Review {
   @@unique([userId, productId, orderId]) // one review per user per product per order
   @@index([productId])
   @@index([userId])
+  @@index([createdAt])
 }

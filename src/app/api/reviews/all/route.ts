@@ -18,13 +18,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fetch all reviews with user and product info
+    // Parse pagination params
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
+    const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "50")));
+    const skip = (page - 1) * pageSize;
+
+    // Fetch total count for pagination
+    const total = await prisma.review.count();
+
+    // Fetch paginated reviews with user and product info
     const reviews = await prisma.review.findMany({
       include: {
         user: { select: { id: true, name: true } },
         product: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
     });
 
     // Add isSelected flag to each review
@@ -33,7 +44,15 @@ export async function GET(request: NextRequest) {
       isSelected: selectedReviewIds.includes(review.id),
     }));
 
-    return NextResponse.json({ reviews: reviewsWithSelection });
+    return NextResponse.json({
+      reviews: reviewsWithSelection,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    });
   } catch (error) {
     console.error("Error fetching all reviews:", error);
     return NextResponse.json(
