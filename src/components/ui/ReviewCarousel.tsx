@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Review {
   id: string;
@@ -16,36 +16,85 @@ interface ReviewCarouselProps {
   autoPlayInterval?: number;
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 1500;
+
 export function ReviewCarousel({ reviews: propReviews, autoPlayInterval = 5000 }: ReviewCarouselProps) {
   const [reviews, setReviews] = useState<Review[]>(propReviews || []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [loading, setLoading] = useState(!propReviews);
+  const [fetchError, setFetchError] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef(0);
+  const mountedRef = useRef(true);
 
-  // Fetch reviews from API if not provided as prop
+  // Fetch reviews from API if not provided as prop, with retry logic
+  const fetchReviews = useCallback(async () => {
+    if (propReviews) return;
+
+    try {
+      setFetchError(false);
+      const response = await fetch('/api/reviews/landing');
+
+      // Always read the body — only parse JSON for successful responses
+      if (!response.ok) {
+        // Try to parse error body (might be JSON or plain text)
+        try {
+          const errorData = await response.json();
+          console.warn('Landing reviews API error:', errorData);
+        } catch {
+          // Body might be empty or not JSON; ignore
+        }
+        throw new Error(`Server responded with ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!mountedRef.current) return;
+
+      if (data.reviews) {
+        setReviews(data.reviews);
+      }
+      retryCountRef.current = 0; // reset on success
+    } catch (error) {
+      if (!mountedRef.current) return;
+
+      // Retry up to MAX_RETRIES times with a delay
+      if (retryCountRef.current < MAX_RETRIES) {
+        retryCountRef.current += 1;
+        console.warn(
+          `Failed to fetch landing reviews (attempt ${retryCountRef.current}/${MAX_RETRIES + 1}), retrying...`,
+          error
+        );
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        return fetchReviews();
+      }
+
+      console.error('Failed to fetch landing reviews after retries:', error);
+      setFetchError(true);
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [propReviews]);
+
   useEffect(() => {
+    mountedRef.current = true;
+    retryCountRef.current = 0;
+
     if (propReviews) {
       setReviews(propReviews);
+      setLoading(false);
       return;
     }
 
-    const fetchReviews = async () => {
-      try {
-        const response = await fetch('/api/reviews/landing');
-        const data = await response.json();
-        if (response.ok && data.reviews) {
-          setReviews(data.reviews);
-        }
-      } catch (error) {
-        console.error('Failed to fetch landing reviews:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchReviews();
-  }, [propReviews]);
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [propReviews, fetchReviews]);
 
   useEffect(() => {
     if (isPaused || reviews.length <= 1) return;
@@ -72,6 +121,39 @@ export function ReviewCarousel({ reviews: propReviews, autoPlayInterval = 5000 }
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
+
+  // Show loading skeleton while fetching
+  if (loading) {
+    return (
+      <div className="relative w-full max-w-4xl mx-auto">
+        <div className="rounded-3xl border border-white/10 bg-white/10 p-8 backdrop-blur-sm animate-pulse">
+          <div className="h-5 w-32 bg-white/20 rounded mb-4" />
+          <div className="h-6 w-full bg-white/20 rounded mb-3" />
+          <div className="h-6 w-3/4 bg-white/20 rounded mb-6" />
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-4 w-28 bg-white/20 rounded mb-1" />
+              <div className="h-3 w-20 bg-white/20 rounded" />
+            </div>
+            <div className="h-3 w-24 bg-white/20 rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error fallback
+  if (fetchError) {
+    return (
+      <div className="relative w-full max-w-4xl mx-auto">
+        <div className="rounded-3xl border border-white/10 bg-white/10 p-8 backdrop-blur-sm text-center">
+          <p className="text-amber-200/70 text-sm">
+            Testimoni belum tersedia. Silakan kembali lagi nanti.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (reviews.length === 0) {
     return null;
